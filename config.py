@@ -8,7 +8,13 @@
 # functions of arity two:
 n_functions = ['add','sub','mul','div','pow'] 
 # functions of arity one:
-f_functions = ['sum']#['sin','exp','tanh']
+f_functions = []#['sin','exp','tanh'] # it is permissible to set f_functions to an empty list.
+# the maximum number of fitting parameters in candidate solutions
+MAX_NUM_FIT_PARAM = 4
+# the number of unique binary trees that are considered in the search space 
+MAX_NUM_TREES = 1000
+
+#### Don't edit after this.
 # a very big number!
 BIG_NUM = 1.79769313e+300
 # prefix and suffix variables and parameters thinking I would do string 
