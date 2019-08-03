@@ -1,20 +1,20 @@
 ![Binoculars](image/Gnome-system-search.jpg)
 
-# pySRURGS - Symbolic Regression by Uniform Random Global Search (in python!)
+# pySRURGS - Symbolic Regression by Uniform Random Global Search (in python)
 
 Symbolic regression is a type of data analysis problem where you search for the 
 equation of best fit for a numerical dataset. This package does this task by 
 randomly, with uniform probability of selection, guessing candidate solutions 
 and evaluating them. The No Free Lunch Theorem argues that this approach should 
 be equivalent to other approaches like Genetic Programming. It is probably faster 
-because of less overhead. 
+because of less computational overhead. 
 
 ## Features 
 
 1. Robust parameter fitting
 2. Multiprocessing for faster computing
-3. Loads data from csv
-4. Avoids considering arithmetically equivalent equations
+3. Avoids considering arithmetically equivalent equations
+4. Loads data from csv
 5. Simple project
 
 ## Getting Started
@@ -25,9 +25,7 @@ It's a python3 script. Just download it and run it via a terminal.
 
 You can install the prerequisite packages with pip
 
-```
-mpmath lmfit sympy pandas numpy
-```
+```mpmath lmfit sympy pandas numpy```
 
 ### Installing
 
@@ -40,8 +38,11 @@ git clone https://github.com/pySRURGS/pySRURGS.git
 
 ### Command line help
 
-```python3 pySRURGS.py -h```
+```
+python3 pySRURGS.py -h
+```
 
+The above command should render the following:
 
 ```
 pySRURGS - Symbolic Regression by Uniform Random Global Search (in python!)
@@ -58,15 +59,15 @@ pySRURGS.py $path_to_csv $max_num_evals
 
 ARGUMENTS
 1. path_to_csv - An absolute or relative file path to the csv file.
-2. max_num_evals - an integer. The number of equations which will be considered in the search
-
+2. max_num_evals - An integer: The number of equations which will be considered in the search.
 ```
 
 ### An example
 
 A sample problem is provided. The filename denotes the true equation.
 
-```pySRURGS.py ./ 100```
+```pySRURGS.py ./x1_squared_minus_five_x3.csv 100
+```
 
 ### Configuring the search
 
