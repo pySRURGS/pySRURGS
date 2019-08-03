@@ -41,6 +41,26 @@ python3 pySRURGS.py -h
 
 ```
 
+
+```
+pySRURGS - Symbolic Regression by Uniform Random Global Search (in python!)
+Sohrab Towfighi (C) 2019
+Licence: GPL 3.0
+
+All your data needs to be numeric. Your CSV file should have a header.
+
+USAGE:
+pySRURGS.py $path_to_csv $max_number_fitting_params $max_num_evals
+   
+path_to_csv: an absolute or relative file path to the csv file, the dependent 
+             variable should be the rightmost variable
+max_number_fitting_params: an integer. The fewer of these you have, the fewer 
+                           fitting constants will be permitted.
+max_number_equations_attempted: an integer. The greater this value, the more 
+                                time your computations will take.
+
+```
+
 ### An example
 
 The code takes several arguments as inputs
