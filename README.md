@@ -70,7 +70,7 @@ A sample problem is provided. The filename denotes the true equation.
 
 ### Configuring the search
 
-Inside config.py, you will find the definition of the permitted functions. The list elements need to be the function names input as strings. The *f_functions* list is for the functions of arity 1. The *n_functions* lost is for functions of arity 2.
+Inside config.py, you will find the definition of the permitted functions. The list elements need to be the function names input as strings. The *f_functions* list is for the functions of arity 1. The *n_functions* list is for functions of arity 2. You can change the maximum number of permitted fitting parameters.
 
 ## Author
 
