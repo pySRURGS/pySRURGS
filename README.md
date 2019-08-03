@@ -13,7 +13,9 @@ because of less overhead.
 
 1. Robust parameter fitting
 2. Multiprocessing for faster computing
-3. Load data from csv
+3. Loads data from csv
+4. Avoids considering arithmetically equivalent equations
+5. Simple project
 
 ## Getting Started
 
@@ -38,41 +40,39 @@ git clone https://github.com/pySRURGS/pySRURGS.git
 
 ### Command line help
 
-```
-python3 pySRURGS.py -h
-
-```
+```python3 pySRURGS.py -h```
 
 
 ```
 pySRURGS - Symbolic Regression by Uniform Random Global Search (in python!)
 Sohrab Towfighi (C) 2019
-Licence: GPL 3.0
+License: GPL 3.0
 
-All your data needs to be numeric. Your CSV file should have a header.
+All your data needs to be numeric. 
+Your CSV file should have a header.
+Inside the csv, the dependent variable should be the rightmost column.
+Do not use special characters or spaces in variable names.
 
 USAGE:
-pySRURGS.py $path_to_csv $max_number_fitting_params $max_num_evals
-   
-path_to_csv: an absolute or relative file path to the csv file, the dependent 
-             variable should be the rightmost variable
-max_number_fitting_params: an integer. The fewer of these you have, the fewer 
-                           fitting constants will be permitted.
-max_number_equations_attempted: an integer. The greater this value, the more 
-                                time your computations will take.
+pySRURGS.py $path_to_csv $max_num_evals
+
+ARGUMENTS
+1. path_to_csv - An absolute or relative file path to the csv file.
+2. max_num_evals - an integer. The number of equations which will be considered in the search
 
 ```
 
 ### An example
 
-The code takes several arguments as inputs
+A sample problem is provided. The filename denotes the true equation.
 
-```
-Give an example
-```
+```pySRURGS.py ./ 100```
 
+### Configuring the search
 
-## Authors
+Inside config.py, you will find the definition of the permitted functions. The list elements need to be the function names input as strings. The *f_functions* list is for the functions of arity 1. The *n_functions* lost is for functions of arity 2.
+
+## Author
 
 **Sohrab Towfighi**
 
