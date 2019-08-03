@@ -45,7 +45,7 @@ python3 pySRURGS.py -h
 The above command should render the following:
 
 ```
-pySRURGS - Symbolic Regression by Uniform Random Global Search (in python!)
+pySRURGS - Symbolic Regression by Uniform Random Global Search
 Sohrab Towfighi (C) 2019
 License: GPL 3.0
 
@@ -54,12 +54,17 @@ Your CSV file should have a header.
 Inside the csv, the dependent variable should be the rightmost column.
 Do not use special characters or spaces in variable names.
 
+The config.py file defines the number of fitting parameters, the number of 
+permitted binary trees through which we search, and the types of functions 
+permitted in the search space. 
+
 USAGE:
 pySRURGS.py $path_to_csv $max_num_evals
 
 ARGUMENTS
 1. path_to_csv - An absolute or relative file path to the csv file.
-2. max_num_evals - An integer: The number of equations which will be considered in the search.
+2. max_num_evals - An integer: The number of equations which will be considered 
+                   in the search.
 ```
 
 ### An example
