@@ -67,7 +67,16 @@ ARGUMENTS
 A sample problem is provided. The filename denotes the true equation.
 
 ```
-pySRURGS.py ./x1_squared_minus_five_x3.csv 100
+python pySRURGS.py ./x1_squared_minus_five_x3.csv 1000
+
+1008it [04:13,  4.47it/s]
+  Mean Squared Error       R^2  Equation, simplified
+--------------------  --------  --------------------------------------------------------------------------
+             2.60238  0.994864  ((p0 + p2*(-x1 + x4))/p2)**(p1 + x3**2)*((-p0*x3*x4 + p2)/(p0*x4))**(1/p1)
+            11.8229   0.969479  (p1*(x1 + 1)/x1)**p3*(p3 + x1**(p1 + x5))**(x1*(p3 - x4))*(p0*x1 + x3)
+            13.5942   0.970111  (p0 + p2*(p2 + (p1*(p3 + x2)**x0)**(p2 - x1 + x2)) + x3*(p3 - x0))/p2
+            14.6246   0.96641   ((p3*(p2 + x3)**p0)**(p3 + x0 + x1))**(p0*x4*x5 + p1*x2*(p1 + x0))
+            14.7199   0.976367  (x0**x0 - x3)*(-p0 + x1 + x1**(2*p0))
 ```
 
 ### Configuring the search
