@@ -14,7 +14,7 @@ because of less computational overhead.
 1. Robust parameter fitting
 2. Multiprocessing for faster computing
 3. Avoids considering arithmetically equivalent equations
-4. Loads data from csv
+4. Loads data from spreadsheets (comma separated value files)
 5. Results are saved to file. New runs are added to previously saved results.
 
 ## Getting Started
