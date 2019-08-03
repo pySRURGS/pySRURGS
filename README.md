@@ -66,7 +66,8 @@ ARGUMENTS
 
 A sample problem is provided. The filename denotes the true equation.
 
-```pySRURGS.py ./x1_squared_minus_five_x3.csv 100
+```
+pySRURGS.py ./x1_squared_minus_five_x3.csv 100
 ```
 
 ### Configuring the search
