@@ -9,6 +9,10 @@ Your CSV file should have a header.
 Inside the csv, the dependent variable should be the rightmost column.
 Do not use special characters or spaces in variable names.
 
+The config.py file defines the number of fitting parameters, the number of 
+permitted binary trees through which we search, and the types of functions 
+permitted in the search space. 
+
 USAGE:
 pySRURGS.py $path_to_csv $max_num_evals
 
@@ -823,7 +827,8 @@ class ResultList(object):
         self._results = sorted(self._results, key=lambda x: x._MSE)
     def print(self, top=5):
         table = []
-        header = ["Mean Squared Error", "R^2", "Equation, simplified"]
+        header = ["Mean Squared Error", "R^2", "Equation, simplified", 
+                  "Parameters"]
         for i in range(0, top):
             row = self._results[i].summarize()
             table.append(row)
@@ -840,7 +845,13 @@ class Result(object):
     def print(self):        
         print(str_e(self._MSE), str_e(self._R2), self._simple_equation)
     def summarize(self):
-        return [self._MSE, self._R2, self._simple_equation]
+        summary = [self._MSE, self._R2, self._simple_equation]
+        parameters = []
+        for param in self._params:
+            parameters.append(str_e(param))
+        parameters_str = ','.join(parameters)
+        summary.append(parameters_str)
+        return summary
 
 def initialize_db(path_to_db):
     with SqliteDict(path_to_db, autocommit=True) as results_dict:
@@ -867,22 +878,17 @@ def uniform_random_global_search_once(path_to_db, path_to_csv):
     params = create_fitting_parameters(dataset._int_max_params)
     (sum_of_squared_residuals, 
         sum_of_squared_totals, 
-        params_dict_to_store, 
+        params_fitted,
         residual) = evalSymbolic(eqn_str, params, dataset)
     R2 = 1 - sum_of_squared_residuals/sum_of_squared_totals
     MSE = sum_of_squared_residuals
-    result = Result(simple_eqn, eqn_str, MSE, R2, params)
+    result = Result(simple_eqn, eqn_str, MSE, R2, params_fitted)
     with SqliteDict(path_to_db, autocommit=True) as results_dict:
         best_result = results_dict['best_result']             
         results_dict[simple_eqn] = result
         if result._MSE < best_result._MSE:                       
             results_dict['best_result'] = best_result            
     return result
-
-def uniform_random_global_search(max_evals, path_to_csv):
-    results_dict = dict()    
-    for i in range(0, max_evals):
-        uniform_random_global_search_once(results_dict, path_to_csv)    
     
 def setup(path_to_csv):
     N = MAX_NUM_TREES
@@ -920,8 +926,9 @@ if __name__ == '__main__':
         print(doc_string)
         exit(0)
     path_to_csv = args[0]
-    max_attempts = int(args[1])
+    max_attempts = int(args[1])    
     path_to_db = create_db(path_to_csv)
+    os.makedirs('./db', exist_ok=True)
     results = parmap.map(uniform_random_global_search_once, 
                                [path_to_db]*max_attempts, 
                                path_to_csv, pm_pbar=True)
