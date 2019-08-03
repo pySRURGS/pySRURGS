@@ -25,7 +25,7 @@ It's a python3 script. Just download it and run it via a terminal.
 
 You can install the prerequisite packages with pip
 
-```mpmath lmfit sympy pandas numpy```
+```mpmath lmfit sympy pandas numpy parmap tqdm sqlitedict```
 
 ### Installing
 
