@@ -25,14 +25,14 @@ It's a python3 script. Just download it and run it via a terminal.
 
 You can install the prerequisite packages with pip
 
-```mpmath lmfit sympy pandas numpy parmap tqdm sqlitedict```
+```mpmath lmfit sympy pandas numpy parmap tqdm sqlitedict tabulate```
 
 ### Installing
 
 Install the prerequisites then download the script.
 
 ```
-pip install mpmath lmfit sympy pandas numpy
+pip install mpmath lmfit sympy pandas numpy parmap tqdm sqlitedict tabulate
 git clone https://github.com/pySRURGS/pySRURGS.git
 ```
 
