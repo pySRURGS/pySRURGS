@@ -15,7 +15,7 @@ because of less computational overhead.
 2. Multiprocessing for faster computing
 3. Avoids considering arithmetically equivalent equations
 4. Loads data from csv
-5. Simple project
+5. Results are saved to a persistent dictionary for later analysis
 
 ## Getting Started
 
