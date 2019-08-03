@@ -1,3 +1,5 @@
+![Binoculars](image/Gnome-system-search.png)
+
 # pySRURGS - Symbolic Regression by Uniform Random Global Search (in python!)
 
 Symbolic regression is a type of data analysis problem where you search for the 
@@ -81,3 +83,4 @@ This project is licensed under the GPL 3.0 License - see the [LICENSE](LICENSE) 
 ## Acknowledgments
 
 * Luther Tychonievich created the algorithm mapping integers to full binary trees
+* The icon is from the GNOME icon project and the respective artists.
