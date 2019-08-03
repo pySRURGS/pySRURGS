@@ -1,4 +1,4 @@
-![Binoculars](image/Gnome-system-search.png)
+![Binoculars](image/Gnome-system-search.jpg)
 
 # pySRURGS - Symbolic Regression by Uniform Random Global Search (in python!)
 
