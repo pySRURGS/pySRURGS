@@ -16,6 +16,7 @@ because of less computational overhead.
 3. Avoids considering arithmetically equivalent equations
 4. Loads data from spreadsheets (comma separated value files)
 5. Results are saved to file. New runs are added to previously saved results.
+6. Developed and tested on Python3.6
 
 ## Getting Started
 
