@@ -45,6 +45,16 @@ from itertools import repeat
 import multiprocessing as mp
 from config import *
 
+def memoize(func):
+    cache = dict()
+    def memoized_func(*args):
+        if args in cache:
+            return cache[args]
+        result = func(*args)
+        cache[args] = result
+        return result
+    return memoized_func
+
 def make_timestamp():
     return '{:%Y-%b-%d.%H.%M.%S}'.format(datetime.datetime.now())
 
@@ -116,6 +126,7 @@ def get_opers_dict():
      opers_dict.move_to_end("mul") 
      return opers_dict
 
+@memoize
 def get_bits(x):
     # Get all even bits of x 
     even_bits = x[::2]
@@ -123,6 +134,7 @@ def get_bits(x):
     odd_bits = x[1::2]
     return odd_bits, even_bits
 
+@memoize
 def get_left_right_bits(integer):
     # splits an integer into its odd and even bits - AKA left and right bits 
     int_as_bin = binary(integer)
@@ -178,51 +190,35 @@ def str_e(my_number):
     return "{:.2E}".format(my_number)
 
 def sin(x):
-    with np.errstate(all='ignore'):
-        return np.nan_to_num(np.sin(x))
+    return np.sin(x)
 
 def exp(x):
-    with np.errstate(all='ignore'):
-        return np.nan_to_num(np.exp(x))
+    return np.exp(x)
 
 def tanh(x):
-    with np.errstate(all='ignore'):
-        return np.nan_to_num(np.tanh(x))
+    return np.tanh(x)
 
 def sum(x):
-    with np.errstate(all='ignore'):
-        return np.nan_to_num(np.sum(x))
+    return np.sum(x)
 
 def add(x, y):
-    with np.errstate(all='ignore'):
-        return np.nan_to_num(np.add(x,y))
+    return np.add(x,y)
 
 def sub(x, y):
-    with np.errstate(all='ignore'):
-        return np.nan_to_num(np.subtract(x,y))
+    return np.subtract(x,y)
 
 def mul(x, y):
-    with np.errstate(all='ignore'):
-        return np.nan_to_num(np.multiply(x,y))
+    return np.multiply(x,y)
 
 def div(x, y):
-    with np.errstate(all='ignore'):
-        return np.nan_to_num(np.divide(x,y))
+    return np.divide(x,y)
 
 def pow(x, y):
-    with np.errstate(all='ignore'):
-        return np.nan_to_num(np.power(x,y))
+    return np.power(x,y)
 
-power_dict = dict()
-    
+@memoize
 def mempower(a,b):
-    try: 
-        result = power_dict[str(a)+'_'+str(b)]
-        return result
-    except KeyError:
-        pass
-    result = mpmath.power(a,b)
-    power_dict[str(a)+'_'+str(b)] = result 
+    result = mpmath.power(a,b)    
     return result
 
 def get_element_of_cartesian_product(*args, repeat=1, index=0):
@@ -252,7 +248,7 @@ def get_element_of_cartesian_product(*args, repeat=1, index=0):
 
 opers_dict = get_opers_dict()
 
-def simplify_equation_string(eqn_str):
+def simplify_equation_string(eqn_str, dataset):
     z = True 
     while z == True:
         z = False
@@ -263,14 +259,18 @@ def simplify_equation_string(eqn_str):
                 z = True             
                 first_argument = match.groups(0)[0]
                 second_argument = match.groups(0)[1]
-                replacement = '[[' + first_argument + ']' + operator_symbol
-                replacement += '[' + second_argument + ']]'
+                replacement = '[' + first_argument + operator_symbol
+                replacement += second_argument + ']'
                 prefix = eqn_str[:match.start()]
                 suffix = eqn_str[match.end():]
                 eqn_str = prefix + replacement + suffix
     eqn_str = eqn_str.replace('[', '(')
     eqn_str = eqn_str.replace(']', ')')
-    eqn_str = str(sympy.simplify(eqn_str))
+    s = sympy.sympify(eqn_str, locals = dataset._sympy_namespace)
+    try:
+        eqn_str = str(sympy.simplify(s))
+    except ValueError:
+        pass
     if 'zoo' in eqn_str: # zoo (complex infinity) in sympy
         eqn_str = '1/0'
     eqn_str = remove_variable_tags(eqn_str)
@@ -443,14 +443,7 @@ class Dataset(object):
 
 
 class Enumerator(object):
-    def __init__(self):        
-        self._G_dict = dict()
-        self._A_dict = dict()
-        self._B_dict = dict()
-        self._M_dict = dict()
-        self._l_i_dict = dict()
-        self._k_i_dict = dict()
-        self._j_i_dict = dict()
+    @memoize
     def get_M(self, N, f, n, m):
         def get_f(i):
             l_i = self.get_l_i(i)
@@ -460,43 +453,28 @@ class Enumerator(object):
             return f
         M = nsum(get_f, [0, N-1])
         return M    
+    @memoize
     def get_G(self, f, i):
         # G is the number of ways to pick l_i functions of arity 
         # one from f possible functions of arity one
         l = self.get_l_i(i)
-        try: 
-            G = self._G_dict[str(l) + '_' + str(i)]
-            return G
-        except KeyError:
-            pass       
         G = mempower(f,l)
         G = int(G)
-        self._G_dict[str(f) + '_' + str(l)] = G
         return G
+    @memoize
     def get_A(self, n, i):
         # A is the number of ways to pick k_i functions of arity 
         # two from n possible functions of arity two
         k = self.get_k_i(i)
-        try: 
-            A = self._A_dict[str(n) + '_' + str(i)]
-            return A
-        except KeyError:
-            pass 
         A = mempower(n,k)
         A = int(A)
-        self._A_dict[str(n) + '_' + str(i)] = A
         return A
+    @memoize
     def get_B(self, m, i):
         # B is the number of ways to pick j_i terminals from m terminals  
-        j = self.get_j_i(i)
-        try: 
-            B = self._B_dict[str(m) + '_' + str(i)]
-            return B
-        except KeyError:
-            pass       
+        j = self.get_j_i(i)   
         B = mempower(m,j)
         B = int(B)
-        self._B_dict[str(m) + '_' + str(i)] = B
         return B        
     def get_q(self, f, i):
         G = self.get_G(f, i)
@@ -510,15 +488,11 @@ class Enumerator(object):
         B = self.get_B(m, i)
         s = random.randint(0, B-1)
         return s
+    @memoize
     def get_l_i(self, i):
         i = int(i)
         # from n functions of arity two, pick k_i 
         # k_i is the number of non-leaf nodes in the tree corresponding to i
-        try:
-            l_i = self._l_i_dict[i]
-            return l_i
-        except KeyError:
-            pass
         if i == 0:
             l_i = 0 
         elif i == 1:
@@ -530,17 +504,12 @@ class Enumerator(object):
             left_l_i = self.get_l_i(left_int)
             right_l_i = self.get_l_i(right_int)
             l_i = left_l_i + right_l_i + 1
-        self._l_i_dict[i] = l_i        
         return l_i
+    @memoize
     def get_k_i(self, i):
         i = int(i)
         # from n functions of arity two, pick k_i 
         # k_i is the number of non-leaf nodes in the tree corresponding to i
-        try:
-            k_i = self._k_i_dict[i]
-            return k_i
-        except KeyError:
-            pass
         if i == 0:
             k_i = 0 
         elif i == 1:
@@ -552,17 +521,12 @@ class Enumerator(object):
             left_k_i = self.get_k_i(left_int)
             right_k_i = self.get_k_i(right_int)
             k_i = left_k_i + right_k_i + 1
-        self._k_i_dict[i] = k_i        
         return k_i
+    @memoize
     def get_j_i(self, i):
         i = int(i)
         # from m m_terminals, pick j_i 
         # j_i is the number of leafs in the tree corresponding to i
-        try:
-            j_i = self._j_i_dict[i]
-            return j_i
-        except KeyError:
-            pass
         if i == 0:
             j_i = 1
         elif i == 1:
@@ -574,17 +538,11 @@ class Enumerator(object):
             left_j_i = self.get_j_i(left_int)
             right_j_i = self.get_j_i(right_int)
             j_i = left_j_i + right_j_i
-        self._j_i_dict[i] = j_i
         return j_i
 
 class Enumerator2(object):
     # for the case where the are zero functions of arity one
-    def __init__(self):        
-        self._A_dict = dict()
-        self._B_dict = dict()
-        self._M_dict = dict()
-        self._k_i_dict = dict()
-        self._j_i_dict = dict()
+    @memoize
     def get_M(self, N, f, n, m):
         def get_f(i):
             k_i = self.get_k_i(i)
@@ -593,30 +551,20 @@ class Enumerator2(object):
             return f
         M = nsum(get_f, [0, N-1])
         return M    
+    @memoize
     def get_A(self, n, i):
         # A is the number of ways to pick k_i functions of arity 
         # two from n possible functions of arity two
         k = self.get_k_i(i)
-        try: 
-            A = self._A_dict[str(n) + '_' + str(i)]
-            return A
-        except KeyError:
-            pass 
         A = mempower(n,k)
         A = int(A)
-        self._A_dict[str(n) + '_' + str(i)] = A
         return A
+    @memoize
     def get_B(self, m, i):
         # B is the number of ways to pick j_i terminals from m terminals  
         j = self.get_j_i(i)
-        try: 
-            B = self._B_dict[str(m) + '_' + str(i)]
-            return B
-        except KeyError:
-            pass       
         B = mempower(m,j)
         B = int(B)
-        self._B_dict[str(m) + '_' + str(i)] = B
         return B        
     def get_r(self, n, i):
         A = self.get_A(n, i)
@@ -626,15 +574,11 @@ class Enumerator2(object):
         B = self.get_B(m, i)
         s = random.randint(0, B-1)
         return s
+    @memoize
     def get_k_i(self, i):
         i = int(i)
         # from n functions of arity two, pick k_i 
         # k_i is the number of non-leaf nodes in the tree corresponding to i
-        try:
-            k_i = self._k_i_dict[i]
-            return k_i
-        except KeyError:
-            pass
         if i == 0:
             k_i = 0 
         elif i == 1:
@@ -644,17 +588,12 @@ class Enumerator2(object):
             left_k_i = self.get_k_i(left_int)
             right_k_i = self.get_k_i(right_int)
             k_i = left_k_i + right_k_i + 1
-        self._k_i_dict[i] = k_i        
         return k_i
+    @memoize
     def get_j_i(self, i):
         i = int(i)
         # from m m_terminals, pick j_i 
         # j_i is the number of leafs in the tree corresponding to i
-        try:
-            j_i = self._j_i_dict[i]
-            return j_i
-        except KeyError:
-            pass
         if i == 0:
             j_i = 1
         elif i == 1:
@@ -664,7 +603,6 @@ class Enumerator2(object):
             left_j_i = self.get_j_i(left_int)
             right_j_i = self.get_j_i(right_int)
             j_i = left_j_i + right_j_i
-        self._j_i_dict[i] = j_i
         return j_i
 
 def create_fitting_parameters(max_params):
@@ -675,9 +613,6 @@ def create_fitting_parameters(max_params):
         params.add(param_name, param_init_value)
     return params
 
-trees_arity_dict = {}
-trees_arity_dict2 = {}
-
 def fitting_func(params, function_string, my_data, mode='residual'):
     len_data = len(my_data._y_data)
     df = my_data._data_dict
@@ -686,29 +621,11 @@ def fitting_func(params, function_string, my_data, mode='residual'):
     independent_var_vector = df[y_label]
     residual = [BIG_NUM]*len(df[y_label])
     if mode == 'residual':
-        try:
-            eval_string = '(' + function_string + ') -  df["' + y_label + '"]'
-            with np.errstate(all='ignore'):        
-                residual = eval(eval_string)
-                residual = np.nan_to_num(residual)
-        except Exception as e:
-            if type(e) in [FloatingPointError, ZeroDivisionError]:
-                residual = np.ones(len_data)*BIG_NUM
-            else:
-                print("unexpected error:, ", e)
-                pdb.set_trace()
+        eval_string = '(' + function_string + ') -  df["' + y_label + '"]'            
+        residual = eval(eval_string)
         output = residual
     elif mode == 'y_calc':
-        try:
-            with np.errstate(all='ignore'):        
-                y_value = eval(function_string)
-                y_value = np.nan_to_num(y_value)
-        except Exception as e:
-            if type(e) in [FloatingPointError, ZeroDivisionError]:
-                y_value = np.ones(len_data)*BIG_NUM
-            else:
-                print("unexpected error:, ", e)
-                pdb.set_trace()
+        y_value = eval(function_string)
         output = y_value
     # if model only has parameters and no data variables, we can have a
     # situation where output is a single constant
@@ -730,7 +647,12 @@ def evalSymbolic(individual, params, my_data):
     funcstring = funcstring.replace(variable_suffix, '"]')
     # Evaluate the sum of squared difference between the expression
     result = lmfit.minimize(fitting_func, params, 
-                            args=(funcstring, my_data), nan_policy='propagate')                            
+                            args=(funcstring, my_data),
+                            method='leastsq', nan_policy='propagate')
+    if result.success == False:
+        result = lmfit.minimize(fitting_func, params, 
+                            args=(funcstring, my_data),
+                            method='nelder', nan_policy='propagate')
     sum_of_squared_residuals = sum(pow(result.residual, 2))        
     avg_y_data = np.average(my_data._y_data)
     y_calc = fitting_func(result.params, funcstring, my_data, mode='y_calc')        
@@ -746,11 +668,8 @@ def evalSymbolic(individual, params, my_data):
             params_dict_to_store, 
             residual)
 
+@memoize
 def ith_full_binary_tree(i):    
-    try:
-        tree = trees_arity_dict[i]
-    except KeyError:
-        pass
     if i == 0:
         tree = '.'
     elif i == 1:
@@ -762,15 +681,11 @@ def ith_full_binary_tree(i):
         left = ith_full_binary_tree(left_int)
         right = ith_full_binary_tree(right_int)
         tree = '[' + left +', ' +right + ']'
-        trees_arity_dict[i] = tree
     return tree
 
+@memoize
 def ith_full_binary_tree2(i):
     # for the cases where there are zero functions of arity two
-    try:
-        tree = trees_arity_dict2[i]
-    except KeyError:
-        pass
     if i == 0:
         tree = '.'
     elif i == 1:
@@ -780,7 +695,6 @@ def ith_full_binary_tree2(i):
         left = ith_full_binary_tree2(left_int)
         right = ith_full_binary_tree2(right_int)
         tree = '[' + left +', ' +right + ']'
-        trees_arity_dict2[i] = tree
     return tree
 
 def print_some_trees(nn):
@@ -804,7 +718,8 @@ def print_some_trees2(nn):
         k_i = en.get_k_i(i)
         j_i = en.get_j_i(i)
         print(i, [left,right], j_i, k_i, tree)
-    
+
+@memoize    
 def get_cum_weights(N, f, n, m, enumerator):
     en = enumerator
     weights = [en.get_G(f, i)*en.get_A(n, i)*en.get_B(m, i) for i in range(0,N)]
@@ -812,6 +727,7 @@ def get_cum_weights(N, f, n, m, enumerator):
     cum_weights = np.array(weights)/np.sum(weights)
     return cum_weights
 
+@memoize
 def get_cum_weights2(N, n, m, enumerator):
     # for the case where there are zero functions of arity one
     en = enumerator
@@ -825,12 +741,13 @@ class ResultList(object):
         self._results = []
     def sort(self):
         self._results = sorted(self._results, key=lambda x: x._MSE)
-    def print(self, top=5):
+    def print(self, y_data, top=5):
         table = []
-        header = ["Mean Squared Error", "R^2", "Equation, simplified", 
+        header = ["Normalized Mean Squared Error", "R^2", "Equation, simplified", 
                   "Parameters"]
         for i in range(0, top):
             row = self._results[i].summarize()
+            row[0] = row[0]/np.std(y_data)
             table.append(row)
         table_string = tabulate.tabulate(table, headers=header)
         print(table_string)
@@ -863,23 +780,29 @@ def initialize_db(path_to_db):
 
 def uniform_random_global_search_once(path_to_db, path_to_csv): 
     (f, n, m, cum_weights, N, dataset, enumerator) = setup(path_to_csv)
-    if f == 0:
-        eqn_str = random_equation2(N, cum_weights, dataset, enumerator)
-    else:    
-        eqn_str = random_equation(N, cum_weights, dataset, enumerator)
-    simple_eqn = simplify_equation_string(eqn_str)
-    initialize_db(path_to_db)    
-    with SqliteDict(path_to_db, autocommit=True) as results_dict:
-        try: # if we have already attempted this equation, do not run again
-            result = results_dict[simple_eqn]
-            return result
-        except:
+    valid = False
+    while valid == False:
+        if f == 0:
+            eqn_str = random_equation2(N, cum_weights, dataset, enumerator)
+        else:    
+            eqn_str = random_equation(N, cum_weights, dataset, enumerator)
+        simple_eqn = simplify_equation_string(eqn_str, dataset)
+        initialize_db(path_to_db)    
+        with SqliteDict(path_to_db, autocommit=True) as results_dict:
+            try: # if we have already attempted this equation, do not run again
+                result = results_dict[simple_eqn]
+                return result
+            except:
+                pass
+        params = create_fitting_parameters(dataset._int_max_params)
+        try:
+            (sum_of_squared_residuals, 
+                sum_of_squared_totals, 
+                params_fitted,
+                residual) = evalSymbolic(eqn_str, params, dataset)
+            valid = True
+        except FloatingPointError:
             pass
-    params = create_fitting_parameters(dataset._int_max_params)
-    (sum_of_squared_residuals, 
-        sum_of_squared_totals, 
-        params_fitted,
-        residual) = evalSymbolic(eqn_str, params, dataset)
     R2 = 1 - sum_of_squared_residuals/sum_of_squared_totals
     MSE = sum_of_squared_residuals
     result = Result(simple_eqn, eqn_str, MSE, R2, params_fitted)
@@ -910,26 +833,27 @@ def create_db(path_to_csv):
     db_name = './db/' + csv_name + '.sqlite'    
     return db_name
 
-def compile_results(path_to_db):
+def compile_results(path_to_db, path_to_csv):
+    (_, _, _, _, _, dataset, _) = setup(path_to_csv)
     result_list = ResultList()
     with SqliteDict(path_to_db, autocommit=True) as results_dict:
         keys = results_dict.keys()
         for eqn in keys:
             result = results_dict[eqn]
             result_list._results.append(result)
-    result_list.sort()
-    result_list.print()
-        
+    result_list.sort()    
+    result_list.print(dataset._y_data)
+
 if __name__ == '__main__':
     args = sys.argv[1:]
     if len(args) == 0 or args[0] == '-h':
         print(doc_string)
         exit(0)
     path_to_csv = args[0]
-    max_attempts = int(args[1])    
+    max_attempts = int(args[1])
     path_to_db = create_db(path_to_csv)
     os.makedirs('./db', exist_ok=True)
     results = parmap.map(uniform_random_global_search_once, 
                                [path_to_db]*max_attempts, 
                                path_to_csv, pm_pbar=True)
-    compiled_results = compile_results(path_to_db)
+    compiled_results = compile_results(path_to_db, path_to_csv)
