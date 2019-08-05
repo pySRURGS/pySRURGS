@@ -60,7 +60,7 @@ The config.py file defines the number of fitting parameters, the number of
 permitted binary trees through which we search, and the types of functions
 permitted in the search space.
 
-usage: pySRURGS.py [-h] [-test TEST] [-single] train iters
+usage: pySRURGS.py [-h] [-test TEST] [-single] [-count] train iters
 
 positional arguments:
   train       absolute or relative file path to the csv file housing the
@@ -71,7 +71,9 @@ optional arguments:
   -h, --help  show this help message and exit
   -test TEST  absolute or relative file path to the csv file housing the
               testing data
-  -single     run in single processing mode  
+  -single     run in single processing mode
+  -count      Prints out how many possible equations for this configuration.
+              No other processing performed.
 ```
 
 ### An example
