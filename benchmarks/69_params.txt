@@ -1,0 +1,5 @@
+Permitted variables: ['x0', 'x1', 'x2', 'x3', 'x4']
+Permitted fitting parameters: ['p0', 'p1', 'p2', 'p3', 'p4']
+Fitting parameters: [ 5.25098724 -6.85826401  1.18768074 -0.87212937  7.71495719]
+Permitted functions: ['log', 'sinh', 'sin', 'add', 'sub', 'mul', 'div', 'pow']
+True equation: (-p3 + (p3 + x0 - 2*x4)*(p0**p2*(p0 + x3) + p2 + p4)**sin(x0))/(p3 + x0 - 2*x4)
