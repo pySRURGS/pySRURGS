@@ -1,0 +1,5 @@
+Permitted variables: ['x0', 'x1', 'x2', 'x3', 'x4']
+Permitted fitting parameters: ['p0', 'p1', 'p2', 'p3', 'p4']
+Fitting parameters: [ 6.98896292 -7.44055737  8.33464894 -0.08759308 -2.11410851]
+Permitted functions: ['log', 'sinh', 'sin', 'add', 'sub', 'mul', 'div', 'pow']
+True equation: p2 + p3*x4/x1 - p4/sinh(x4) - x2/(x4*sinh(x4)) - x3/sinh(x4) + 1/sinh(x4) - x3*x4/x1 + x0**p4*x1/p3
