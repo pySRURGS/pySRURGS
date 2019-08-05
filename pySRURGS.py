@@ -11,20 +11,9 @@ Do not use special characters or spaces in variable names.
 
 The config.py file defines the number of fitting parameters, the number of 
 permitted binary trees through which we search, and the types of functions 
-permitted in the search space. 
-
-USAGE:
-pySRURGS.py $path_to_csv $max_num_evals [$single_processing]
-
-ARGUMENTS
-Mandatory 
-1. path_to_csv          An absolute or relative file path to the csv file.
-2. max_num_evals        An integer: The number of equations which will be 
-                        considered in the search.
-Optional 
-3. single_processing    If a 3rd argument is passed, the system will run in 
-                        single processing mode.                 
+permitted in the search space.                
 '''
+print(doc_string)
 import sympy
 from sympy import simplify, sympify, Symbol
 import mpmath
@@ -37,6 +26,7 @@ import os
 import tqdm
 import parmap
 import pandas
+import argparse
 import numpy as np
 np.seterr(all='raise')
 import random 
@@ -832,6 +822,14 @@ class Result(object):
         parameters_str = ','.join(parameters)
         summary.append(parameters_str)
         return summary
+    def predict(self, dataset):
+        pass
+        #TODO
+        #parameters = create_parameter_list(dataset._m_terminals)
+        #for i in range(0,dataset._m_terminals):
+        #    parameters['p'+str(i)].value = fitting_parameters[i]
+        #y_calc = eval_equation(fit_param_list, eqn_original_cleaned, dataset, mode='y_calc')
+        
 
 def initialize_db(path_to_db):
     with SqliteDict(path_to_db, autocommit=True) as results_dict:
@@ -919,7 +917,7 @@ def generate_benchmark(path_to_csv, benchmark_name):
                     path = benchmarks_dir + '/' + benchmark_name + '_train.csv'
                 else:
                     path = benchmarks_dir + '/' + benchmark_name + '_test.csv'
-                dataset._dataframe.to_csv(path)                    
+                dataset._dataframe.to_csv(path, index=False)
                 path = benchmarks_dir + '/' + benchmark_name + '_params.txt'
                 # save the problem parameters to a text file 
                 with open(path, "w") as text_file:
@@ -928,7 +926,10 @@ def generate_benchmark(path_to_csv, benchmark_name):
                     msg += 'Fitting parameters: ' 
                     msg += str(np.array(fit_param_list)) + '\n'                    
                     msg += 'Permitted functions: ' + str(f_functions + n_functions) + '\n'
-                    msg += 'True equation: ' + str(eqn_simple) + '\n'
+                    msg += 'Simplified equation: ' + str(eqn_simple) + '\n'
+                    eqn_original = remove_variable_tags(eqn_original)
+                    eqn_original = remove_parameter_tags(eqn_original)
+                    msg += 'Raw equation: ' + str(eqn_original) + '\n'
                     text_file.write(msg)
             valid = True
         except FloatingPointError:
@@ -967,6 +968,7 @@ def compile_results(path_to_db, path_to_csv):
             result_list._results.append(result)
     result_list.sort()    
     result_list.print(dataset._y_data)
+    return result_list
 
 def generate_benchmarks(path_to_csv, start_num, count):
     # make sure to configure config.py before running this, as your generated 
@@ -974,31 +976,55 @@ def generate_benchmarks(path_to_csv, start_num, count):
     for z in range(start_num, start_num+count):
         generate_benchmark(path_to_csv, str(z))
 
-if __name__ == '__main__':
-    args = sys.argv[1:]
-    if len(args) == 0 or args[0] == '-h':
-        print(doc_string)
-        exit(0)
-    mode = 'multi'
-    if len(args) == 3:
-        mode = 'single'
-    if len(args) > 3:
-        print(doc_string)
-        print("Invalid number of arguments", "Number:", str(len(args)))
-        exit(1)
-    path_to_csv = args[0]
-    max_attempts = int(args[1])
-    path_to_db = create_db(path_to_csv)        
-    os.makedirs('./db', exist_ok=True)
-    if mode == 'multi':
+def read_benchmarks():
+    with open('./benchmarks_summary.tsv', 'w') as benchmarks_file:
+        wrtr = csv.writer(benchmarks_file, delimiter='\t', lineterminator='\n')
+        for i in range(0,100):
+            param_file = benchmarks_dir + '/' + str(i) + '_params.txt'
+            with open(param_file) as pfile:
+                param_file_lines = pfile.readlines()
+                for line in param_file_lines:
+                    if 'Simplified equation:' in line:
+                        true_equation = line.replace('Simplified equation: ', '').strip()
+                        true_equation = true_equation.replace(' ', '')
+                    if 'Raw equation:' in line:
+                        raw_equation = line.replace('Raw equation: ', '').strip()
+                        raw_equation = raw_equation.replace('"', '')
+                        raw_equation = raw_equation.replace(' ', '')
+                row = [i,true_equation,raw_equation]
+                wrtr.writerow(row)
+
+if __name__ == '__main__':    
+    parser = argparse.ArgumentParser(prog='pySRURGS.py')
+    parser.add_argument("train", help="absolute or relative file path to the csv file housing the training data")
+    parser.add_argument("iters", help="the number of equations to be attempted in this run", type=int)
+    parser.add_argument("-test", help="absolute or relative file path to the csv file housing the testing data")
+    parser.add_argument("-single", help="run in single processing mode", action="store_true")
+    #sys.argv includes a list of elements starting with the program
+    if len(sys.argv) < 2:
+        parser.print_usage()
+        sys.exit(1)
+    parser.parse_args()
+    args = parser.parse_args()
+    single_processing_mode = args.single
+    path_to_csv = args.train
+    max_attempts = args.iters
+    #
+    generate_benchmarks(path_to_toy_csv, 0, 20)
+    exit(0)
+    path_to_db = create_db(path_to_csv)
+    os.makedirs('./db', exist_ok=True) 
+    if single_processing_mode == False:
         print("Running in multi processor mode")
         results = parmap.map(uniform_random_global_search_once, 
                                    [path_to_db]*max_attempts, 
                                    path_to_csv, pm_pbar=True)
-    elif mode == 'single':
+    elif single_processing_mode == True:
         print("Running in single processor mode")
         for i in tqdm.tqdm(range(0,max_attempts)):
             uniform_random_global_search_once(path_to_db, path_to_csv)            
     else:
         raise("Invalid mode")
     compiled_results = compile_results(path_to_db, path_to_csv)
+    best_model = compiled_results._results[0]
+    
