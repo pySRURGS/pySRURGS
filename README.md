@@ -15,8 +15,9 @@ because of less computational overhead.
 2. Multiprocessing for faster computing
 3. Avoids considering arithmetically equivalent equations
 4. Loads data from spreadsheets (comma separated value files)
-5. Results are saved to file. New runs are added to previously saved results.
-6. Developed and tested on Python3.6
+5. Memoization so that computations speed up after a few iterations 
+6. Results are saved to file. New runs are added to previously saved results.
+7. Developed and tested on Python3.6
 
 ## Getting Started
 
@@ -60,12 +61,16 @@ permitted binary trees through which we search, and the types of functions
 permitted in the search space. 
 
 USAGE:
-pySRURGS.py $path_to_csv $max_num_evals
+pySRURGS.py $path_to_csv $max_num_evals [$single_processing]
 
 ARGUMENTS
-1. path_to_csv - An absolute or relative file path to the csv file.
-2. max_num_evals - An integer: The number of equations which will be considered 
-                   in the search.
+Mandatory 
+1. path_to_csv          An absolute or relative file path to the csv file.
+2. max_num_evals        An integer: The number of equations which will be 
+                        considered in the search.
+Optional 
+3. single_processing    If a 3rd argument is passed, the system will run in 
+                        single processing mode.     
 ```
 
 ### An example
@@ -73,16 +78,16 @@ ARGUMENTS
 A sample problem is provided. The filename denotes the true equation.
 
 ```
-python pySRURGS.py ./csvs/x1_squared_minus_five_x3.csv 1000
-
-1008it [04:33,  3.71it/s]
-  Mean Squared Error       R^2  Equation, simplified                                                     Parameters
---------------------  --------  -----------------------------------------------------------------------  ------------------------------------
-             5.31825  0.988549  -p0*x1 + p3**x3 + x3 + ((p3 + x1*(p3 - x3))/x1)**(p3*x1 - x3)            6.19E+00,1.00E+00,1.00E+00,1.31E-01
-             7.41245  0.983117  ((p1*p2*x3 + x1)/(p2*x3))**(-p0 - p1 + x5)*(p2 + x5**2)*(2*p3 - x1)**p3  1.34E+10,1.13E+00,1.62E+05,4.20E-01
-            15.7958   0.965121  p0*(p0 + p1 - x3)*(x3**p0)**(x3*(x0 - x1))/x3                            -3.90E+00,4.20E+00,1.00E+00,1.00E+00
-            17.7386   0.95368   p0/x1 + p2 + x1*x2 - 4*x3 - x3**x2/p1                                    3.11E-04,2.48E-01,-1.61E-01,1.00E+00
-            23.5429   0.951874  -p0*p2*x0*(p0 + x3**2)*(x2 + x5)*(x4 - 1)/(x3**2*(p3 - x1))              7.91E-03,1.00E+00,5.06E-03,3.67E+00
+$ winpty python pySRURGS.py ./csvs/x1_squared_minus_five_x3.csv 10 2
+Running in single processor mode
+100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 10/10 [00:27<00:00,  2.74s/it]
+  Normalized Mean Squared Error        R^2  Equation, simplified                                                                                           Parameters
+-------------------------------  ---------  -------------------------------------------------------------------------------------------------------------  ----------------------------------------------
+                        10.2672   0.963167  -(x0 - x1*((p1*p3 - x1*x3)/(p1*x1))**x3*(p3 - x0))*(p0*x1*(x0*(x1 + x3) - x1) - x0*sin(p2))/(x0*x1*(p3 - x0))  -4.74E-04,1.51E+04,2.14E-01,5.25E+03,-1.27E+04
+                        17.338    0.941908  x2 + p4*x3/p1**2 - p0**(-x1)*p4*x5*log(p0)/x4 - p0**(-x1)*x2*x5*log(p0)/x4                                     1.00E+00,1.69E+02,1.00E+00,1.00E+00,1.33E+05
+                        65.4971   0.742457  (2*p3 - p4**x2)*(-p0*p3*x0 + p0*x2 + x0*x2)*((-p2 + p3)**(x3/p0))**(-p1 + x2)/(p0*x0*sin(p1))                  1.88E+00,-1.15E+00,-3.12E+00,4.76E-01,1.07E-01
+                       111.863    0.461941  x5**(-x4)*(-x3**x5*(p4**p0 - 2*x5))**sinh(p0)*(p0*x5 - p1*x0)/(p1*(p2 - x1))                                   8.75E-01,5.85E-04,1.00E+00,1.00E+00,5.76E+00
+                       256.675   -1.05228   (x1 + x2)*(x2 + x4)*(p0 - p0**p1 + x2)*(p0 - x0 + x3 + x5)*log(p0)                                             1.03E+00,1.03E+00,1.00E+00,1.00E+00,1.00E+00
 ```
 
 ### Configuring the search

@@ -1,0 +1,5 @@
+Permitted variables: ['x0', 'x1', 'x2', 'x3', 'x4']
+Permitted fitting parameters: ['p0', 'p1', 'p2', 'p3', 'p4']
+Fitting parameters: [ 1.9691025  -9.3491292   9.91212335  0.94930014  2.84362506]
+Permitted functions: ['add', 'sub', 'mul', 'div']
+True equation: -(p4*(x1 + (p4 + x4)*(p2*x0 - x2)) + x4)/p4
