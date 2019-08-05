@@ -1,5 +1,6 @@
 Permitted variables: ['x0', 'x1', 'x2', 'x3', 'x4']
 Permitted fitting parameters: ['p0', 'p1', 'p2', 'p3', 'p4']
-Fitting parameters: [9.59226893 0.38448993 6.23936206 7.55814804 5.18111223]
+Fitting parameters: [-2.43374866  6.77278926 -9.38909126  5.6079462   5.98947691]
 Permitted functions: ['log', 'sinh', 'sin', 'add', 'sub', 'mul', 'div', 'pow']
-True equation: (p0*p3*x4*(-p0 + p3 + x4*(p0 + x4)**(-p4 + x3) + sinh(p0)) - p4*(x3 - x4))/(p0*p3*x4)
+Simplified equation: p0*((p0 + p3 + x1*x4)**(2*p3) + log(x0))*(-p1**2*x4 + p1*p2 + p3*x4)/(p2*x0*x4)
+Raw equation: mul(sub(div(mul(add(p2, x4), div(p3, p1)), p1), div(mul(p1, p0), mul(p2, x0))), add(pow(add(add(p0, p3), mul(x1, x4)), add(p3, p3)), log(x0)))
