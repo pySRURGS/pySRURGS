@@ -14,12 +14,16 @@ permitted binary trees through which we search, and the types of functions
 permitted in the search space. 
 
 USAGE:
-pySRURGS.py $path_to_csv $max_num_evals
+pySRURGS.py $path_to_csv $max_num_evals [$single_processing]
 
 ARGUMENTS
-1. path_to_csv - An absolute or relative file path to the csv file.
-2. max_num_evals - An integer: The number of equations which will be considered 
-                   in the search.
+Mandatory 
+1. path_to_csv          An absolute or relative file path to the csv file.
+2. max_num_evals        An integer: The number of equations which will be 
+                        considered in the search.
+Optional 
+3. single_processing    If a 3rd argument is passed, the system will run in 
+                        single processing mode.                 
 '''
 import sympy
 from sympy import simplify, sympify, Symbol
@@ -195,8 +199,17 @@ def sin(x):
 def exp(x):
     return np.exp(x)
 
+def log(x):
+    return np.log(np.abs(x))
+
 def tanh(x):
     return np.tanh(x)
+
+def sinh(x):
+    return np.sinh(x)
+
+def cosh(x):
+    return np.cosh(x)
 
 def sum(x):
     return np.sum(x)
@@ -248,6 +261,35 @@ def get_element_of_cartesian_product(*args, repeat=1, index=0):
 
 opers_dict = get_opers_dict()
 
+def fix_order_of_fitting_parameters(funcstring):    
+    # sometimes equations come out like p1 * x2 - p0
+    # would prefer p0 * x2 - p1 because they are equivalent and reduces 
+    # redundancy 
+    # TODO - if a parameter is not in the equation, reduce the integer value 
+    # corresponding with the parameters in the equation, if their integer is 
+    # larger than that of the missing parameter
+    param_pattern = fitting_param_prefix + '(.+?)' + fitting_param_suffix
+    all_params = re.findall(param_pattern, funcstring)
+    params_indexing = list()
+    if len(all_params) > 0:
+        for i in range(0,len(all_params)):
+            current_param = all_params[i]
+            if current_param not in params_indexing:
+                params_indexing.append(current_param)
+        for j in range(0,len(params_indexing)):
+            old_name = make_parameter_name(params_indexing[j])
+            temp_name = make_parameter_name('p'+str(j))
+            funcstring = funcstring.replace(old_name, temp_name)
+        for j in range(0,len(params_indexing)):
+            temp_name = make_parameter_name('p'+str(j))
+            new_name = make_parameter_name(str(j))
+            funcstring = funcstring.replace(temp_name, new_name)
+    replacements = {'[' : '(', 
+                    ']' : ')'}                   
+    for key,value in replacements.items():
+        funcstring = funcstring.replace(key, value)
+    return funcstring
+
 def simplify_equation_string(eqn_str, dataset):
     z = True 
     while z == True:
@@ -272,7 +314,7 @@ def simplify_equation_string(eqn_str, dataset):
     except ValueError:
         pass
     if 'zoo' in eqn_str: # zoo (complex infinity) in sympy
-        eqn_str = '1/0'
+        raise FloatingPointError
     eqn_str = remove_variable_tags(eqn_str)
     eqn_str = remove_parameter_tags(eqn_str)
     return eqn_str
@@ -345,7 +387,7 @@ def equation_generator2(i, r, s, dataset, enumerator, simpler=True):
         tree = tree.replace('.', term, 1)
     return tree
     
-def random_equation(N, cum_weights, dataset, enumerator):
+def random_equation(N, cum_weights, dataset, enumerator, details=False):
     n = len(n_functions)
     f = len(f_functions)
     m = dataset._m_terminals
@@ -355,9 +397,14 @@ def random_equation(N, cum_weights, dataset, enumerator):
     s = enumerator.get_s(m, i)   
     equation_string = equation_generator(i, q, r, s, dataset, enumerator, 
                                          simpler=True)
-    return equation_string
+    if details == False:
+        return equation_string
+    else:   
+        original_equation_string = equation_generator(i, q, r, s, dataset, 
+                                                      enumerator, simpler=False)        
+        return [original_equation_string, equation_string, N, n, f, m, i, q, r, s]
     
-def random_equation2(N, cum_weights, dataset, enumerator):
+def random_equation2(N, cum_weights, dataset, enumerator, details=False):
     # for the case where there are zero functions of arity one 
     n = len(n_functions)
     m = dataset._m_terminals
@@ -366,7 +413,12 @@ def random_equation2(N, cum_weights, dataset, enumerator):
     s = enumerator.get_s(m, i)   
     equation_string = equation_generator2(i, r, s, dataset, enumerator, 
                                           simpler=True)
-    return equation_string
+    if details == False:
+        return equation_string
+    else:   
+        original_equation_string = equation_generator2(i, r, s, dataset, 
+                                                       enumerator, simpler=False)
+        return [original_equation_string, equation_string, N, n, m, i, r, s]
 
 class Dataset(object):    
     def __init__(self, path_to_csv_file, int_max_params, scaled=False):
@@ -613,7 +665,7 @@ def create_fitting_parameters(max_params):
         params.add(param_name, param_init_value)
     return params
 
-def fitting_func(params, function_string, my_data, mode='residual'):
+def eval_equation(params, function_string, my_data, mode='residual'):
     len_data = len(my_data._y_data)
     df = my_data._data_dict
     pd = params.valuesdict()
@@ -631,9 +683,24 @@ def fitting_func(params, function_string, my_data, mode='residual'):
     # situation where output is a single constant
     if np.size(output) == 1:
         output = np.resize(output, np.size(independent_var_vector))
-    return np.nan_to_num(output)
+    return output
 
-def evalSymbolic(individual, params, my_data):
+def clean_funcstring_params(funcstring):
+    funcstring = funcstring.replace(fitting_param_prefix, 'params["')
+    funcstring = funcstring.replace(fitting_param_suffix, '"].value')
+    return funcstring 
+    
+def clean_funcstring_vars(funcstring):
+    funcstring = funcstring.replace(variable_prefix, 'df["')
+    funcstring = funcstring.replace(variable_suffix, '"]')
+    return funcstring 
+
+def clean_funcstring(funcstring):
+    funcstring = clean_funcstring_vars(funcstring)
+    funcstring = clean_funcstring_params(funcstring)
+    return funcstring
+
+def check_goodness_of_fit(individual, params, my_data):
     '''
         Given the individual, the lmfit params object, and the datastructure,
         the function outputs sum_of_squared_residuals, sum_of_squared_totals, 
@@ -641,30 +708,26 @@ def evalSymbolic(individual, params, my_data):
     '''
     # If funcstring is a tree, transform to string
     funcstring = str(individual)
-    funcstring = funcstring.replace(fitting_param_prefix, 'params["')
-    funcstring = funcstring.replace(fitting_param_suffix, '"].value')
-    funcstring = funcstring.replace(variable_prefix, 'df["')
-    funcstring = funcstring.replace(variable_suffix, '"]')
+    funcstring = clean_funcstring(funcstring)
     # Evaluate the sum of squared difference between the expression
-    result = lmfit.minimize(fitting_func, params, 
+    result = lmfit.minimize(eval_equation, params, 
                             args=(funcstring, my_data),
                             method='leastsq', nan_policy='propagate')
     if result.success == False:
-        result = lmfit.minimize(fitting_func, params, 
+        result = lmfit.minimize(eval_equation, params, 
                             args=(funcstring, my_data),
                             method='nelder', nan_policy='propagate')
     sum_of_squared_residuals = sum(pow(result.residual, 2))        
     avg_y_data = np.average(my_data._y_data)
-    y_calc = fitting_func(result.params, funcstring, my_data, mode='y_calc')        
+    y_calc = eval_equation(result.params, funcstring, my_data, mode='y_calc')        
     sum_of_squared_residuals = sum(pow(my_data._y_data - y_calc,2))
     sum_of_squared_totals = sum(pow(y_calc - avg_y_data,2))
     params_dict_to_store = result.params
     residual = result.residual
-    sum_of_squared_residuals = np.nan_to_num(sum_of_squared_residuals)
-    sum_of_squared_totals = np.nan_to_num(sum_of_squared_totals)
-    residual = np.nan_to_num(residual)
+    R2 = 1 - sum_of_squared_residuals/sum_of_squared_totals
     return (sum_of_squared_residuals, 
             sum_of_squared_totals, 
+            R2,
             params_dict_to_store, 
             residual)
 
@@ -786,7 +849,10 @@ def uniform_random_global_search_once(path_to_db, path_to_csv):
             eqn_str = random_equation2(N, cum_weights, dataset, enumerator)
         else:    
             eqn_str = random_equation(N, cum_weights, dataset, enumerator)
-        simple_eqn = simplify_equation_string(eqn_str, dataset)
+        try:
+            simple_eqn = simplify_equation_string(eqn_str, dataset)
+        except FloatingPointError:
+            pass
         initialize_db(path_to_db)    
         with SqliteDict(path_to_db, autocommit=True) as results_dict:
             try: # if we have already attempted this equation, do not run again
@@ -798,12 +864,12 @@ def uniform_random_global_search_once(path_to_db, path_to_csv):
         try:
             (sum_of_squared_residuals, 
                 sum_of_squared_totals, 
+                R2,
                 params_fitted,
-                residual) = evalSymbolic(eqn_str, params, dataset)
+                residual) = check_goodness_of_fit(eqn_str, params, dataset)
             valid = True
         except FloatingPointError:
             pass
-    R2 = 1 - sum_of_squared_residuals/sum_of_squared_totals
     MSE = sum_of_squared_residuals
     result = Result(simple_eqn, eqn_str, MSE, R2, params_fitted)
     with SqliteDict(path_to_db, autocommit=True) as results_dict:
@@ -812,19 +878,75 @@ def uniform_random_global_search_once(path_to_db, path_to_csv):
         if result._MSE < best_result._MSE:                       
             results_dict['best_result'] = best_result            
     return result
+
+def generate_benchmark(path_to_csv, benchmark_name):
+    # x_domain is [lower_bound, upper_bound]
+    (f, n, m, cum_weights, N, dataset, enumerator) = setup(path_to_csv)
+    valid = False
+    while valid == False:
+        try:
+            # specify the equation
+            if f == 0:
+                eqn_details = random_equation2(N, cum_weights, 
+                                               dataset, enumerator, 
+                                               details=True)
+            else:    
+                eqn_details = random_equation(N, cum_weights, 
+                                              dataset, enumerator, 
+                                              details=True)
+            eqn_original = eqn_details[0]
+            eqn_simple = simplify_equation_string(eqn_original, dataset)
+            eqn_specifiers = eqn_details[2:]
+            # create the fitting parameters values
+            fitting_parameters = (np.random.sample((5))-0.5)*20
+            fit_param_list = create_fitting_parameters(5)
+            for i in range(0,5):
+                fit_param_list['p'+str(i)].value = fitting_parameters[i]
+            eqn_original_cleaned = clean_funcstring(eqn_original)
+            # create the training dataset
+            for zz in range(0,2): # 1st iteration, train. 2nd iteration, test.                
+                sample_dataset = np.zeros((100,6))
+                for j in range(0,5):
+                    sample_dataset[:,j] = np.random.sample((100,))*10
+                dataset._dataframe = pandas.DataFrame(sample_dataset)
+                dataset._dataframe.columns = dataset._x_labels.tolist() + [dataset._y_label]
+                dataset._data_dict = dataset.get_data_dict()
+                # calculate y for the sample problem 
+                y_calc = eval_equation(fit_param_list, eqn_original_cleaned, dataset, mode='y_calc')
+                dataset._dataframe[dataset._y_label] = y_calc
+                # save the test and train sets to file 
+                if zz == 0:
+                    path = benchmarks_dir + '/' + benchmark_name + '_train.csv'
+                else:
+                    path = benchmarks_dir + '/' + benchmark_name + '_test.csv'
+                dataset._dataframe.to_csv(path)                    
+                path = benchmarks_dir + '/' + benchmark_name + '_params.txt'
+                # save the problem parameters to a text file 
+                with open(path, "w") as text_file:
+                    msg = 'Permitted variables: ' + str(dataset._x_labels.tolist()) + '\n'
+                    msg += 'Permitted fitting parameters: ' + str(list(fit_param_list.keys())) + '\n'
+                    msg += 'Fitting parameters: ' 
+                    msg += str(np.array(fit_param_list)) + '\n'                    
+                    msg += 'Permitted functions: ' + str(f_functions + n_functions) + '\n'
+                    msg += 'True equation: ' + str(eqn_simple) + '\n'
+                    text_file.write(msg)
+            valid = True
+        except FloatingPointError:
+            pass
     
 def setup(path_to_csv):
+    # reads the configuration, the csv file, and creates needed objects
     N = MAX_NUM_TREES
     m = MAX_NUM_FIT_PARAM
     n = len(n_functions)
-    f = len(f_functions)    
-    dataset = Dataset(path_to_csv, m, scaled=False)
+    f = len(f_functions)        
     if f == 0:
         enumerator = Enumerator2()
         cum_weights = get_cum_weights2(N, n, m, enumerator)
     else:
         enumerator = Enumerator()
         cum_weights = get_cum_weights(N, f, n, m, enumerator)
+    dataset = Dataset(path_to_csv, m, scaled=False)
     return (f, n, m, cum_weights, N, dataset, enumerator)
 
 def create_db(path_to_csv):
@@ -834,6 +956,8 @@ def create_db(path_to_csv):
     return db_name
 
 def compile_results(path_to_db, path_to_csv):
+    # reads the generated .sqlite file to determine the best models, then 
+    # prints them to screen!
     (_, _, _, _, _, dataset, _) = setup(path_to_csv)
     result_list = ResultList()
     with SqliteDict(path_to_db, autocommit=True) as results_dict:
@@ -844,16 +968,37 @@ def compile_results(path_to_db, path_to_csv):
     result_list.sort()    
     result_list.print(dataset._y_data)
 
+def generate_benchmarks(path_to_csv, start_num, count):
+    # make sure to configure config.py before running this, as your generated 
+    # benchmarks will use your configuration
+    for z in range(start_num, start_num+count):
+        generate_benchmark(path_to_csv, str(z))
+
 if __name__ == '__main__':
     args = sys.argv[1:]
     if len(args) == 0 or args[0] == '-h':
         print(doc_string)
         exit(0)
+    mode = 'multi'
+    if len(args) == 3:
+        mode = 'single'
+    if len(args) > 3:
+        print(doc_string)
+        print("Invalid number of arguments", "Number:", str(len(args)))
+        exit(1)
     path_to_csv = args[0]
     max_attempts = int(args[1])
-    path_to_db = create_db(path_to_csv)
+    path_to_db = create_db(path_to_csv)        
     os.makedirs('./db', exist_ok=True)
-    results = parmap.map(uniform_random_global_search_once, 
-                               [path_to_db]*max_attempts, 
-                               path_to_csv, pm_pbar=True)
+    if mode == 'multi':
+        print("Running in multi processor mode")
+        results = parmap.map(uniform_random_global_search_once, 
+                                   [path_to_db]*max_attempts, 
+                                   path_to_csv, pm_pbar=True)
+    elif mode == 'single':
+        print("Running in single processor mode")
+        for i in tqdm.tqdm(range(0,max_attempts)):
+            uniform_random_global_search_once(path_to_db, path_to_csv)            
+    else:
+        raise("Invalid mode")
     compiled_results = compile_results(path_to_db, path_to_csv)
