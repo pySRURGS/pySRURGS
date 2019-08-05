@@ -250,7 +250,8 @@ def get_element_of_cartesian_product(*args, repeat=1, index=0):
 
 opers_dict = get_opers_dict()
 
-def fix_order_of_fitting_parameters(funcstring):    
+def fix_order_of_fitting_parameters(funcstring):
+    # NOT DEPLOYED YET
     # sometimes equations come out like p1 * x2 - p0
     # would prefer p0 * x2 - p1 because they are equivalent and reduces 
     # redundancy 
@@ -280,6 +281,10 @@ def fix_order_of_fitting_parameters(funcstring):
     return funcstring
 
 def simplify_equation_string(eqn_str, dataset):
+    '''
+        This replaces add(a,b) with a + b 
+        Also uses sympy for algebraic simplification 
+    '''
     z = True 
     while z == True:
         z = False
@@ -309,6 +314,13 @@ def simplify_equation_string(eqn_str, dataset):
     return eqn_str
 
 def equation_generator(i, q, r, s, dataset, enumerator, simpler=True):
+    '''
+        Generates the random equation 
+        i is in the domain [0, N-1], and specifies which binary tree to use 
+        q is in the domain [0, G-1], and specifies which function of arity 1 configuration
+        r is in the domain [0, A-1], and specifies which function of arity 2 configuration
+        s is in the domain [0, B-1], and specifies which terminal configuration        
+    '''
     en = enumerator
     f = len(f_functions)
     n = len(n_functions)
@@ -326,13 +338,23 @@ def equation_generator(i, q, r, s, dataset, enumerator, simpler=True):
     l_i = en.get_l_i(i)
     k_i = en.get_k_i(i)
     j_i = en.get_j_i(i)
+    # of all the possible configurations of arity 1 functions, we pick the 
+    # configuration at index q 
     f_func_config = get_element_of_cartesian_product(f_functions, repeat=l_i, 
                                                      index=q)
+    # of all the possible configurations of arity 2 functions, we pick the 
+    # configuration at index r 
     n_func_config = get_element_of_cartesian_product(n_functions, repeat=k_i, 
                                                      index=r)
+    # of all the possible configurations of terminals, we pick the 
+    # configuration at index s
     term_config = get_element_of_cartesian_product(dataset._terminals_list, 
                                                    repeat=j_i, index=s)
     orig_tree = tree
+    # the trees are generated in the form [. , .] where . denotes a leaf, 
+    # and the square brackets indicate a function 
+    # we do some string replacements here, according to the determined 
+    # configurations to build the equation as a string 
     for z in range(0,len(n_func_config)):
         func = n_func_config[z]
         tree = tree.replace('[', func +'(', 1)
@@ -377,6 +399,17 @@ def equation_generator2(i, r, s, dataset, enumerator, simpler=True):
     return tree
     
 def random_equation(N, cum_weights, dataset, enumerator, details=False):
+    '''
+        Generates a random equation given the number of permitted unique trees, N,
+        the probability of selection for each of those trees, cum_weights, a 
+        Dataset object, and an Enumerator object 
+        
+        It works by generating the random numbers which specify the equation, 
+        then passing those as arguments to equation_generator
+        
+        The details specifier is used when generating benchmark problems,
+        for most usecases, it should be false.
+    '''
     n = len(n_functions)
     f = len(f_functions)
     m = dataset._m_terminals
@@ -484,15 +517,22 @@ class Dataset(object):
 
 
 class Enumerator(object):
+    '''
+        This class is used to count all the possible equations for the case 
+        where functions of arity 1 and 2 are permitted.
+    '''
     @memoize
     def get_M(self, N, f, n, m):
-        def get_f(i):
+        # M is the total number of equations possible for [0, 1, 2, ..., i, ..., N]
+        # unique binary trees, f functions of arity one, n functions of arity two, 
+        # and m terminals 
+        def get_count(i):
             l_i = self.get_l_i(i)
             k_i = self.get_k_i(i)
             j_i = self.get_j_i(i)
-            f = mempower(n,k_i)*mempower(m,j_i)*mempower(f,l_i)
-            return f
-        M = nsum(get_f, [0, N-1])
+            count = mempower(n,k_i)*mempower(m,j_i)*mempower(f,l_i)
+            return count
+        M = mpmath.nsum(get_count, [0, N-1])
         return M    
     @memoize
     def get_G(self, f, i):
@@ -584,13 +624,13 @@ class Enumerator(object):
 class Enumerator2(object):
     # for the case where the are zero functions of arity one
     @memoize
-    def get_M(self, N, f, n, m):
-        def get_f(i):
+    def get_M(self, N, n, m):
+        def get_count(i):
             k_i = self.get_k_i(i)
             j_i = self.get_j_i(i)
-            f = mempower(n,k_i)*mempower(m,j_i)
-            return f
-        M = nsum(get_f, [0, N-1])
+            count = mempower(n,k_i)*mempower(m,j_i)
+            return count
+        M = mpmath.nsum(get_count, [0, N-1])
         return M    
     @memoize
     def get_A(self, n, i):
@@ -935,16 +975,17 @@ def generate_benchmark(path_to_csv, benchmark_name):
 def setup(path_to_csv):
     # reads the configuration, the csv file, and creates needed objects
     N = MAX_NUM_TREES
-    m = MAX_NUM_FIT_PARAM
-    n = len(n_functions)
-    f = len(f_functions)        
+    num_fit_param = MAX_NUM_FIT_PARAM
+    dataset = Dataset(path_to_csv, num_fit_param, scaled=False)
+    m = dataset._m_terminals # the number of vars + number of fit params 
+    n = len(n_functions) # the number of functions of arity 2 
+    f = len(f_functions) # the number of functions of arity 1
     if f == 0:
         enumerator = Enumerator2()
-        cum_weights = get_cum_weights2(N, n, m, enumerator)
+        cum_weights = get_cum_weights2(N, n, num_fit_param, enumerator)
     else:
         enumerator = Enumerator()
-        cum_weights = get_cum_weights(N, f, n, m, enumerator)
-    dataset = Dataset(path_to_csv, m, scaled=False)
+        cum_weights = get_cum_weights(N, f, num_fit_param, m, enumerator)    
     return (f, n, m, cum_weights, N, dataset, enumerator)
 
 def create_db(path_to_csv):
@@ -997,6 +1038,7 @@ if __name__ == '__main__':
     parser.add_argument("iters", help="the number of equations to be attempted in this run", type=int)
     parser.add_argument("-test", help="absolute or relative file path to the csv file housing the testing data")
     parser.add_argument("-single", help="run in single processing mode", action="store_true")
+    parser.add_argument("-count", help="Prints out how many possible equations for this configuration. No other processing performed.", action="store_true")
     #sys.argv includes a list of elements starting with the program
     if len(sys.argv) < 2:
         parser.print_usage()
@@ -1006,6 +1048,15 @@ if __name__ == '__main__':
     single_processing_mode = args.single
     path_to_csv = args.train
     max_attempts = args.iters
+    count_M = args.count
+    if count_M == True:
+        (f, n, m, cum_weights, N, dataset, enumerator) = setup(path_to_csv)
+        if f == 0:
+            number_possible_equations = enumerator.get_M(N,n,m)
+        else:
+            number_possible_equations = enumerator.get_M(N,f,n,m)
+        print("Number possible equations:", number_possible_equations)        
+        exit(0)
     #
     #generate_benchmarks(path_to_toy_csv, 0, 20)
     #read_benchmarks()
