@@ -13,7 +13,6 @@ The config.py file defines the number of fitting parameters, the number of
 permitted binary trees through which we search, and the types of functions 
 permitted in the search space.                
 '''
-print(doc_string)
 import sympy
 from sympy import simplify, sympify, Symbol
 import mpmath
@@ -849,17 +848,15 @@ def uniform_random_global_search_once(path_to_db, path_to_csv):
             eqn_str = random_equation(N, cum_weights, dataset, enumerator)
         try:
             simple_eqn = simplify_equation_string(eqn_str, dataset)
-        except FloatingPointError:
-            pass
-        initialize_db(path_to_db)    
-        with SqliteDict(path_to_db, autocommit=True) as results_dict:
-            try: # if we have already attempted this equation, do not run again
-                result = results_dict[simple_eqn]
-                return result
-            except:
-                pass
-        params = create_fitting_parameters(dataset._int_max_params)
-        try:
+            initialize_db(path_to_db)    
+            with SqliteDict(path_to_db, autocommit=True) as results_dict:
+                try: # if we have already attempted this equation, do not run again
+                    result = results_dict[simple_eqn]
+                    return result
+                except:
+                    pass
+            params = create_fitting_parameters(dataset._int_max_params)
+        
             (sum_of_squared_residuals, 
                 sum_of_squared_totals, 
                 R2,
@@ -1010,8 +1007,10 @@ if __name__ == '__main__':
     path_to_csv = args.train
     max_attempts = args.iters
     #
-    generate_benchmarks(path_to_toy_csv, 0, 20)
-    exit(0)
+    #generate_benchmarks(path_to_toy_csv, 0, 20)
+    #read_benchmarks()
+    #exit(0)
+    #
     path_to_db = create_db(path_to_csv)
     os.makedirs('./db', exist_ok=True) 
     if single_processing_mode == False:
