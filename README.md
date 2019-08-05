@@ -51,26 +51,27 @@ pySRURGS - Symbolic Regression by Uniform Random Global Search
 Sohrab Towfighi (C) 2019
 License: GPL 3.0
 
-All your data needs to be numeric. 
+All your data needs to be numeric.
 Your CSV file should have a header.
 Inside the csv, the dependent variable should be the rightmost column.
 Do not use special characters or spaces in variable names.
 
-The config.py file defines the number of fitting parameters, the number of 
-permitted binary trees through which we search, and the types of functions 
-permitted in the search space. 
+The config.py file defines the number of fitting parameters, the number of
+permitted binary trees through which we search, and the types of functions
+permitted in the search space.
 
-USAGE:
-pySRURGS.py $path_to_csv $max_num_evals [$single_processing]
+usage: pySRURGS.py [-h] [-test TEST] [-single] train iters
 
-ARGUMENTS
-Mandatory 
-1. path_to_csv          An absolute or relative file path to the csv file.
-2. max_num_evals        An integer: The number of equations which will be 
-                        considered in the search.
-Optional 
-3. single_processing    If a 3rd argument is passed, the system will run in 
-                        single processing mode.     
+positional arguments:
+  train       absolute or relative file path to the csv file housing the
+              training data
+  iters       the number of equations to be attempted in this run
+
+optional arguments:
+  -h, --help  show this help message and exit
+  -test TEST  absolute or relative file path to the csv file housing the
+              testing data
+  -single     run in single processing mode  
 ```
 
 ### An example
