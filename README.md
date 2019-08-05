@@ -73,7 +73,7 @@ ARGUMENTS
 A sample problem is provided. The filename denotes the true equation.
 
 ```
-python pySRURGS.py ./x1_squared_minus_five_x3.csv 1000
+python pySRURGS.py ./csvs/x1_squared_minus_five_x3.csv 1000
 
 1008it [04:33,  3.71it/s]
   Mean Squared Error       R^2  Equation, simplified                                                     Parameters
