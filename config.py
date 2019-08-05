@@ -6,11 +6,11 @@
 
 # you can edit n_functions to change the functions you permit in the search
 # functions of arity two:
-n_functions = ['add','sub','mul','div','pow'] 
+n_functions = ['add','sub','mul','div', 'pow'] 
 # functions of arity one:
-f_functions = []#['sin','exp','tanh'] # it is permissible to set f_functions to an empty list.
+f_functions = ['log', 'sinh', 'sin'] # ['sin','exp','tanh'] # it is permissible to set f_functions to an empty list.
 # the maximum number of fitting parameters in candidate solutions
-MAX_NUM_FIT_PARAM = 4
+MAX_NUM_FIT_PARAM = 5
 # the number of unique binary trees that are considered in the search space 
 MAX_NUM_TREES = 1000
 
@@ -23,3 +23,7 @@ fitting_param_prefix = 'begin_fitting_param_'
 fitting_param_suffix = '_end_fitting_param'
 variable_prefix = 'begin_variable_'
 variable_suffix = '_end_variable'
+path_to_toy_csv = './csvs/toy_data_for_benchmark_gen.csv'
+benchmarks_x_domain = [0, 10]
+benchmarks_fit_param_domain = [-10, 10]
+benchmarks_dir = './benchmarks'
