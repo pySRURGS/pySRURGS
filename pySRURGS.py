@@ -988,10 +988,13 @@ def setup(path_to_csv):
         cum_weights = get_cum_weights(N, f, num_fit_param, m, enumerator)    
     return (f, n, m, cum_weights, N, dataset, enumerator)
 
-def create_db(path_to_csv):
+def create_db(path_to_csv, additional_name=None):
     csv_basename = os.path.basename(path_to_csv)
-    csv_name = csv_basename[:-4]
-    db_name = './db/' + csv_name + '.sqlite'    
+    csv_name = csv_basename[:-4]    
+    if additional_name is not None:
+        db_name = './db/' + csv_name + additional_name + '.sqlite'   
+    else:
+        db_name = './db/' + csv_name + '.sqlite'   
     return db_name
 
 def compile_results(path_to_db, path_to_csv):
@@ -1037,6 +1040,7 @@ if __name__ == '__main__':
     parser.add_argument("train", help="absolute or relative file path to the csv file housing the training data")
     parser.add_argument("iters", help="the number of equations to be attempted in this run", type=int)
     parser.add_argument("-test", help="absolute or relative file path to the csv file housing the testing data")
+    parser.add_argument("-run_ID", help="some text that uniquely identifies this run", required=False)
     parser.add_argument("-single", help="run in single processing mode", action="store_true")
     parser.add_argument("-count", help="Prints out how many possible equations for this configuration. No other processing performed.", action="store_true")
     #sys.argv includes a list of elements starting with the program
@@ -1057,12 +1061,8 @@ if __name__ == '__main__':
             number_possible_equations = enumerator.get_M(N,f,n,m)
         print("Number possible equations:", number_possible_equations)        
         exit(0)
-    #
-    #generate_benchmarks(path_to_toy_csv, 0, 20)
-    #read_benchmarks()
-    #exit(0)
-    #
-    path_to_db = create_db(path_to_csv)
+    run_ID = args.run_ID
+    path_to_db = create_db(path_to_csv, run_ID)
     os.makedirs('./db', exist_ok=True) 
     if single_processing_mode == False:
         print("Running in multi processor mode")
