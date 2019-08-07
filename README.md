@@ -17,7 +17,10 @@ because of less computational overhead.
 4. Loads data from spreadsheets (comma separated value files)
 5. Memoization so that computations speed up after a few iterations 
 6. Results are saved to file. New runs are added to previously saved results.
-7. Developed and tested on Python3.6
+7. User specified number of fitting parameters 
+8. User specified number of permitted unique equation forms 
+9. User specified permitted functions 
+10. Developed and tested on Python3.6
 
 ## Getting Started
 
@@ -47,35 +50,47 @@ python3 pySRURGS.py -h
 The above command should render the following:
 
 ```
-pySRURGS - Symbolic Regression by Uniform Random Global Search
-Sohrab Towfighi (C) 2019
-License: GPL 3.0
-
-All your data needs to be numeric.
-Your CSV file should have a header.
-Inside the csv, the dependent variable should be the rightmost column.
-Do not use special characters or spaces in variable names.
-
-The config.py file defines the number of fitting parameters, the number of
-permitted binary trees through which we search, and the types of functions
-permitted in the search space.
-
 usage: pySRURGS.py [-h] [-test TEST] [-run_ID RUN_ID] [-single] [-count]
+                   [-funcs_arity_two FUNCS_ARITY_TWO]
+                   [-funcs_arity_one FUNCS_ARITY_ONE]
+                   [-max_num_fit_params MAX_NUM_FIT_PARAMS]
+                   [-max_size_trees MAX_SIZE_TREES]
                    train iters
 
 positional arguments:
-  train           absolute or relative file path to the csv file housing the
-                  training data
-  iters           the number of equations to be attempted in this run
+  train                 absolute or relative file path to the csv file housing
+                        the training data
+  iters                 the number of equations to be attempted in this run
 
 optional arguments:
-  -h, --help      show this help message and exit
-  -test TEST      absolute or relative file path to the csv file housing the
-                  testing data
-  -run_ID RUN_ID  some text that uniquely identifies this run
-  -single         run in single processing mode
-  -count          Prints out how many possible equations for this
-                  configuration. No other processing performed.
+  -h, --help            show this help message and exit
+  -test TEST            absolute or relative file path to the csv file housing
+                        the testing data (default: None)
+  -run_ID RUN_ID        some text that uniquely identifies this run (default:
+                        None)
+  -single               run in single processing mode (default: False)
+  -count                Instead of doing symbolic regression, just count out
+                        how many possible equations for this configuration. No
+                        other processing performed. (default: False)
+  -funcs_arity_two FUNCS_ARITY_TWO
+                        a comma separated string listing the functions of
+                        arity two you want to be considered.
+                        Permitted:add,sub,mul,div,pow (default:
+                        add,sub,mul,div,pow)
+  -funcs_arity_one FUNCS_ARITY_ONE
+                        a comma separated string listing the functions of
+                        arity one you want to be considered.
+                        Permitted:sin,cos,tan,exp,log,sinh,cosh,tanh (default:
+                        None)
+  -max_num_fit_params MAX_NUM_FIT_PARAMS
+                        the maximum number of fitting parameters permitted in
+                        the generated models (default: 3)
+  -max_size_trees MAX_SIZE_TREES
+                        the number of unique binary trees that are permitted
+                        in the generated models - binary trees define the form
+                        of the equation, increasing this number tends to
+                        increase the complexity of generated equations
+                        (default: 1000)
 ```
 
 ### An example
@@ -95,9 +110,12 @@ Running in single processor mode
                        256.675   -1.05228   (x1 + x2)*(x2 + x4)*(p0 - p0**p1 + x2)*(p0 - x0 + x3 + x5)*log(p0)                                             1.03E+00,1.03E+00,1.00E+00,1.00E+00,1.00E+00
 ```
 
-### Configuring the search
+### Important details 
 
-Inside config.py, you will find the definition of the permitted functions. The list elements need to be the function names input as strings. The *f_functions* list is for the functions of arity 1. The *n_functions* list is for functions of arity 2. You can change the maximum number of permitted fitting parameters.
+All your data needs to be numeric.
+Your CSV file should have a header.
+Inside the csv, the dependent variable should be the rightmost column.
+Do not use special characters or spaces in variable names.
 
 ## Author
 
