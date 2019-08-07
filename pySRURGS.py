@@ -1,17 +1,9 @@
 #!/usr/bin/env python
-doc_string = '''
+'''
 pySRURGS - Symbolic Regression by Uniform Random Global Search
 Sohrab Towfighi (C) 2019
 License: GPL 3.0
-
-All your data needs to be numeric. 
-Your CSV file should have a header.
-Inside the csv, the dependent variable should be the rightmost column.
-Do not use special characters or spaces in variable names.
-
-The config.py file defines the number of fitting parameters, the number of 
-permitted binary trees through which we search, and the types of functions 
-permitted in the search space.                
+https://github.com/pySRURGS/pySRURGS
 '''
 import sympy
 from sympy import simplify, sympify, Symbol
@@ -50,8 +42,7 @@ class SymbolicRegressionConfig(object):
         self._max_num_fit_params = max_num_fit_params
         self._max_size_trees = max_size_trees
 
-
-#### Don't edit after this.
+#### GLOBALS 
 # a very big number!
 BIG_NUM = 1.79769313e+300
 # prefix and suffix variables and parameters thinking I would do string 
@@ -64,7 +55,8 @@ path_to_toy_csv = './csvs/toy_data_for_benchmark_gen.csv'
 benchmarks_x_domain = [0, 10]
 benchmarks_fit_param_domain = [-10, 10]
 benchmarks_dir = './benchmarks'
-
+benchmarks_summary_tsv = './benchmarks_summary.tsv'
+##### END GLOBALS
 
 def memoize(func):
     cache = dict()
@@ -105,7 +97,7 @@ def check_dir_perms(path_to_file):
         raise Exception("Output dir has bad permissions: " + path_to_file)
     return path_to_file
 
-def make_variable_name(label):
+def make_variable_name(label):    
     return variable_prefix + str(label) + variable_suffix
     
 def make_parameter_name(label):
@@ -138,6 +130,10 @@ def create_parameter_list(m):
     return my_pars   
 
 def get_opers_dict():
+     ''' 
+         The order of this dictionary affects the way we simplify expressions
+         eg add(pow(x,mul(y,z)),x) ----> x**(y*z)+x
+     '''
      opers_dict = {"mul":"*", 
                    "div":"/", 
                    "add":"+",
@@ -258,6 +254,11 @@ def mempower(a,b):
     return result
 
 def get_element_of_cartesian_product(*args, repeat=1, index=0):
+    '''
+        You want the i^th index of the cartesian product of two large arrays?
+        This function retrieves that element without needing to iterate through 
+        the entire product 
+    '''
     pools = [tuple(pool) for pool in args] * repeat 
     if len(pools) == 0:
         return []
@@ -417,7 +418,7 @@ def equation_generator2(i, r, s, dataset, enumerator, SRconfig, simpler=True):
         raise Exception("s is an index that must be smaller than B")
     k_i = en.get_k_i(i)
     j_i = en.get_j_i(i)
-    n_func_config = get_element_of_cartesian_product(n_functions, repeat=k_i, 
+    n_func_config = get_element_of_cartesian_product(SRconfig._n_functions, repeat=k_i, 
                                                      index=r)
     term_config = get_element_of_cartesian_product(dataset._terminals_list, 
                                                    repeat=j_i, index=s)
@@ -473,11 +474,15 @@ def random_equation2(N, cum_weights, dataset, enumerator, SRconfig, details=Fals
     if details == False:
         return equation_string
     else:   
-        original_equation_string = equation_generator2(i, r, s, dataset, SRconfig,
-                                                       enumerator, simpler=False)
+        original_equation_string = equation_generator2(i, r, s, dataset, 
+                                                       enumerator, SRconfig, 
+                                                       simpler=False)
         return [original_equation_string, equation_string, N, n, m, i, r, s]
 
-class Dataset(object):    
+class Dataset(object):
+    '''
+        This class houses all the numerical data for the problem 
+    '''
     def __init__(self, path_to_csv_file, int_max_params, scaled=False):
         # the independent variables will be scaled if self._scaled == True.
         self._scaled = scaled
@@ -838,6 +843,7 @@ def print_some_trees(nn):
         print(i, get_left_right_bits(i), j_i, k_i, tree)
 
 def print_some_trees2(nn):
+    # for the case of zero functions of arity one 
     trees = []
     en = Enumerator2()
     for i in range(0,nn):
@@ -868,6 +874,10 @@ def get_cum_weights2(N, n, m, enumerator):
     return cum_weights
 
 class ResultList(object):
+    '''
+        Class to store multiple results from SRURGS
+        Permits easy printing 
+    '''
     def __init__(self):
         self._results = []
     def sort(self):
@@ -884,6 +894,11 @@ class ResultList(object):
         print(table_string)
 
 class Result(object):
+    '''
+        Class to save a single result of SRURGS
+        Permits easy printing
+        TODO add predict functionality
+    '''
     def __init__(self, simple_equation, equation, MSE, R2, params):
         self._simple_equation = simple_equation
         self._equation = equation
@@ -910,6 +925,7 @@ class Result(object):
         
 
 def initialize_db(path_to_db):
+    # initialize the SQLiteDict 
     with SqliteDict(path_to_db, autocommit=True) as results_dict:
         try:
             results_dict['best_result']
@@ -917,7 +933,8 @@ def initialize_db(path_to_db):
             results_dict['best_result'] = Result(None, None, np.inf, None, None)
     return 
 
-def uniform_random_global_search_once(path_to_db, path_to_csv, SRconfig): 
+def uniform_random_global_search_once(path_to_db, path_to_csv, SRconfig):
+    # Run SRURGS once
     (f, n, m, cum_weights, N, dataset, enumerator, _, _) = setup(path_to_csv, SRconfig)
     valid = False
     while valid == False:
@@ -953,10 +970,10 @@ def uniform_random_global_search_once(path_to_db, path_to_csv, SRconfig):
             results_dict['best_result'] = best_result            
     return result
 
-def generate_benchmark(path_to_csv, benchmark_name, SR_config):
+def generate_benchmark(benchmark_name, SR_config):
     # x_domain is [lower_bound, upper_bound]
     (f, n, m, cum_weights, N, dataset, 
-     enumerator, n_functions, f_functions) = setup(path_to_csv, SRconfig)
+     enumerator, n_functions, f_functions) = setup(path_to_toy_csv, SRconfig)
     valid = False
     while valid == False:
         try:
@@ -1009,6 +1026,8 @@ def generate_benchmark(path_to_csv, benchmark_name, SR_config):
                     msg += 'Raw equation: ' + str(eqn_original) + '\n'
                     text_file.write(msg)
             valid = True
+            if eqn_simple == '0':
+                valid = False            
         except FloatingPointError:
             pass
     
@@ -1041,7 +1060,7 @@ def create_db(path_to_csv, additional_name=None):
         db_name = './db/' + csv_name + '.sqlite'   
     return db_name
 
-def compile_results(path_to_db, path_to_csv):
+def compile_results(path_to_db, path_to_csv, SRconfig):
     # reads the generated .sqlite file to determine the best models, then 
     # prints them to screen!
     (_, _, _, _, _, dataset, _, _, _) = setup(path_to_csv, SRconfig)
@@ -1055,14 +1074,31 @@ def compile_results(path_to_db, path_to_csv):
     result_list.print(dataset._y_data)
     return result_list
 
-def generate_benchmarks(path_to_csv, start_num, count):
-    # make sure to configure config.py before running this, as your generated 
-    # benchmarks will use your configuration
-    for z in range(start_num, start_num+count):
-        generate_benchmark(path_to_csv, str(z))
+def generate_benchmarks_SRconfigs():
+    SR_config1 = SymbolicRegressionConfig(n_functions=['add','sub','mul','div'],
+                                          f_functions=[],
+                                          max_num_fit_params=5,
+                                          max_size_trees=100)
+    SR_config2 = SymbolicRegressionConfig(n_functions=['add','sub','mul','div','pow'],
+                                          f_functions=['sin','sinh','exp'],
+                                          max_num_fit_params=5,
+                                          max_size_trees=1000)
+    return SR_config1, SR_config2
+
+def generate_benchmarks():
+    SR_config1, SR_config2 = generate_benchmarks_SRconfigs()
+    # first set is from 0 - 19 inclusive
+    for z in range(0, 19):
+        print("Generating benchmark:", z, "out of:", 99)
+        generate_benchmark(str(z), SR_config1)
+    for z in range(20, 99):
+        print("Generating benchmark:", z, "out of:", 99)
+        generate_benchmark(str(z), SR_config2)
+    print("Outputting a summary to ", benchmarks_summary_tsv)
+    read_benchmarks()
 
 def read_benchmarks():
-    with open('./benchmarks_summary.tsv', 'w') as benchmarks_file:
+    with open(benchmarks_summary_tsv, 'w') as benchmarks_file:
         wrtr = csv.writer(benchmarks_file, delimiter='\t', lineterminator='\n')
         for i in range(0,100):
             param_file = benchmarks_dir + '/' + str(i) + '_params.txt'
@@ -1110,7 +1146,8 @@ if __name__ == '__main__':
     parser.add_argument("-test", help="absolute or relative file path to the csv file housing the testing data")
     parser.add_argument("-run_ID", help="some text that uniquely identifies this run", required=False)
     parser.add_argument("-single", help="run in single processing mode", action="store_true")
-    parser.add_argument("-count", help="Instead of doing symbolic regression, just count out how many possible equations for this configuration. No other processing performed.", action="store_true")    
+    parser.add_argument("-count", help="Instead of doing symbolic regression, just count out how many possible equations for this configuration. No other processing performed.", action="store_true")
+    parser.add_argument("-benchmarks", help="Instead of doing symbolic regression, generate the 100 benchmark problems. No other processing performed.", action="store_true")
     parser.add_argument("-funcs_arity_two", help="a comma separated string listing the functions of arity two you want to be considered. Permitted:add,sub,mul,div,pow", default='add,sub,mul,div,pow')
     parser.add_argument("-funcs_arity_one", help="a comma separated string listing the functions of arity one you want to be considered. Permitted:sin,cos,tan,exp,log,sinh,cosh,tanh")
     parser.add_argument("-max_num_fit_params", help="the maximum number of fitting parameters permitted in the generated models", default=3, type=int)
@@ -1123,7 +1160,8 @@ if __name__ == '__main__':
     single_processing_mode = arguments.single
     path_to_csv = arguments.train
     max_attempts = arguments.iters
-    count_M = arguments.count    
+    count_M = arguments.count
+    benchmarks = arguments.benchmarks
     n_funcs = arguments.funcs_arity_two    
     n_funcs = n_funcs.split(',')
     n_funcs = check_validity_suggested_functions(n_funcs, 2)     
@@ -1137,6 +1175,11 @@ if __name__ == '__main__':
     max_size_trees = arguments.max_size_trees
     SRconfig = SymbolicRegressionConfig(n_funcs, f_funcs, 
                                         max_num_fit_params, max_size_trees)
+    if benchmarks and count_M:
+        raise Exception("You cannot have both -count and -benchmarks as arguments")
+    if benchmarks == True:
+        generate_benchmarks()
+        exit(0)
     if count_M == True:
         (f, n, m, cum_weights, N, dataset, enumerator, _, _) = setup(path_to_csv, SRconfig)
         if f == 0:
@@ -1152,13 +1195,13 @@ if __name__ == '__main__':
         print("Running in multi processor mode")
         results = parmap.map(uniform_random_global_search_once, 
                              [path_to_db]*max_attempts,
-                             SRconfig, path_to_csv, pm_pbar=True)
+                             path_to_csv, SRconfig, pm_pbar=True)
     elif single_processing_mode == True:
         print("Running in single processor mode")
         for i in tqdm.tqdm(range(0,max_attempts)):
-            uniform_random_global_search_once(path_to_db, path_to_csv, SRconfig)            
+            uniform_random_global_search_once(path_to_db, path_to_csv, SRconfig)
     else:
         raise("Invalid mode")
-    compiled_results = compile_results(path_to_db, path_to_csv)
+    compiled_results = compile_results(path_to_db, path_to_csv, SRconfig)
     best_model = compiled_results._results[0]
     
