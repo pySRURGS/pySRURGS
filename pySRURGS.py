@@ -36,7 +36,35 @@ from sqlitedict import SqliteDict
 import collections
 from itertools import repeat
 import multiprocessing as mp
-from config import *
+
+class SymbolicRegressionConfig(object):
+    ''' 
+        Defines the nature of the search space in a symbolic regression problem
+    '''
+    def __init__(self, n_functions=['add','sub','mul','div', 'pow'],
+                       f_functions=['log', 'sinh', 'sin'],
+                       max_num_fit_params=3,
+                       max_size_trees=100):
+        self._n_functions = n_functions
+        self._f_functions = f_functions
+        self._max_num_fit_params = max_num_fit_params
+        self._max_size_trees = max_size_trees
+
+
+#### Don't edit after this.
+# a very big number!
+BIG_NUM = 1.79769313e+300
+# prefix and suffix variables and parameters thinking I would do string 
+# manipulations, but this may end up being needless.
+fitting_param_prefix = 'begin_fitting_param_'
+fitting_param_suffix = '_end_fitting_param'
+variable_prefix = 'begin_variable_'
+variable_suffix = '_end_variable'
+path_to_toy_csv = './csvs/toy_data_for_benchmark_gen.csv'
+benchmarks_x_domain = [0, 10]
+benchmarks_fit_param_domain = [-10, 10]
+benchmarks_dir = './benchmarks'
+
 
 def memoize(func):
     cache = dict()
@@ -185,20 +213,26 @@ def str_e(my_number):
 def sin(x):
     return np.sin(x)
 
+def cos(x):
+    return np.cos(x)
+    
+def tan(x):
+    return np.tan(x)
+
 def exp(x):
     return np.exp(x)
 
 def log(x):
     return np.log(np.abs(x))
 
-def tanh(x):
-    return np.tanh(x)
-
 def sinh(x):
     return np.sinh(x)
 
 def cosh(x):
     return np.cosh(x)
+
+def tanh(x):
+    return np.tanh(x)
 
 def sum(x):
     return np.sum(x)
@@ -313,7 +347,7 @@ def simplify_equation_string(eqn_str, dataset):
     eqn_str = remove_parameter_tags(eqn_str)
     return eqn_str
 
-def equation_generator(i, q, r, s, dataset, enumerator, simpler=True):
+def equation_generator(i, q, r, s, dataset, enumerator, SRconfig, simpler=True):
     '''
         Generates the random equation 
         i is in the domain [0, N-1], and specifies which binary tree to use 
@@ -322,8 +356,8 @@ def equation_generator(i, q, r, s, dataset, enumerator, simpler=True):
         s is in the domain [0, B-1], and specifies which terminal configuration        
     '''
     en = enumerator
-    f = len(f_functions)
-    n = len(n_functions)
+    f = len(SRconfig._f_functions)
+    n = len(SRconfig._n_functions)
     m = dataset._m_terminals
     tree = ith_full_binary_tree(i)
     G = en.get_G(f, i)
@@ -340,12 +374,12 @@ def equation_generator(i, q, r, s, dataset, enumerator, simpler=True):
     j_i = en.get_j_i(i)
     # of all the possible configurations of arity 1 functions, we pick the 
     # configuration at index q 
-    f_func_config = get_element_of_cartesian_product(f_functions, repeat=l_i, 
-                                                     index=q)
+    f_func_config = get_element_of_cartesian_product(SRconfig._f_functions,     
+                                                     repeat=l_i, index=q)
     # of all the possible configurations of arity 2 functions, we pick the 
     # configuration at index r 
-    n_func_config = get_element_of_cartesian_product(n_functions, repeat=k_i, 
-                                                     index=r)
+    n_func_config = get_element_of_cartesian_product(SRconfig._n_functions, 
+                                                     repeat=k_i, index=r)
     # of all the possible configurations of terminals, we pick the 
     # configuration at index s
     term_config = get_element_of_cartesian_product(dataset._terminals_list, 
@@ -369,10 +403,10 @@ def equation_generator(i, q, r, s, dataset, enumerator, simpler=True):
         tree = tree.replace('.', term, 1)
     return tree
 
-def equation_generator2(i, r, s, dataset, enumerator, simpler=True):
+def equation_generator2(i, r, s, dataset, enumerator, SRconfig, simpler=True):
     # for the case where there are zero functions of arity one 
     en = enumerator
-    n = len(n_functions)
+    n = len(SRconfig._n_functions)
     m = dataset._m_terminals
     tree = ith_full_binary_tree2(i)
     A = en.get_A(n, i)
@@ -398,7 +432,7 @@ def equation_generator2(i, r, s, dataset, enumerator, simpler=True):
         tree = tree.replace('.', term, 1)
     return tree
     
-def random_equation(N, cum_weights, dataset, enumerator, details=False):
+def random_equation(N, cum_weights, dataset, enumerator, SRconfig, details=False):
     '''
         Generates a random equation given the number of permitted unique trees, N,
         the probability of selection for each of those trees, cum_weights, a 
@@ -410,35 +444,36 @@ def random_equation(N, cum_weights, dataset, enumerator, details=False):
         The details specifier is used when generating benchmark problems,
         for most usecases, it should be false.
     '''
-    n = len(n_functions)
-    f = len(f_functions)
+    n = len(SRconfig._n_functions)
+    f = len(SRconfig._f_functions)
     m = dataset._m_terminals
     i = random.choices(range(0, N), cum_weights=cum_weights, k=1)[0]
     q = enumerator.get_q(f, i)
     r = enumerator.get_r(n, i)
     s = enumerator.get_s(m, i)   
-    equation_string = equation_generator(i, q, r, s, dataset, enumerator, 
+    equation_string = equation_generator(i, q, r, s, dataset, enumerator, SRconfig, 
                                          simpler=True)
     if details == False:
         return equation_string
     else:   
         original_equation_string = equation_generator(i, q, r, s, dataset, 
-                                                      enumerator, simpler=False)        
+                                                      enumerator, SRconfig, 
+                                                      simpler=False)        
         return [original_equation_string, equation_string, N, n, f, m, i, q, r, s]
     
-def random_equation2(N, cum_weights, dataset, enumerator, details=False):
+def random_equation2(N, cum_weights, dataset, enumerator, SRconfig, details=False):
     # for the case where there are zero functions of arity one 
-    n = len(n_functions)
+    n = len(SRconfig._n_functions)
     m = dataset._m_terminals
     i = random.choices(range(0, N), cum_weights=cum_weights, k=1)[0]
     r = enumerator.get_r(n, i)
     s = enumerator.get_s(m, i)   
-    equation_string = equation_generator2(i, r, s, dataset, enumerator, 
+    equation_string = equation_generator2(i, r, s, dataset, enumerator, SRconfig,
                                           simpler=True)
     if details == False:
         return equation_string
     else:   
-        original_equation_string = equation_generator2(i, r, s, dataset, 
+        original_equation_string = equation_generator2(i, r, s, dataset, SRconfig,
                                                        enumerator, simpler=False)
         return [original_equation_string, equation_string, N, n, m, i, r, s]
 
@@ -553,7 +588,7 @@ class Enumerator(object):
     @memoize
     def get_B(self, m, i):
         # B is the number of ways to pick j_i terminals from m terminals  
-        j = self.get_j_i(i)   
+        j = self.get_j_i(i)
         B = mempower(m,j)
         B = int(B)
         return B        
@@ -739,20 +774,24 @@ def check_goodness_of_fit(individual, params, my_data):
     funcstring = str(individual)
     funcstring = clean_funcstring(funcstring)
     # Evaluate the sum of squared difference between the expression
-    result = lmfit.minimize(eval_equation, params, 
-                            args=(funcstring, my_data),
-                            method='leastsq', nan_policy='propagate')
-    if result.success == False:
+    if len(params) > 0:            
         result = lmfit.minimize(eval_equation, params, 
-                            args=(funcstring, my_data),
-                            method='nelder', nan_policy='propagate')
-    sum_of_squared_residuals = sum(pow(result.residual, 2))        
+                                args=(funcstring, my_data),
+                                method='leastsq', nan_policy='propagate')
+        if result.success == False:
+            result = lmfit.minimize(eval_equation, params, 
+                                args=(funcstring, my_data),
+                                method='nelder', nan_policy='propagate')
+        residual = result.residual
+        y_calc = eval_equation(result.params, funcstring, my_data, mode='y_calc')
+        params_dict_to_store = result.params
+    else:
+        residual = eval_equation(params, funcstring, my_data)
+        y_calc = eval_equation(params, funcstring, my_data, mode='y_calc')
+        params_dict_to_store = params
     avg_y_data = np.average(my_data._y_data)
-    y_calc = eval_equation(result.params, funcstring, my_data, mode='y_calc')        
-    sum_of_squared_residuals = sum(pow(my_data._y_data - y_calc,2))
-    sum_of_squared_totals = sum(pow(y_calc - avg_y_data,2))
-    params_dict_to_store = result.params
-    residual = result.residual
+    sum_of_squared_residuals = sum(pow(residual,2))
+    sum_of_squared_totals = sum(pow(y_calc - avg_y_data,2))     
     R2 = 1 - sum_of_squared_residuals/sum_of_squared_totals
     return (sum_of_squared_residuals, 
             sum_of_squared_totals, 
@@ -878,14 +917,14 @@ def initialize_db(path_to_db):
             results_dict['best_result'] = Result(None, None, np.inf, None, None)
     return 
 
-def uniform_random_global_search_once(path_to_db, path_to_csv): 
-    (f, n, m, cum_weights, N, dataset, enumerator) = setup(path_to_csv)
+def uniform_random_global_search_once(path_to_db, path_to_csv, SRconfig): 
+    (f, n, m, cum_weights, N, dataset, enumerator, _, _) = setup(path_to_csv, SRconfig)
     valid = False
     while valid == False:
         if f == 0:
-            eqn_str = random_equation2(N, cum_weights, dataset, enumerator)
+            eqn_str = random_equation2(N, cum_weights, dataset, enumerator, SRconfig)
         else:    
-            eqn_str = random_equation(N, cum_weights, dataset, enumerator)
+            eqn_str = random_equation(N, cum_weights, dataset, enumerator, SRconfig)
         try:
             simple_eqn = simplify_equation_string(eqn_str, dataset)
             initialize_db(path_to_db)    
@@ -914,20 +953,21 @@ def uniform_random_global_search_once(path_to_db, path_to_csv):
             results_dict['best_result'] = best_result            
     return result
 
-def generate_benchmark(path_to_csv, benchmark_name):
+def generate_benchmark(path_to_csv, benchmark_name, SR_config):
     # x_domain is [lower_bound, upper_bound]
-    (f, n, m, cum_weights, N, dataset, enumerator) = setup(path_to_csv)
+    (f, n, m, cum_weights, N, dataset, 
+     enumerator, n_functions, f_functions) = setup(path_to_csv, SRconfig)
     valid = False
     while valid == False:
         try:
             # specify the equation
             if f == 0:
                 eqn_details = random_equation2(N, cum_weights, 
-                                               dataset, enumerator, 
+                                               dataset, enumerator, SRconfig,
                                                details=True)
             else:    
                 eqn_details = random_equation(N, cum_weights, 
-                                              dataset, enumerator, 
+                                              dataset, enumerator, SRconfig,
                                               details=True)
             eqn_original = eqn_details[0]
             eqn_simple = simplify_equation_string(eqn_original, dataset)
@@ -972,21 +1012,25 @@ def generate_benchmark(path_to_csv, benchmark_name):
         except FloatingPointError:
             pass
     
-def setup(path_to_csv):
+def setup(path_to_csv, SR_config):
     # reads the configuration, the csv file, and creates needed objects
-    N = MAX_NUM_TREES
-    num_fit_param = MAX_NUM_FIT_PARAM
+    N = SR_config._max_size_trees    
+    n = len(SR_config._n_functions) # the number of functions of arity 2 
+    n_funcs = SR_config._n_functions
+    f_funcs = SR_config._f_functions
+    f = len(SR_config._f_functions) # the number of functions of arity 1
+    num_fit_param = SR_config._max_num_fit_params    
     dataset = Dataset(path_to_csv, num_fit_param, scaled=False)
+    if num_fit_param > dataset._x_data.shape[0]:
+        raise Exception("You have more fitting parameters than you do data points")
     m = dataset._m_terminals # the number of vars + number of fit params 
-    n = len(n_functions) # the number of functions of arity 2 
-    f = len(f_functions) # the number of functions of arity 1
     if f == 0:
         enumerator = Enumerator2()
-        cum_weights = get_cum_weights2(N, n, num_fit_param, enumerator)
+        cum_weights = get_cum_weights2(N, n, m, enumerator)
     else:
         enumerator = Enumerator()
-        cum_weights = get_cum_weights(N, f, num_fit_param, m, enumerator)    
-    return (f, n, m, cum_weights, N, dataset, enumerator)
+        cum_weights = get_cum_weights(N, f, n, m, enumerator)    
+    return (f, n, m, cum_weights, N, dataset, enumerator, n_funcs, f_funcs)
 
 def create_db(path_to_csv, additional_name=None):
     csv_basename = os.path.basename(path_to_csv)
@@ -1000,7 +1044,7 @@ def create_db(path_to_csv, additional_name=None):
 def compile_results(path_to_db, path_to_csv):
     # reads the generated .sqlite file to determine the best models, then 
     # prints them to screen!
-    (_, _, _, _, _, dataset, _) = setup(path_to_csv)
+    (_, _, _, _, _, dataset, _, _, _) = setup(path_to_csv, SRconfig)
     result_list = ResultList()
     with SqliteDict(path_to_db, autocommit=True) as results_dict:
         keys = results_dict.keys()
@@ -1035,44 +1079,84 @@ def read_benchmarks():
                 row = [i,true_equation,raw_equation]
                 wrtr.writerow(row)
 
-if __name__ == '__main__':    
-    parser = argparse.ArgumentParser(prog='pySRURGS.py')
+def check_validity_suggested_functions(suggested_funcs, arity):
+    valid_funcs_arity_1 = ['sin','cos','tan','exp','log','tanh','sinh','cosh',None]
+    valid_funcs_arity_2 = ['add','sub','mul','div','pow']
+    if arity == 1:
+        if suggested_funcs != [',']:            
+            for func in suggested_funcs:
+                if func not in valid_funcs_arity_1:
+                    msg = "Your suggested function of arity 1: " + func
+                    msg += " is not in the list of valid functions"
+                    msg += " " + str(valid_funcs_arity_1)
+                    raise Exception(msg)
+        else:
+            suggested_funcs = []
+    elif arity == 2:
+        for func in suggested_funcs:
+            if func not in valid_funcs_arity_2:
+                msg = "Your suggested function of arity 2: " + func
+                msg += " is not in the list of valid functions"
+                msg += " " + str(valid_funcs_arity_2)
+                raise Exception(msg)
+    return suggested_funcs
+
+if __name__ == '__main__':
+    # Read the doc string at the top of this script.
+    # Run this script in terminal with '-h' as an argument.
+    parser = argparse.ArgumentParser(prog='pySRURGS.py', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("train", help="absolute or relative file path to the csv file housing the training data")
     parser.add_argument("iters", help="the number of equations to be attempted in this run", type=int)
     parser.add_argument("-test", help="absolute or relative file path to the csv file housing the testing data")
     parser.add_argument("-run_ID", help="some text that uniquely identifies this run", required=False)
     parser.add_argument("-single", help="run in single processing mode", action="store_true")
-    parser.add_argument("-count", help="Prints out how many possible equations for this configuration. No other processing performed.", action="store_true")
-    #sys.argv includes a list of elements starting with the program
+    parser.add_argument("-count", help="Instead of doing symbolic regression, just count out how many possible equations for this configuration. No other processing performed.", action="store_true")    
+    parser.add_argument("-funcs_arity_two", help="a comma separated string listing the functions of arity two you want to be considered. Permitted:add,sub,mul,div,pow", default='add,sub,mul,div,pow')
+    parser.add_argument("-funcs_arity_one", help="a comma separated string listing the functions of arity one you want to be considered. Permitted:sin,cos,tan,exp,log,sinh,cosh,tanh")
+    parser.add_argument("-max_num_fit_params", help="the maximum number of fitting parameters permitted in the generated models", default=3, type=int)
+    parser.add_argument("-max_size_trees", help="the number of unique binary trees that are permitted in the generated models - binary trees define the form of the equation, increasing this number tends to increase the complexity of generated equations", default=1000, type=int)
     if len(sys.argv) < 2:
         parser.print_usage()
         sys.exit(1)
     parser.parse_args()
-    args = parser.parse_args()
-    single_processing_mode = args.single
-    path_to_csv = args.train
-    max_attempts = args.iters
-    count_M = args.count
+    arguments = parser.parse_args()
+    single_processing_mode = arguments.single
+    path_to_csv = arguments.train
+    max_attempts = arguments.iters
+    count_M = arguments.count    
+    n_funcs = arguments.funcs_arity_two    
+    n_funcs = n_funcs.split(',')
+    n_funcs = check_validity_suggested_functions(n_funcs, 2)     
+    f_funcs = arguments.funcs_arity_one
+    if f_funcs is None:
+        f_funcs = []
+    else:
+        f_funcs = f_funcs.split(',')
+        f_funcs = check_validity_suggested_functions(f_funcs, 1)    
+    max_num_fit_params = arguments.max_num_fit_params
+    max_size_trees = arguments.max_size_trees
+    SRconfig = SymbolicRegressionConfig(n_funcs, f_funcs, 
+                                        max_num_fit_params, max_size_trees)
     if count_M == True:
-        (f, n, m, cum_weights, N, dataset, enumerator) = setup(path_to_csv)
+        (f, n, m, cum_weights, N, dataset, enumerator, _, _) = setup(path_to_csv, SRconfig)
         if f == 0:
             number_possible_equations = enumerator.get_M(N,n,m)
         else:
             number_possible_equations = enumerator.get_M(N,f,n,m)
         print("Number possible equations:", number_possible_equations)        
         exit(0)
-    run_ID = args.run_ID
+    run_ID = arguments.run_ID
     path_to_db = create_db(path_to_csv, run_ID)
     os.makedirs('./db', exist_ok=True) 
     if single_processing_mode == False:
         print("Running in multi processor mode")
         results = parmap.map(uniform_random_global_search_once, 
-                                   [path_to_db]*max_attempts, 
-                                   path_to_csv, pm_pbar=True)
+                             [path_to_db]*max_attempts,
+                             SRconfig, path_to_csv, pm_pbar=True)
     elif single_processing_mode == True:
         print("Running in single processor mode")
         for i in tqdm.tqdm(range(0,max_attempts)):
-            uniform_random_global_search_once(path_to_db, path_to_csv)            
+            uniform_random_global_search_once(path_to_db, path_to_csv, SRconfig)            
     else:
         raise("Invalid mode")
     compiled_results = compile_results(path_to_db, path_to_csv)
