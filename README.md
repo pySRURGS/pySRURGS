@@ -51,7 +51,7 @@ The above command should render the following:
 
 ```
 usage: pySRURGS.py [-h] [-test TEST] [-run_ID RUN_ID] [-single] [-count]
-                   [-funcs_arity_two FUNCS_ARITY_TWO]
+                   [-benchmarks] [-funcs_arity_two FUNCS_ARITY_TWO]
                    [-funcs_arity_one FUNCS_ARITY_ONE]
                    [-max_num_fit_params MAX_NUM_FIT_PARAMS]
                    [-max_size_trees MAX_SIZE_TREES]
@@ -72,6 +72,9 @@ optional arguments:
   -count                Instead of doing symbolic regression, just count out
                         how many possible equations for this configuration. No
                         other processing performed. (default: False)
+  -benchmarks           Instead of doing symbolic regression, generate the 100
+                        benchmark problems. No other processing performed.
+                        (default: False)
   -funcs_arity_two FUNCS_ARITY_TWO
                         a comma separated string listing the functions of
                         arity two you want to be considered.
