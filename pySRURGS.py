@@ -1143,7 +1143,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='pySRURGS.py', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("train", help="absolute or relative file path to the csv file housing the training data")
     parser.add_argument("iters", help="the number of equations to be attempted in this run", type=int)
-    parser.add_argument("-test", help="absolute or relative file path to the csv file housing the testing data")
+    #TODO parser.add_argument("-test", help="absolute or relative file path to the csv file housing the testing data")
     parser.add_argument("-run_ID", help="some text that uniquely identifies this run", required=False)
     parser.add_argument("-single", help="run in single processing mode", action="store_true")
     parser.add_argument("-count", help="Instead of doing symbolic regression, just count out how many possible equations for this configuration. No other processing performed.", action="store_true")

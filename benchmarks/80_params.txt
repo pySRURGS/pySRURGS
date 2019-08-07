@@ -1,6 +1,6 @@
 Permitted variables: ['x0', 'x1', 'x2', 'x3', 'x4']
 Permitted fitting parameters: ['p0', 'p1', 'p2', 'p3', 'p4']
-Fitting parameters: [-9.89474746  3.36636491  6.14971424  7.66724606 -3.06245944]
-Permitted functions: ['log', 'sinh', 'sin', 'add', 'sub', 'mul', 'div', 'pow']
-Simplified equation: -2*p4*x0*x3**2*(x2/p2)**(x3**2)*(p0 - x0)*log(p3)/(p1*x2)
-Raw equation: mul(mul(pow(mul(div(x2, p2), mul(x3, x3)), p3), add(div(x3, x3), mul(p3, p1))), sub(mul(mul(div(x0, p0), div(x2, p4)), mul(x0, x3)), log(p3)))
+Fitting parameters: [-8.92785307  0.44004556 -3.68430107  0.89162494  3.40896642]
+Permitted functions: ['add', 'sub', 'mul', 'div', 'pow']
+Simplified equation: (((x3 + x4**2)/x4)**x3 + (p1*x0 + x1)*(x0*x1 + x3 + (-p0 + x1 + x2)**x3))/(p1*x0 + x1)
+Raw equation: div(div(add(add(pow(x3, x4), x4), x3), add(mul(x0, p1), x1)), pow(add(sub(x1, sub(p0, x2)), x3), mul(add(x1, x0), x3)))
