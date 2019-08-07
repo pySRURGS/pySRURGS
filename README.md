@@ -64,8 +64,6 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
-  -test TEST            absolute or relative file path to the csv file housing
-                        the testing data (default: None)
   -run_ID RUN_ID        some text that uniquely identifies this run (default:
                         None)
   -single               run in single processing mode (default: False)
