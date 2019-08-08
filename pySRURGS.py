@@ -948,7 +948,7 @@ def uniform_random_global_search_once(path_to_db, path_to_csv, SRconfig):
             with SqliteDict(path_to_db, autocommit=True) as results_dict:
                 try: # if we have already attempted this equation, do not run again
                     result = results_dict[simple_eqn]
-                    return result
+                    raise FloatingPointError
                 except:
                     pass
             params = create_fitting_parameters(dataset._int_max_params)

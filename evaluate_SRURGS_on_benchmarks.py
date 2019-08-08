@@ -12,7 +12,7 @@ except ImportError:
     sh = Sh()
 
 SR_config1, SR_config2 = pySRURGS.generate_benchmarks_SRconfigs()
-iters = 1000 
+iters = 100
 
 def run_experiments(SRconfig, start_index, count_experiments, n_runs):
     funcs_arity_two = ','.join(SR_config._n_functions)
