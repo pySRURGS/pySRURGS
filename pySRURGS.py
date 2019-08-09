@@ -519,6 +519,12 @@ class Dataset(object):
         sympy_namespace['mul'] = sympy.Mul
         sympy_namespace['div'] = lambda a,b: a*sympy.Pow(b,-1)
         sympy_namespace['pow'] = sympy.Pow
+        sympy_namespace['cos'] = sympy.Function('cos')
+        sympy_namespace['sin'] = sympy.Function('sin')
+        sympy_namespace['tan'] = sympy.Function('tan')
+        sympy_namespace['cosh'] = sympy.Function('cosh')
+        sympy_namespace['sinh'] = sympy.Function('sinh')
+        sympy_namespace['tanh'] = sympy.Function('tanh')
         return sympy_namespace
     def load_csv_data(self, path_to_csv):
         dataframe = pandas.read_csv(path_to_csv)

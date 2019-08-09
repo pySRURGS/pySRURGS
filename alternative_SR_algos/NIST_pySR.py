@@ -16,16 +16,29 @@ from scoop import futures
 import pickle
 import os
 import sys
-
-#Check args
-if len(sys.argv) < 5:
-    print("Usage: python -m scoop pysr.py csvfile numgens popsize picklefile")
-
-    sys.exit()
+import argparse
+import pandas as pd
+sys.path.append(os.path.realpath(__file__)+'/..')
+from pySRURGS import add, mul, sub, div, pow, sin, cos, tan, log, exp, sinh, tanh, cosh
+from pySRURGS import Dataset, simplify_equation_string
+parser = argparse.ArgumentParser(prog='pySR.py', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+parser.add_argument("csv_path", help="absolute path to the csv")
+parser.add_argument("numgens", help='number of generations for evolution', type=int)
+parser.add_argument("population", help='number of individuals in the population', type=int)
+parser.add_argument("comma_delim_primitives", help='comma delimited list of functions to be used eg: add,pow,sub,mul,div', type=int)
+if len(sys.argv) < 2:
+    parser.print_usage()
+    sys.exit(1)
+arguments = parser.parse_args()
+csv_path = arguments.csv_path
+numgens = arguments.numgens
+popsize = arguments.popsize
+comma_delim_primitives = arguments.comma_delim_primitives
+comma_delim_primitives = comma_delim_primitives.split(',')
+pickleFile = arguments.pickleFile
 
 #Let's read some data
-import pandas as pd
-df = pd.read_csv(sys.argv[1], delimiter=',')
+df = pd.read_csv(csv_path, delimiter=',')
 X_names = [k for k in df.keys()[:-1]]
 y_name = df.keys()[-1]
 # X_names = ['Tr','rhor']
@@ -36,32 +49,43 @@ df.apply(lambda x: (x - np.mean(x)) / (np.max(x) - np.min(x)))
 X = np.r_[[df.loc[:,k] for k in X_names]]
 y = df.loc[:, y_name]
 
-#So we don't have to deal with evil NaNs propagating about and whatnot
-np.seterr(all='ignore')
+np.seterr(all='raise') # need to implement the error handling
 
 #Define the tree elements the EA chooses from
 pset = gp.PrimitiveSet('MATH', arity=X.shape[0]) #'MATH' is just a name
-pset.addPrimitive(lambda x,y: np.nan_to_num(np.add(x,y)),
-                  2, name='add')
-pset.addPrimitive(lambda x,y: np.nan_to_num(np.subtract(x,y)),
-                  2, name='sub')
-pset.addPrimitive(lambda x,y: np.nan_to_num(np.multiply(x,y)),
-                  2, name='mul')
-pset.addPrimitive(lambda x,y: np.nan_to_num(np.divide(x,y)),
-                  2, name='div')
-pset.addPrimitive(lambda x,y: np.nan_to_num(np.power(np.abs(x),np.abs(y))/2),
-                  2, name='pow')
-pset.addEphemeralConstant('C',    #95% of the time falls within [-100, 100]
-                          lambda: random.gauss(0, 50))
-#pset.renameArguments(**{'ARG'+str(i):'x_'+str(i)})
+if 'add' in comma_delim_primitives:
+    pset.addPrimitive(add, 2, name='add')
+if 'sub' in comma_delim_primitives:
+    pset.addPrimitive(sub, 2, name='sub')
+if 'mul' in comma_delim_primitives:
+    pset.addPrimitive(mul, 2, name='mul')
+if 'div' in comma_delim_primitives:
+    pset.addPrimitive(div, 2, name='div')
+if 'pow' in comma_delim_primitives:
+    pset.addPrimitive(pow, 2, name='pow')
+if 'sin' in comma_delim_primitives:
+    pset.addPrimitive(sin, 1, name='sin')
+if 'cos' in comma_delim_primitives:
+    pset.addPrimitive(cos, 1, name='cos')
+if 'tan' in comma_delim_primitives:
+    pset.addPrimitive(tan, 1, name='tan')
+if 'exp' in comma_delim_primitives:
+    pset.addPrimitive(exp, 1, name='exp')
+if 'log' in comma_delim_primitives:
+    pset.addPrimitive(log, 1, name='log')
+if 'sinh' in comma_delim_primitives:
+    pset.addPrimitive(sinh, 1, name='sinh')
+if 'cosh' in comma_delim_primitives:
+    pset.addPrimitive(cosh, 1, name='cosh')
+if 'tanh' in comma_delim_primitives:
+    pset.addPrimitive(tanh, 1, name='tanh')
 
 #Define our 'Individual' class
 creator.create('FitnessMin', base.Fitness, weights=(-1.0,-1.0))
 creator.create('Individual',
                gp.PrimitiveTree,
                pset=pset,
-               fitness=creator.FitnessMin)
-               
+               fitness=creator.FitnessMin)               
 
 #Define our evaluation function
 def optimizeConstants(individual):
@@ -96,7 +120,7 @@ def evaluate(individual):
     func = toolbox.lambdify(expr=individual)
     diff = np.sum((func(*X) - y)**2)/len(y)
     return np.nan_to_num(diff),len(individual)    
-
+  
 #Construct our toolbox
 toolbox = base.Toolbox()
 toolbox.register('expr', gp.genGrow, pset=pset, min_=1, max_=2)
@@ -108,9 +132,26 @@ toolbox.register("select", tools.selTournament, tournsize=4)
 toolbox.register("mate", gp.cxOnePoint)
 toolbox.register("expr_mut", gp.genGrow, min_=0, max_=2)
 toolbox.register("mutate", gp.mutUniform, expr=toolbox.expr_mut, pset=pset)
-toolbox.decorate("mate", gp.staticLimit(key=operator.attrgetter("height"), max_value=7))
-toolbox.decorate("mutate", gp.staticLimit(key=operator.attrgetter("height"), max_value=7))
+toolbox.decorate("mate", gp.staticLimit(key=operator.attrgetter("height"), max_value=17))
+toolbox.decorate("mutate", gp.staticLimit(key=operator.attrgetter("height"), max_value=17))
 toolbox.register("map",  futures.map)
+    
+def filter_population(population, toolbox):
+    for i in range(0, len(population)):
+        individual = population[i]
+        try:
+            evaluate(individual)
+        except:
+            run_bool = True
+            while run_bool:
+                new_indiv = toolbox.population(n=1)
+                try:
+                    evaluate(new_indiv)
+                    population[i] = new_indiv
+                    run_bool = False
+                except:
+                    pass
+    return population    
 
 def evolve(population, toolbox, popSize, cxpb, mutpb, ngen,
            stats=None, halloffame=None, verbose=True, pickleFile=None):
@@ -166,6 +207,7 @@ def evolve(population, toolbox, popSize, cxpb, mutpb, ngen,
     for gen in range(1, ngen + 1):
         # Vary the population
         offspring = varOr(population, toolbox, lambda_, cxpb, mutpb)
+        offspring = filter_population(offspring, toolbox)
         #Optimize the new individuals
         offspring = list(toolbox.map(optimizeConstants, offspring))
         # Evaluate the individuals with an invalid fitness
@@ -193,10 +235,8 @@ def evolve(population, toolbox, popSize, cxpb, mutpb, ngen,
 
 def main():
     random.seed(317)
-    numgens = int(sys.argv[2])
-    popsize = int(sys.argv[3])
-    pickleFile=sys.argv[4]
     pop = toolbox.population(n=popsize)
+    pop = filter_population(pop, toolbox)
     hof = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("best",
