@@ -783,10 +783,6 @@ def check_goodness_of_fit(individual, params, my_data):
         result = lmfit.minimize(eval_equation, params, 
                                 args=(funcstring, my_data),
                                 method='leastsq', nan_policy='propagate')
-        if result.success == False:
-            result = lmfit.minimize(eval_equation, params, 
-                                args=(funcstring, my_data),
-                                method='nelder', nan_policy='propagate')
         residual = result.residual
         y_calc = eval_equation(result.params, funcstring, my_data, mode='y_calc')
         params_dict_to_store = result.params
@@ -1078,11 +1074,11 @@ def generate_benchmarks_SRconfigs():
     SR_config1 = SymbolicRegressionConfig(n_functions=['add','sub','mul','div'],
                                           f_functions=[],
                                           max_num_fit_params=5,
-                                          max_size_trees=100)
+                                          max_size_trees=200)
     SR_config2 = SymbolicRegressionConfig(n_functions=['add','sub','mul','div','pow'],
                                           f_functions=['sin','sinh','exp'],
                                           max_num_fit_params=5,
-                                          max_size_trees=1000)
+                                          max_size_trees=200)
     return SR_config1, SR_config2
 
 def generate_benchmarks():
@@ -1155,7 +1151,6 @@ if __name__ == '__main__':
     if len(sys.argv) < 2:
         parser.print_usage()
         sys.exit(1)
-    parser.parse_args()
     arguments = parser.parse_args()
     single_processing_mode = arguments.single
     path_to_csv = arguments.train
