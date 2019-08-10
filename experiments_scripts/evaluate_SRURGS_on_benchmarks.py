@@ -1,5 +1,7 @@
 # I am using sh through python so as to bypass issue with python 
 # multiprocessing on windows and to avoid writing too much bash code
+import sys
+sys.path.append('./..')
 import pySRURGS 
 try:
     import sh
