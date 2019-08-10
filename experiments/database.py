@@ -86,7 +86,7 @@ def purge_db():
         mydb.commit()
         mydb.close()
     
-def get_SRGP_job():
+def get_SRGP_job(finished=0):
     with sshtunnel.SSHTunnelForwarder(
         ('ssh.pythonanywhere.com'),
         ssh_username=PYTHONANYWHERE_USERNAME, ssh_password=PYTHONANYWHERE_PASSWORD,
@@ -98,10 +98,11 @@ def get_SRGP_job():
                                              database='SohrabT$pySRURGS')
         mycursor = mydb.cursor()                               
         sql = '''SELECT job_ID, arguments FROM jobs
-                WHERE finished = 1
+                WHERE finished = %s
                 ORDER BY RAND()
                 LIMIT 1'''
-        mycursor.execute(sql)
+        val = (finished,)
+        mycursor.execute(sql, val)
         myresult = mycursor.fetchone()
         if myresult is None:
             return None
@@ -137,14 +138,22 @@ def set_SRGP_job_finished(job_ID):
         mydb.close()            
     
 def run_all_SRGP_jobs():
-    job_ID, job_arguments = get_SRGP_job()
-    while job_arguments is not None:
-        sh.python(*job_arguments)
-        sh.git('add', job_arguments[4])
-        sh.git('commit', '-m', os.path.basename(job_arguments[4]), job_arguments[4])
-        sh.git('push')
-        set_SRGP_job_finished(job_ID)
-        job_ID, job_arguments = get_SRGP_job()
-    
+    i = 0
+    for finished in range(0,2)
+        job_ID, job_arguments = get_SRGP_job(finished)
+        while job_arguments is not None:
+            
+            if (job_arguments[0] != '-m' or job_arguments[1] != 'scoop' or
+                job_arguments[2] != pySRURGS_dir+'/experiments/SRGP.py')
+                raise Exception("SQL injection?")
+            sh.python(*job_arguments)        
+            sh.git('add', job_arguments[4])
+            sh.git('commit', '-m', os.path.basename(job_arguments[4]), job_arguments[4])
+            sh.git('push')
+            set_SRGP_job_finished(job_ID)
+            job_ID, job_arguments = get_SRGP_job(finished)
+            print('finished a job', i)
+            i = i + 1
+
 if __name__ == '__main__':
     run_all_SRGP_jobs()
