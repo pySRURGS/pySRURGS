@@ -22,7 +22,7 @@ import sys
 import multiprocessing as mp
 import argparse
 import pandas as pd
-sys.path.append('./..')
+sys.path.append('./../..')
 
 # making the codes analogous 
 from pySRURGS import add, mul, sub, div, pow, sin, cos, tan, log, exp, sinh, tanh, cosh
@@ -257,14 +257,14 @@ def eaSimple(population, toolbox, cxpb, mutpb, ngen, verbose=__debug__):
         #display_population(population)
     return population, logbook, best_ever
 
-def main():    
+def main():
     pop = toolbox.population(n=popsize)
     pop = filter_population(pop, toolbox)
     pop, logbook, best = eaSimple(pop,
-                            toolbox,                            
-                            0.7,
-                            0.3,
-                            numgens)    
+                                  toolbox,
+                                  0.7,
+                                  0.3,
+                                  numgens)
 
 if __name__ == "__main__":
     main()
