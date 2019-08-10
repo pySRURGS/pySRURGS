@@ -36,11 +36,11 @@ class SymbolicRegressionConfig(object):
     def __init__(self, n_functions=['add','sub','mul','div', 'pow'],
                        f_functions=['log', 'sinh', 'sin'],
                        max_num_fit_params=3,
-                       max_size_trees=100):
+                       max_permitted_trees=100):
         self._n_functions = n_functions
         self._f_functions = f_functions
         self._max_num_fit_params = max_num_fit_params
-        self._max_size_trees = max_size_trees
+        self._max_permitted_trees = max_permitted_trees
 
 #### GLOBALS 
 # a very big number!
@@ -1035,7 +1035,7 @@ def generate_benchmark(benchmark_name, SR_config):
     
 def setup(path_to_csv, SR_config):
     # reads the configuration, the csv file, and creates needed objects
-    N = SR_config._max_size_trees    
+    N = SR_config._max_permitted_trees    
     n = len(SR_config._n_functions) # the number of functions of arity 2 
     n_funcs = SR_config._n_functions
     f_funcs = SR_config._f_functions
@@ -1080,11 +1080,11 @@ def generate_benchmarks_SRconfigs():
     SR_config1 = SymbolicRegressionConfig(n_functions=['add','sub','mul','div'],
                                           f_functions=[],
                                           max_num_fit_params=5,
-                                          max_size_trees=200)
+                                          max_permitted_trees=200)
     SR_config2 = SymbolicRegressionConfig(n_functions=['add','sub','mul','div','pow'],
                                           f_functions=['sin','sinh','exp'],
                                           max_num_fit_params=5,
-                                          max_size_trees=200)
+                                          max_permitted_trees=200)
     return SR_config1, SR_config2
 
 def generate_benchmarks():
@@ -1153,7 +1153,7 @@ if __name__ == '__main__':
     parser.add_argument("-funcs_arity_two", help="a comma separated string listing the functions of arity two you want to be considered. Permitted:add,sub,mul,div,pow", default='add,sub,mul,div,pow')
     parser.add_argument("-funcs_arity_one", help="a comma separated string listing the functions of arity one you want to be considered. Permitted:sin,cos,tan,exp,log,sinh,cosh,tanh")
     parser.add_argument("-max_num_fit_params", help="the maximum number of fitting parameters permitted in the generated models", default=3, type=int)
-    parser.add_argument("-max_size_trees", help="the number of unique binary trees that are permitted in the generated models - binary trees define the form of the equation, increasing this number tends to increase the complexity of generated equations", default=1000, type=int)
+    parser.add_argument("-max_permitted_trees", help="the number of unique binary trees that are permitted in the generated models - binary trees define the form of the equation, increasing this number tends to increase the complexity of generated equations", default=1000, type=int)
     if len(sys.argv) < 2:
         parser.print_usage()
         sys.exit(1)
@@ -1173,9 +1173,9 @@ if __name__ == '__main__':
         f_funcs = f_funcs.split(',')
         f_funcs = check_validity_suggested_functions(f_funcs, 1)    
     max_num_fit_params = arguments.max_num_fit_params
-    max_size_trees = arguments.max_size_trees
+    max_permitted_trees = arguments.max_permitted_trees
     SRconfig = SymbolicRegressionConfig(n_funcs, f_funcs, 
-                                        max_num_fit_params, max_size_trees)
+                                        max_num_fit_params, max_permitted_trees)
     if benchmarks and count_M:
         raise Exception("You cannot have both -count and -benchmarks as arguments")
     if benchmarks == True:
