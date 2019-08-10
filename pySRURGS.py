@@ -132,7 +132,7 @@ def create_parameter_list(m):
 def get_opers_dict():
      ''' 
          The order of this dictionary affects the way we simplify expressions
-         eg add(pow(x,mul(y,z)),x) ----> x**(y*z)+x
+         eg add(pow(x,mul(y,z)),x) ----> x**(y*z)+x         
      '''
      opers_dict = {"mul":"*", 
                    "div":"/", 

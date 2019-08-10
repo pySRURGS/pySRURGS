@@ -1,13 +1,42 @@
 # For our experiements, we save the commands to a mysql database, and have computers 
 # call the database when they need a new job 
+# There is a file called secret.py which houses 
+# PYTHONANYWHERE_PASSWORD, PYTHONANYWHERE_USERNAME, DATABASE_HOSTNAME, DATABASE_NAME, DATABASE_PASSWORD
+# and we don't want these saved to the git so I have added secret.py to .gitignore
 import mysql.connector
 import sys 
+import pdb
 from secret import *
 import mysql.connector
 import sshtunnel
+import platform 
+
+try:
+    import sh
+except ImportError:
+    # fallback: emulate the sh API with pbs
+    import pbs
+    class Sh(object):
+        def __getattr__(self, attr):
+            return pbs.Command(attr)
+    sh = Sh()
 
 sshtunnel.SSH_TIMEOUT = 5.0
 sshtunnel.TUNNEL_TIMEOUT = 5.0
+
+# This portion of the script is specific to my home computing setup.
+if platform.system() == 'Windows':
+    pySRURGS_dir = 'C:/Users/sohra/Google Drive (fischerproject2018@gmail.com)/pySRURGS'
+elif platform.system() == 'Linux':
+    pySRURGS_dir = '/home/brain/pySRURGS'
+else:
+    raise Exception("Invalid OS")
+
+def int_finished_meaning(my_int):
+    # this integer we use when assigning job completion status to the listing of 
+    # jobs in our database 
+    int_dict = {0: 'not_run', 1: 'running', 2:'finished'}
+    return int_dict[my_int]
 
 def submit_job_to_db(algo_argu_list):
     num_job = len(algo_argu_list)
@@ -18,7 +47,7 @@ def submit_job_to_db(algo_argu_list):
                                                  password=DATABASE_PASSWORD,
                                                  host='127.0.0.1', 
                                                  port=tunnel.local_bind_port,
-                                                 database='SohrabT$pySRURGS')
+                                                 database=DATABASE_NAME)
         i = 0
         for job in algo_argu_list:            
             print(i, num_job)
@@ -34,13 +63,13 @@ def submit_job_to_db(algo_argu_list):
             );'''
             mycursor = mydb.cursor()
             mycursor.execute(create_db_command)
-            sql = "INSERT INTO jobs (algorithm, arguments, finished) VALUES (%s, %s, %i)"
+            sql = "INSERT INTO jobs (algorithm, arguments, finished) VALUES (%s, %s, %s)"
             val = (algorithm, arguments, 0)
             mycursor.execute(sql, val)        
         mydb.commit()
         mydb.close()
 
-def purge_db(mydb, username, password):
+def purge_db():
     with sshtunnel.SSHTunnelForwarder(
         ('ssh.pythonanywhere.com'),
         ssh_username=PYTHONANYWHERE_USERNAME, ssh_password=PYTHONANYWHERE_PASSWORD,
@@ -55,3 +84,63 @@ def purge_db(mydb, username, password):
         mycursor.execute(sql)
         mydb.commit()
         mydb.close()
+    
+def get_SRGP_job():
+    with sshtunnel.SSHTunnelForwarder(
+        ('ssh.pythonanywhere.com'),
+        ssh_username=PYTHONANYWHERE_USERNAME, ssh_password=PYTHONANYWHERE_PASSWORD,
+        remote_bind_address=(DATABASE_HOSTNAME, 3306)) as tunnel:
+        mydb = mysql.connector.connect(user=PYTHONANYWHERE_USERNAME, 
+                                             password=DATABASE_PASSWORD,
+                                             host='127.0.0.1', 
+                                             port=tunnel.local_bind_port,
+                                             database='SohrabT$pySRURGS')
+        mycursor = mydb.cursor()                               
+        sql = '''SELECT job_ID, arguments FROM jobs
+                WHERE finished = 0
+                ORDER BY RAND()
+                LIMIT 1'''
+        mycursor.execute(sql)
+        myresult = mycursor.fetchone()
+        if myresult is None:
+            return None
+        job_ID = myresult[0]
+        arguments = myresult[1]      
+        sql = "UPDATE jobs SET finished = 1 WHERE job_ID = %s"
+        val = (job_ID,)
+        mycursor.execute(sql, val)
+        mydb.commit()
+        mydb.close()            
+    if ';' in arguments:
+        raise Exception("SQL insertion? - don't run this.")
+    arguments = arguments.split()
+    for i in range(0,len(arguments)):
+        arguments[i] = arguments[i].replace('$PYSRURGSDIR',pySRURGS_dir)    
+    return job_ID, arguments
+
+def set_SRGP_job_finished(job_ID):
+    with sshtunnel.SSHTunnelForwarder(
+        ('ssh.pythonanywhere.com'),
+        ssh_username=PYTHONANYWHERE_USERNAME, ssh_password=PYTHONANYWHERE_PASSWORD,
+        remote_bind_address=(DATABASE_HOSTNAME, 3306)) as tunnel:
+        mydb = mysql.connector.connect(user=PYTHONANYWHERE_USERNAME, 
+                                             password=DATABASE_PASSWORD,
+                                             host='127.0.0.1', 
+                                             port=tunnel.local_bind_port,
+                                             database='SohrabT$pySRURGS')
+        mycursor = mydb.cursor()                               
+        sql = "UPDATE jobs SET finished = 2 WHERE job_ID = %s"
+        val = (job_ID,)
+        mycursor.execute(sql, val)
+        mydb.commit()
+        mydb.close()            
+    
+def run_all_SRGP_jobs():
+    job_ID, job_arguments = get_SRGP_job()
+    while job_arguments is not None:
+        sh.python(*job_arguments)
+        set_SRGP_job_finished(job_ID)
+        job_ID, job_arguments = get_SRGP_job()
+    
+if __name__ == '__main__':
+    run_all_SRGP_jobs()
