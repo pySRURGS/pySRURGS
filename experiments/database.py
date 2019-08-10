@@ -5,6 +5,7 @@
 # and we don't want these saved to the git so I have added secret.py to .gitignore
 import mysql.connector
 import sys 
+import os
 import pdb
 from secret import *
 import mysql.connector
@@ -139,6 +140,9 @@ def run_all_SRGP_jobs():
     job_ID, job_arguments = get_SRGP_job()
     while job_arguments is not None:
         sh.python(*job_arguments)
+        sh.git('add', job_arguments[4])
+        sh.git('commit', '-m', os.path.basename(job_arguments[4]), job_arguments[4])
+        sh.git('push', '-m', os.path.basename(job_arguments[4]), job_arguments[4])
         set_SRGP_job_finished(job_ID)
         job_ID, job_arguments = get_SRGP_job()
     
