@@ -18,7 +18,7 @@ because of less computational overhead.
 5. Memoization so that computations speed up after a few iterations 
 6. Results are saved to file. New runs are added to previously saved results.
 7. User specified number of fitting parameters 
-8. User specified number of permitted unique equation forms 
+8. User specified number of permitted unique binary trees, which determine the possible equation forms 
 9. User specified permitted functions 
 10. Developed and tested on Python3.6
 
