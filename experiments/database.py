@@ -139,12 +139,12 @@ def set_SRGP_job_finished(job_ID):
     
 def run_all_SRGP_jobs():
     i = 0
-    for finished in range(0,2)
+    for finished in range(0,2):
         job_ID, job_arguments = get_SRGP_job(finished)
         while job_arguments is not None:
-            
-            if (job_arguments[0] != '-m' or job_arguments[1] != 'scoop' or
-                job_arguments[2] != pySRURGS_dir+'/experiments/SRGP.py')
+            if ((job_arguments[0] != '-m') 
+               or (job_arguments[1] != 'scoop') 
+               or (job_arguments[2] != pySRURGS_dir+'/experiments/SRGP.py')):
                 raise Exception("SQL injection?")
             sh.python(*job_arguments)  
             sh.git('pull')
