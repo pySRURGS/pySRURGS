@@ -22,7 +22,7 @@ import sys
 import multiprocessing as mp
 import argparse
 import pandas as pd
-sys.path.append('./../..')
+sys.path.append('./..')
 
 # making the codes analogous 
 from pySRURGS import add, mul, sub, div, pow, sin, cos, tan, log, exp, sinh, tanh, cosh
@@ -240,7 +240,7 @@ def eaSimple(population, toolbox, cxpb, mutpb, ngen, verbose=__debug__):
         for ind, fit in zip(invalid_ind, fitnesses):
             ind.fitness.values = fit
         # Replace the current population by the offspring
-        population[:] = offspring
+        population = toolbox.select(population + offspring, len(population))
         # Append the current generation statistics to the logbook
         nevals = len(invalid_ind)
         logbook.record(gen=gen, nevals=nevals)
