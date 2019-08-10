@@ -32,14 +32,14 @@ def run_experiments(SRconfig, start_index, count_experiments, n_runs):
     funcs_arity_one = ','.join(SR_config._f_functions)
     max_num_fit_params = SR_config._max_num_fit_params
     max_size_trees = SR_config._max_size_trees
-    popsize = 1000
+    popsize = 500
     numgens = 20
     # first twenty problems
     for z in range(start_index,count_experiments):
-        print("Experiment number:", z)
+        print("SRGP experiment number:", z)
         train = './benchmarks/'+str(z)+'_train.csv'
         for j in range(0,n_runs):
-            print("Run number:", j)
+            print("Run number:", j, "out of", n_runs)
             run_ID = str(j)
             path_to_db = give_db_path(train, run_ID) 
             run_SRGP(train, path_to_db, numgens, popsize, max_num_fit_params, 
