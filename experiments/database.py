@@ -146,7 +146,8 @@ def run_all_SRGP_jobs():
             if (job_arguments[0] != '-m' or job_arguments[1] != 'scoop' or
                 job_arguments[2] != pySRURGS_dir+'/experiments/SRGP.py')
                 raise Exception("SQL injection?")
-            sh.python(*job_arguments)        
+            sh.python(*job_arguments)  
+            sh.git('pull')
             sh.git('add', job_arguments[4])
             sh.git('commit', '-m', os.path.basename(job_arguments[4]), job_arguments[4])
             sh.git('push')
