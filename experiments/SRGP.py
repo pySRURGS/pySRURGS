@@ -252,10 +252,13 @@ def eaSimple(population, toolbox, cxpb, mutpb, ngen, verbose=__debug__):
                 best_ever = best
         MSE = best_ever.fitness.values[0]
         NMSE = MSE / np.std(dataset._y_data)
-        print(gen, nevals, NMSE, 
-              simplify_equation_string(remove_tags(str(best_ever), dataset),dataset))
-        #display_population(population)
     return population, logbook, best_ever
+
+def calc_total_evals(logbook):
+    nevals = 0
+    for entry in logbook:
+        nevals += entry['nevals']
+    return nevals
 
 def main():
     pop = toolbox.population(n=popsize)
@@ -264,7 +267,9 @@ def main():
                                   toolbox,
                                   0.7,
                                   0.3,
-                                  numgens)
+                                  numgens)    
+    with SqliteDict(path_to_db, autocommit=True) as results_dict:
+        results_dict['nevals'] = calc_total_evals(logbook) 
 
 if __name__ == "__main__":
     main()
