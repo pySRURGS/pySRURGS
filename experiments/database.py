@@ -98,7 +98,7 @@ def get_SRGP_job():
                                              database='SohrabT$pySRURGS')
         mycursor = mydb.cursor()                               
         sql = '''SELECT job_ID, arguments FROM jobs
-                WHERE finished = 0
+                WHERE finished = 1
                 ORDER BY RAND()
                 LIMIT 1'''
         mycursor.execute(sql)
@@ -142,7 +142,7 @@ def run_all_SRGP_jobs():
         sh.python(*job_arguments)
         sh.git('add', job_arguments[4])
         sh.git('commit', '-m', os.path.basename(job_arguments[4]), job_arguments[4])
-        sh.git('push', '-m', os.path.basename(job_arguments[4]), job_arguments[4])
+        sh.git('push')
         set_SRGP_job_finished(job_ID)
         job_ID, job_arguments = get_SRGP_job()
     
