@@ -49,8 +49,8 @@ def run_experiments(SR_config, start_index, count_experiments, n_runs):
             algorithm = 'SRGP'
             arguments = run_SRGP(train, path_to_db, numgens, popsize, max_num_fit_params, 
                                  funcs_arity_two, funcs_arity_one)
-            print(algorithm, arguments)
             list_of_jobs.append([algorithm, arguments])
+    return list_of_jobs
 
 if __name__ == '__main__':
     jobs1 = run_experiments(SR_config1, 0, 20, 10)

@@ -8,7 +8,6 @@ import pySRURGS
 # TODO - change the code so that 'iters' reflects the number of iterations 
 # run by the corresponding SRGP run
 
-
 try:
     import sh
 except ImportError:
