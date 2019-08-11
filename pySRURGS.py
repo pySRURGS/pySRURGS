@@ -1203,6 +1203,4 @@ if __name__ == '__main__':
             uniform_random_global_search_once(path_to_db, path_to_csv, SRconfig)
     else:
         raise("Invalid mode")
-    compiled_results = compile_results(path_to_db, path_to_csv, SRconfig)
-    best_model = compiled_results._results[0]
     
