@@ -103,14 +103,15 @@ A sample problem is provided. The filename denotes the true equation.
 
 $ winpty python pySRURGS.py -max_num_fit_params 0 -max_permitted_trees 1000 ./csvs/quartic_polynomial.csv 100
 Running in multi processor mode
-1008it [01:13, 12.48it/s]
-  Normalized Mean Squared Error       R^2  Equation, simplified                       Parameters
--------------------------------  --------  -----------------------------------------  ------------
-                       0.21425   0.995187  x*(x*(2*x + 1) + 2)
-                       0.22746   0.994465  x*(4*x - (x + 1)**x + 1)
-                       0.289212  0.992846  x*(x + 1)**(x + 1) + x**(x + 2)*(x**x)**x
-                       0.363446  0.991796  ((2*x)**x*(x + 1))**(x**(2*x))
-                       0.41818   0.987663  0**x + (2*x)**x*(x + 1)**x
+1008it [03:03,  7.78it/s]
+  Normalized Mean Squared Error       R^2  Equation, simplified                                                 Parameters
+-------------------------------  --------  -------------------------------------------------------------------  ---------------------------
+                     0.00518398  0.999871  (p2**p2)**p1*(p2**p2)**(p1*x) + ((p0**2 + p1)**x)**(-p2)             6.16E-01,3.41E+00,1.01E+00
+                     0.00623639  0.999845  p0**p2*(p0*x**p2 - p2)**(p1 + 1)*(p1**x)**p1                         3.11E+00,6.34E-01,1.43E+00
+                     0.0851371   0.997893  (p0**(p0 + 1) + p1*(p2 + x)**x)**(-p2*x*(p0 - 1)*(p1 + p2 - x))      1.36E+00,1.60E+00,2.85E-01
+                     0.108024    0.997381  (p0 + p1*(-p2 + p2**p1 - x + x**(2*p2)) - 1)/p1                      4.89E-01,1.10E+00,7.58E-01
+                     0.286993    0.99297   -p2*x**2*(p0 + 1)/(p0*(p2*(p0*x - p0 - p1 + x) + x)*(p0 + p1 + p2))  2.59E+00,6.91E+00,-2.73E-02
+
 ```
 
 ### Important details 
