@@ -1,0 +1,9 @@
+mpmath
+lmfit
+sympy
+pandas
+numpy
+parmap
+tqdm
+sqlitedict
+tabulate
