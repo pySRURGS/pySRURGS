@@ -3,12 +3,11 @@
 # There is a file called secret.py which houses 
 # PYTHONANYWHERE_PASSWORD, PYTHONANYWHERE_USERNAME, DATABASE_HOSTNAME, DATABASE_NAME, DATABASE_PASSWORD
 # and we don't want these saved to the git so I have added secret.py to .gitignore
-import mysql.connector
 import sys 
 import os
 import pdb
 from secret import *
-import mysql.connector
+import pymysql
 import sshtunnel
 import platform 
 
@@ -22,8 +21,8 @@ except ImportError:
             return pbs.Command(attr)
     sh = Sh()
 
-sshtunnel.SSH_TIMEOUT = 5.0
-sshtunnel.TUNNEL_TIMEOUT = 5.0
+sshtunnel.SSH_TIMEOUT = 15.0
+sshtunnel.TUNNEL_TIMEOUT = 15.0
 
 # This portion of the script is specific to my home computing setup.
 if platform.system() == 'Windows':
@@ -44,7 +43,7 @@ def submit_job_to_db(algo_argu_list):
     with sshtunnel.SSHTunnelForwarder(('ssh.pythonanywhere.com'),
         ssh_username=PYTHONANYWHERE_USERNAME, ssh_password=PYTHONANYWHERE_PASSWORD,
         remote_bind_address=(DATABASE_HOSTNAME, 3306)) as tunnel:
-        mydb = mysql.connector.connect(user=PYTHONANYWHERE_USERNAME, 
+        mydb = pymysql.connect(user=PYTHONANYWHERE_USERNAME, 
                                                  password=DATABASE_PASSWORD,
                                                  host='127.0.0.1', 
                                                  port=tunnel.local_bind_port,
@@ -75,7 +74,7 @@ def purge_db():
         ('ssh.pythonanywhere.com'),
         ssh_username=PYTHONANYWHERE_USERNAME, ssh_password=PYTHONANYWHERE_PASSWORD,
         remote_bind_address=(DATABASE_HOSTNAME, 3306)) as tunnel:
-        mydb = mysql.connector.connect(user=PYTHONANYWHERE_USERNAME, 
+        mydb = pymysql.connect(user=PYTHONANYWHERE_USERNAME, 
                                              password=DATABASE_PASSWORD,
                                              host='127.0.0.1', 
                                              port=tunnel.local_bind_port,
@@ -91,7 +90,7 @@ def get_SRGP_job(finished=0):
         ('ssh.pythonanywhere.com'),
         ssh_username=PYTHONANYWHERE_USERNAME, ssh_password=PYTHONANYWHERE_PASSWORD,
         remote_bind_address=(DATABASE_HOSTNAME, 3306)) as tunnel:
-        mydb = mysql.connector.connect(user=PYTHONANYWHERE_USERNAME, 
+        mydb = pymysql.connect(user=PYTHONANYWHERE_USERNAME, 
                                              password=DATABASE_PASSWORD,
                                              host='127.0.0.1', 
                                              port=tunnel.local_bind_port,
