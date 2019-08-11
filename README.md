@@ -1,6 +1,6 @@
 
 ![Binoculars](image/Gnome-system-search.jpg)
-
+[![Build Status](https://travis-ci.com/pySRURGS/pySRURGS.svg?branch=master)](https://travis-ci.com/pySRURGS/pySRURGS)
 # pySRURGS - Symbolic Regression by Uniform Random Global Search (in python)
 
 Symbolic regression is a type of data analysis problem where you search for the 
@@ -25,7 +25,7 @@ because of less computational overhead.
 
 ## Getting Started
 
-It's a python3 script. Just download it and run it via a terminal.
+It's a python3 script. Download it and run it via a terminal.
 
 ### Prerequisites
 
