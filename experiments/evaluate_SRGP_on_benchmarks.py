@@ -38,7 +38,7 @@ def run_experiments(SR_config, start_index, count_experiments, n_runs):
     funcs_arity_one = ','.join(SR_config._f_functions)
     max_num_fit_params = SR_config._max_num_fit_params
     max_size_trees = SR_config._max_permitted_trees
-    popsize = 500
+    popsize = 100
     numgens = 20
     # first twenty problems
     for z in range(start_index,count_experiments):
