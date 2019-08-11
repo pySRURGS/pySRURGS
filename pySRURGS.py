@@ -1041,8 +1041,6 @@ def setup(path_to_csv, SR_config):
     f = len(SR_config._f_functions) # the number of functions of arity 1
     num_fit_param = SR_config._max_num_fit_params    
     dataset = Dataset(path_to_csv, num_fit_param, scaled=False)
-    if num_fit_param > dataset._x_data.shape[0]:
-        raise Exception("You have more fitting parameters than you do data points")
     m = dataset._m_terminals # the number of vars + number of fit params 
     if f == 0:
         enumerator = Enumerator2()
