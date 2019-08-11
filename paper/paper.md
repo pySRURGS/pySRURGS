@@ -9,7 +9,7 @@ tags:
   - genetic programming
 authors:
   - name: Sohrab Towfighi
-    orcid: 0000-0003-0872-7098
+    orcid: 0000-0002-3050-8943
     affiliation: 1
 affiliations:
  - name: University of Toronto, Faculty of Medicine
