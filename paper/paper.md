@@ -10,7 +10,7 @@ tags:
 authors:
   - name: Sohrab Towfighi
     orcid: 0000-0003-0872-7098
-    affiliation: "1, 2" # (Multiple affiliations must be quoted)
+    affiliation: 1
 affiliations:
  - name: University of Toronto, Faculty of Medicine
    index: 1
@@ -20,7 +20,7 @@ bibliography: paper.bib
 
 # Summary
 Symbolic regression is a regression analysis where we search for the 
-mathematical expression that best describes a the relationship between our 
+mathematical expression that best describes the relationship between our 
 independent variables and our output variable. Typically, symbolic regression 
 problems are solved using genetic programming[@Koza:1992], but the data 
 demonstrating that genetic programming actually outperforms random search on 
@@ -57,4 +57,6 @@ dictionary file for future review. Though intuitive, it is proven to converge
 on the ideal solution as the number of iterations tends to infinity,
 a property not shared by genetic programming [@Solis:2012].
 
-![pySRURGS enumerates the problem space, then searches randomly.](enumerating.png)
+![pySRURGS uses a binary tree representation for symbolic regression.](sample_equation.png)
+
+# References
