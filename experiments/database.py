@@ -146,11 +146,14 @@ def run_all_SRGP_jobs():
                or (job_arguments[1] != 'scoop') 
                or (job_arguments[2] != pySRURGS_dir+'/experiments/SRGP.py')):
                 raise Exception("SQL injection?")
-            sh.python(*job_arguments)  
-            sh.git('pull')
-            sh.git('add', job_arguments[4])
-            sh.git('commit', '-m', os.path.basename(job_arguments[4]), job_arguments[4])
-            sh.git('push')
+            try:
+                sh.python(*job_arguments)  
+                sh.git('pull')
+                sh.git('add', job_arguments[4])
+                sh.git('commit', '-m', os.path.basename(job_arguments[4]), job_arguments[4])
+                sh.git('push')                
+            except sh.ErrorReturnCode, e:
+                print e.stderr
             set_SRGP_job_finished(job_ID)
             job_ID, job_arguments = get_SRGP_job(finished)
             print('finished a job', i)
