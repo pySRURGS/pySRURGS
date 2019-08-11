@@ -35,11 +35,11 @@ You can install the prerequisite packages with pip
 
 ### Installing
 
-Install the prerequisites then download the script.
+Clone the repo then install the prerequisites.
 
 ```
-pip install mpmath lmfit sympy pandas numpy parmap tqdm sqlitedict tabulate
 git clone https://github.com/pySRURGS/pySRURGS.git
+pip install -r requirements.txt
 ```
 
 ### Command line help
