@@ -20,8 +20,7 @@ import pandas
 import argparse
 import numpy as np
 np.seterr(all='raise')
-import random 
-random.seed(0)
+import random
 import datetime
 import tabulate
 from sqlitedict import SqliteDict
