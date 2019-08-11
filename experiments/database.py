@@ -152,8 +152,8 @@ def run_all_SRGP_jobs():
                 sh.git('add', job_arguments[4])
                 sh.git('commit', '-m', os.path.basename(job_arguments[4]), job_arguments[4])
                 sh.git('push')                
-            except sh.ErrorReturnCode, e:
-                print e.stderr
+            except sh.ErrorReturnCode as e:
+                print(e.stderr)
             set_SRGP_job_finished(job_ID)
             job_ID, job_arguments = get_SRGP_job(finished)
             print('finished a job', i)
