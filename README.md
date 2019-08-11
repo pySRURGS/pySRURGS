@@ -99,7 +99,8 @@ optional arguments:
 A sample problem is provided. The filename denotes the true equation.
 
 ```
-$ winpty python pySRURGS.py ./csvs/x1_squared_minus_five_x3.csv 10 2
+
+$ winpty python pySRURGS.py -max_num_fit_params 5 -max_size_trees 1000 ./csvs/x1_squared_minus_five_x3.csv 10
 Running in single processor mode
 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 10/10 [00:27<00:00,  2.74s/it]
   Normalized Mean Squared Error        R^2  Equation, simplified                                                                                           Parameters
