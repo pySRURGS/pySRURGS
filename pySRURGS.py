@@ -54,7 +54,7 @@ variable_suffix = '_end_variable'
 path_to_toy_csv = './csvs/toy_data_for_benchmark_gen.csv'
 benchmarks_x_domain = [0, 10]
 benchmarks_fit_param_domain = [-10, 10]
-benchmarks_dir = './benchmarks'
+benchmarks_dir = './csvs/benchmarks'
 benchmarks_summary_tsv = './benchmarks_summary.tsv'
 ##### END GLOBALS
 
