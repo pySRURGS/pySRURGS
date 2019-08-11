@@ -86,7 +86,7 @@ optional arguments:
   -max_num_fit_params MAX_NUM_FIT_PARAMS
                         the maximum number of fitting parameters permitted in
                         the generated models (default: 3)
-  -max_size_trees MAX_SIZE_TREES
+  -max_permitted_trees MAX_PERMITTED_TREES
                         the number of unique binary trees that are permitted
                         in the generated models - binary trees define the form
                         of the equation, increasing this number tends to
@@ -100,7 +100,7 @@ A sample problem is provided. The filename denotes the true equation.
 
 ```
 
-$ winpty python pySRURGS.py -max_num_fit_params 5 -max_size_trees 1000 ./csvs/x1_squared_minus_five_x3.csv 10
+$ winpty python pySRURGS.py -max_num_fit_params 5 -max_permitted_trees 1000 ./csvs/x1_squared_minus_five_x3.csv 10
 Running in single processor mode
 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 10/10 [00:27<00:00,  2.74s/it]
   Normalized Mean Squared Error        R^2  Equation, simplified                                                                                           Parameters
