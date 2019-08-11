@@ -53,9 +53,9 @@ applied problems. It allows users to generate benchmark problems in symbolic
 regression, and also to enumerate the problem space. Users are allowed to 
 specify which functions they want permitted, and how many fitting parameters 
 they want permitted. The code works very nicely, saving results to a sqlite 
-dictionary file for future review. Though intuitive, it is proven to converge 
-on the ideal solution as the number of iterations tends to infinity,
-a property not shared by genetic programming [@Solis:2012].
+dictionary file for future review. Though intuitive, uniform random global 
+search is proven to converge on the ideal solution as the number of iterations 
+tends to infinity, a property not shared by genetic programming [@Solis:2012].
 
 ![pySRURGS uses a binary tree representation for symbolic regression.](sample_equation.png)
 
