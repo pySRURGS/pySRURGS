@@ -1203,4 +1203,4 @@ if __name__ == '__main__':
             uniform_random_global_search_once(path_to_db, path_to_csv, SRconfig)
     else:
         raise("Invalid mode")
-    
+    compile_results(path_to_db, path_to_csv, SRconfig)
