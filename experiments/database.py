@@ -124,7 +124,7 @@ def set_SRGP_job_finished(job_ID):
         ('ssh.pythonanywhere.com'),
         ssh_username=PYTHONANYWHERE_USERNAME, ssh_password=PYTHONANYWHERE_PASSWORD,
         remote_bind_address=(DATABASE_HOSTNAME, 3306)) as tunnel:
-        mydb = mysql.connector.connect(user=PYTHONANYWHERE_USERNAME, 
+        mydb = pymysql.connect(user=PYTHONANYWHERE_USERNAME, 
                                              password=DATABASE_PASSWORD,
                                              host='127.0.0.1', 
                                              port=tunnel.local_bind_port,
