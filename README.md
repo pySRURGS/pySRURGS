@@ -20,7 +20,7 @@ because of less computational overhead.
 7. User specified number of fitting parameters 
 8. User specified number of permitted unique binary trees, which determine the possible equation forms 
 9. User specified permitted functions 
-10. Developed and tested on Python3.6
+10. Developed and tested on Python 3.6
 
 ## Getting Started
 
