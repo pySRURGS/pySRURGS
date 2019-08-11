@@ -50,7 +50,7 @@ python3 pySRURGS.py -h
 The above command should render the following:
 
 ```
-usage: pySRURGS.py [-h] [-test TEST] [-run_ID RUN_ID] [-single] [-count]
+usage: pySRURGS.py [-h] [-run_ID RUN_ID] [-single] [-count]
                    [-benchmarks] [-funcs_arity_two FUNCS_ARITY_TWO]
                    [-funcs_arity_one FUNCS_ARITY_ONE]
                    [-max_num_fit_params MAX_NUM_FIT_PARAMS]
