@@ -155,9 +155,6 @@ class TransferData:
 def run_all_SRGP_jobs():
     i = 0
     dropbox_trnsfer = TransferData(DROPBOX_KEY)
-    
-def run_all_SRGP_jobs():
-    i = 0
     for finished in range(0,2):
         job_ID, job_arguments = get_SRGP_job(finished)        
         while job_arguments is not None:
@@ -166,11 +163,14 @@ def run_all_SRGP_jobs():
                or (job_arguments[1] != 'scoop') 
                or (job_arguments[2] != pySRURGS_dir+'/experiments/SRGP.py')):
                 raise Exception("SQL injection?")
-            sh.python(*job_arguments)              
-            dropbox_trnsfer(output_db, os.path.basename(output_db))
+            try:
+                sh.python(*job_arguments, _err="error.txt")
+            except:
+                print(sh.cat('error.txt'))
+                continue
+            dropbox_trnsfer.upload_file(output_db, '/'+os.path.basename(output_db))
             with SqliteDict(output_db, autocommit=True) as results_dict:
                 n_evals = results_dict['n_evals']
-            results_dict['best_result']
             set_SRGP_job_finished(n_evals, job_ID)
             job_ID, job_arguments = get_SRGP_job(finished)
             print('finished a job', i)
