@@ -12,6 +12,7 @@ import sshtunnel
 import platform 
 import argparse 
 from sqlitedict import SqliteDict
+import dropbox
 
 try:
     import sh
@@ -138,9 +139,22 @@ def set_SRGP_job_finished(n_evals, job_ID):
         mycursor.execute(sql, val)
         mydb.commit()
         mydb.close()            
+
+class TransferData:
+    def __init__(self, access_token):
+        self.access_token = access_token
+
+    def upload_file(self, file_from, file_to):
+        """upload a file to Dropbox using API v2
+        """
+        dbx = dropbox.Dropbox(self.access_token)
+
+        with open(file_from, 'rb') as f:
+            dbx.files_upload(f.read(), file_to)
     
 def run_all_SRGP_jobs():
     i = 0
+    dropbox_trnsfer = TransferData(DROPBOX_KEY)
     for finished in range(0,2):
         job_ID, job_arguments = get_SRGP_job(finished)        
         while job_arguments is not None:
@@ -149,11 +163,8 @@ def run_all_SRGP_jobs():
                or (job_arguments[1] != 'scoop') 
                or (job_arguments[2] != pySRURGS_dir+'/experiments/SRGP.py')):
                 raise Exception("SQL injection?")
-            sh.git('pull')            
-            sh.python(*job_arguments)  
-            sh.git('add', output_db)
-            sh.git('commit', '-m', os.path.basename(output_db), output_db)
-            sh.git('push')     
+            sh.python(*job_arguments)              
+            dropbox_trnsfer(output_db, os.path.basename(output_db))
             with SqliteDict(output_db, autocommit=True) as results_dict:
                 n_evals = results_dict['n_evals']
             results_dict['best_result']
