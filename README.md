@@ -1,7 +1,8 @@
 
 ![Binoculars](image/Gnome-system-search.jpg)
-[![Build Status](https://travis-ci.com/pySRURGS/pySRURGS.svg?branch=master)](https://travis-ci.com/pySRURGS/pySRURGS)
+
 # pySRURGS - Symbolic Regression by Uniform Random Global Search (in python)
+[![Build Status](https://travis-ci.com/pySRURGS/pySRURGS.svg?branch=master)](https://travis-ci.com/pySRURGS/pySRURGS)
 
 Symbolic regression is a type of data analysis problem where you search for the 
 equation of best fit for a numerical dataset. This package does this task by 
