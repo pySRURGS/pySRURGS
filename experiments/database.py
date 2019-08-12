@@ -78,7 +78,7 @@ def purge_db():
                                              password=DATABASE_PASSWORD,
                                              host='127.0.0.1', 
                                              port=tunnel.local_bind_port,
-                                             database='SohrabT$pySRURGS')
+                                             database=DATABASE_NAME)
         mycursor = mydb.cursor()                               
         sql = "DROP TABLE jobs'"
         mycursor.execute(sql)
@@ -94,7 +94,7 @@ def get_SRGP_job(finished=0):
                                              password=DATABASE_PASSWORD,
                                              host='127.0.0.1', 
                                              port=tunnel.local_bind_port,
-                                             database='SohrabT$pySRURGS')
+                                             database=DATABASE_NAME)
         mycursor = mydb.cursor()                               
         sql = '''SELECT job_ID, arguments FROM jobs
                 WHERE finished = %s
@@ -128,7 +128,7 @@ def set_SRGP_job_finished(job_ID):
                                              password=DATABASE_PASSWORD,
                                              host='127.0.0.1', 
                                              port=tunnel.local_bind_port,
-                                             database='SohrabT$pySRURGS')
+                                             database=DATABASE_NAME)
         mycursor = mydb.cursor()                               
         sql = "UPDATE jobs SET finished = 2 WHERE job_ID = %s"
         val = (job_ID,)

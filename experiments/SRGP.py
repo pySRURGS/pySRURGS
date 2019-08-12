@@ -215,6 +215,67 @@ def display_population(population):
     for ind in population:
         print(remove_tags(str(ind), dataset))
 
+
+def varAnd_EnsureValid(population, toolbox, cxpb, mutpb):
+    """custom varand which ensures that produced children do not evaluate 
+    to a floatingpointerror
+    """
+    offspring = [toolbox.clone(ind) for ind in population]
+
+    # Apply crossover and mutation on the offspring
+    for i in range(1, len(offspring), 2):
+        if random.random() < cxpb:
+            are_offspring_valid = False
+            valid_offspring = []
+            max_iter = 0
+            while are_offspring_valid == False:
+                max_iter = max_iter + 1                 
+                offspring[i - 1], offspring[i] = toolbox.mate(offspring[i - 1],
+                                                              offspring[i])                
+                try:
+                    toolbox.evaluate(offspring[i - 1])
+                    valid_offspring.append(offspring[i - 1])
+                except FloatingPointError:
+                    pass
+                if len(valid_offspring) == 2:
+                    are_offspring_valid = True
+                    break
+                try:
+                    toolbox.evaluate(offspring[i])
+                    valid_offspring.append(offspring[i])
+                except FloatingPointError:
+                    pass
+                if len(valid_offspring) == 2:
+                    are_offspring_valid = True
+                    break
+                if max_iter == 10:
+                    [offspring[i - 1], offspring[i]] = filter_population([offspring[i - 1], 
+                                                                          offspring[i]], toolbox)
+            offspring[i - 1], offspring[i] = valid_offspring[0], valid_offspring[1]
+            del offspring[i - 1].fitness.values, offspring[i].fitness.values
+                    
+    for i in range(len(offspring)):
+        if random.random() < mutpb:
+            is_offspring_valid = False
+            valid_offspring = []
+            max_iter = 0
+            while is_offspring_valid == False:
+                max_iter = max_iter + 1
+                offspring[i], = toolbox.mutate(offspring[i])
+                try:
+                    toolbox.evaluate(offspring[i])
+                    valid_offspring.append(offspring[i])
+                except FloatingPointError:
+                    pass
+                if len(valid_offspring) == 1:
+                    is_offspring_valid = True
+                    break
+                if max_iter == 10:
+                    [offspring[i]] = filter_population([offspring[i], toolbox)
+            offspring[i] = valid_offspring[0]
+            del offspring[i].fitness.values
+    return offspring
+        
 def eaSimple(population, toolbox, cxpb, mutpb, ngen, verbose=__debug__):
     population = filter_population(population, toolbox)
     logbook = tools.Logbook()
@@ -231,7 +292,7 @@ def eaSimple(population, toolbox, cxpb, mutpb, ngen, verbose=__debug__):
         # Select the next generation individuals
         offspring = toolbox.select(population, len(population))
         # Vary the pool of individuals
-        offspring = algorithms.varAnd(offspring, toolbox, cxpb, mutpb)
+        offspring = varAnd_EnsureValid(offspring, toolbox, cxpb, mutpb)
         offspring = filter_population(offspring, toolbox)
         # Evaluate the individuals with an invalid fitness
         offspring = list(toolbox.map(check_against_db, offspring))
