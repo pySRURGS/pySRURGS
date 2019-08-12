@@ -16,15 +16,16 @@ because of less computational overhead.
 ## Features 
 
 1. Robust parameter fitting
-2. Multiprocessing for faster computing
-3. Avoids considering arithmetically equivalent equations
-4. Loads data from spreadsheets (comma separated value files)
-5. Memoization so that computations speed up after a few iterations 
-6. Results are saved to file. New runs are added to previously saved results.
-7. User specified number of fitting parameters 
-8. User specified number of permitted unique binary trees, which determine the possible equation forms 
-9. User specified permitted functions 
-10. Developed and tested on Python 3.6
+2. Multiprocessing for speed
+3. Memoization for speed
+4. Avoids many arithmetically equivalent equations
+5. Loads data from CSV files
+6. Results saved to SQLite file. 
+7. Results of new runs are added to results of old runs.
+8. User specified number of fitting parameters.
+9. User specified number of permitted unique binary trees, which determine the possible equation forms 
+10. User specified permitted functions of arity 1 or 2
+11. Developed and tested on Python 3.6
 
 ## Getting Started
 
