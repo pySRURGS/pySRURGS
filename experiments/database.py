@@ -10,6 +10,9 @@ from secret import *
 import pymysql
 import sshtunnel
 import platform 
+import argparse 
+from sqlitedict import SqliteDict
+import dropbox
 
 try:
     import sh
@@ -59,12 +62,13 @@ def submit_job_to_db(algo_argu_list):
                algorithm VARCHAR(200) NOT NULL,
                arguments VARCHAR(200) NOT NULL,
                finished TINYINT(1) NOT NULL,
+               n_evals INT NOT NULL,
                PRIMARY KEY ( job_ID )
             );'''
             mycursor = mydb.cursor()
             mycursor.execute(create_db_command)
-            sql = "INSERT INTO jobs (algorithm, arguments, finished) VALUES (%s, %s, %s)"
-            val = (algorithm, arguments, 0)
+            sql = "INSERT INTO jobs (algorithm, arguments, finished, n_evals) VALUES (%s, %s, %s, %s)"
+            val = (algorithm, arguments, 0, -1)
             mycursor.execute(sql, val)        
         mydb.commit()
         mydb.close()
@@ -80,7 +84,7 @@ def purge_db():
                                              port=tunnel.local_bind_port,
                                              database=DATABASE_NAME)
         mycursor = mydb.cursor()                               
-        sql = "DROP TABLE jobs'"
+        sql = "DROP TABLE jobs"
         mycursor.execute(sql)
         mydb.commit()
         mydb.close()
@@ -119,7 +123,7 @@ def get_SRGP_job(finished=0):
         arguments[i] = arguments[i].replace('$PYSRURGSDIR',pySRURGS_dir)    
     return job_ID, arguments
 
-def set_SRGP_job_finished(job_ID):
+def set_SRGP_job_finished(n_evals, job_ID):
     with sshtunnel.SSHTunnelForwarder(
         ('ssh.pythonanywhere.com'),
         ssh_username=PYTHONANYWHERE_USERNAME, ssh_password=PYTHONANYWHERE_PASSWORD,
@@ -130,33 +134,63 @@ def set_SRGP_job_finished(job_ID):
                                              port=tunnel.local_bind_port,
                                              database=DATABASE_NAME)
         mycursor = mydb.cursor()                               
-        sql = "UPDATE jobs SET finished = 2 WHERE job_ID = %s"
-        val = (job_ID,)
+        sql = "UPDATE jobs SET finished = 2, n_evals = %s  WHERE job_ID = %s"
+        val = (n_evals,job_ID)
         mycursor.execute(sql, val)
         mydb.commit()
         mydb.close()            
+
+class TransferData:
+    def __init__(self, access_token):
+        self.access_token = access_token
+
+    def upload_file(self, file_from, file_to):
+        """upload a file to Dropbox using API v2
+        """
+        dbx = dropbox.Dropbox(self.access_token)
+
+        with open(file_from, 'rb') as f:
+            dbx.files_upload(f.read(), file_to)
     
 def run_all_SRGP_jobs():
     i = 0
+    dropbox_trnsfer = TransferData(DROPBOX_KEY)
     for finished in range(0,2):
-        job_ID, job_arguments = get_SRGP_job(finished)
+        job_ID, job_arguments = get_SRGP_job(finished)        
         while job_arguments is not None:
+            output_db = job_arguments[4]
             if ((job_arguments[0] != '-m') 
                or (job_arguments[1] != 'scoop') 
                or (job_arguments[2] != pySRURGS_dir+'/experiments/SRGP.py')):
                 raise Exception("SQL injection?")
             try:
-                sh.python(*job_arguments)  
-                sh.git('pull')
-                sh.git('add', job_arguments[4])
-                sh.git('commit', '-m', os.path.basename(job_arguments[4]), job_arguments[4])
-                sh.git('push')                
-            except sh.ErrorReturnCode as e:
-                print(e.stderr)
-            set_SRGP_job_finished(job_ID)
+                sh.python(*job_arguments, _err="error.txt")
+            except:
+                print(sh.cat('error.txt'))
+                continue
+            dropbox_trnsfer.upload_file(output_db, '/'+os.path.basename(output_db))
+            with SqliteDict(output_db, autocommit=True) as results_dict:
+                n_evals = results_dict['n_evals']
+            set_SRGP_job_finished(n_evals, job_ID)
             job_ID, job_arguments = get_SRGP_job(finished)
             print('finished a job', i)
             i = i + 1
 
 if __name__ == '__main__':
-    run_all_SRGP_jobs()
+
+    # Read the doc string at the top of this script.
+    # Run this script in terminal with '-h' as an argument.
+    parser = argparse.ArgumentParser(prog='database.py', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument("-run_SRGP", help="run the code against all the SRGP problems in the mySQL database", action="store_true")
+    #parser.add_argument("run_SRURGS", help="run the code against all the SRURGS problems in the mySQL database")
+    parser.add_argument("-purge_db", help="deletes all the jobs in the database", action="store_true")
+    if len(sys.argv) < 2:
+        parser.print_usage()
+        sys.exit(1)
+    arguments = parser.parse_args()
+    if arguments.run_SRGP and arguments.purge_db:
+        raise Exception("Cannot do both run SRGP jobs and purge database")
+    if arguments.run_SRGP:
+        run_all_SRGP_jobs()
+    if arguments.purge_db:
+        purge_db()
