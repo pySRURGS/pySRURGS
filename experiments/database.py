@@ -155,6 +155,9 @@ class TransferData:
 def run_all_SRGP_jobs():
     i = 0
     dropbox_trnsfer = TransferData(DROPBOX_KEY)
+    
+def run_all_SRGP_jobs():
+    i = 0
     for finished in range(0,2):
         job_ID, job_arguments = get_SRGP_job(finished)        
         while job_arguments is not None:
