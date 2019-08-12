@@ -32,7 +32,7 @@ def run_SRGP(csv_path, path_to_db, numgens, popsize, int_max_params,
 def give_db_path(path_to_csv, run_ID):
     return '$PYSRURGSDIR/db/'+os.path.basename(path_to_csv)[:-3]+run_ID+'.SRGP.db'
 
-def run_experiments(SR_config, start_index, count_experiments, n_runs):
+def generate_list_of_experiments(SR_config, start_index, count_experiments, n_runs):
     list_of_jobs = []
     funcs_arity_two = ','.join(SR_config._n_functions)
     funcs_arity_one = ','.join(SR_config._f_functions)
@@ -53,8 +53,8 @@ def run_experiments(SR_config, start_index, count_experiments, n_runs):
     return list_of_jobs
 
 if __name__ == '__main__':
-    jobs1 = run_experiments(SR_config1, 0, 20, 10)
-    jobs2 = run_experiments(SR_config2, 20, 80, 10)
+    jobs1 = generate_list_of_experiments(SR_config1, 0, 20, 10)
+    jobs2 = generate_list_of_experiments(SR_config2, 20, 80, 10)
     database.submit_job_to_db(jobs1)
     database.submit_job_to_db(jobs2)
     
