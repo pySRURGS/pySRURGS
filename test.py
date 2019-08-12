@@ -8,9 +8,9 @@ sh.python('pySRURGS.py', '-count', './csvs/quartic_polynomial.csv', 10)
 sh.python('pySRURGS.py', '-benchmarks', './csvs/quartic_polynomial.csv', 10)
 sh.python('pySRURGS.py', '-max_num_fit_params', 0, './csvs/quartic_polynomial.csv', 10)
 sh.python('pySRURGS.py', '-max_num_fit_params', 5, './csvs/quartic_polynomial.csv', 10)
-sh.python('pySRURGS.py', '-funcs_arity_two', 'add,sub,div', '-num_max_fit_params', 5, './csvs/quartic_polynomial.csv', 10)
-sh.python('pySRURGS.py', '-funcs_arity_one', 'tan,exp', '-num_max_fit_params', 5, './csvs/quartic_polynomial.csv', 10)
-sh.python('pySRURGS.py', '-max_permitted_trees', 10, '-num_max_fit_params', 5, './csvs/quartic_polynomial.csv', 10)
+sh.python('pySRURGS.py', '-funcs_arity_two', 'add,sub,div', '-max_num_fit_params', 5, './csvs/quartic_polynomial.csv', 10)
+sh.python('pySRURGS.py', '-funcs_arity_one', 'tan,exp', '-max_num_fit_params', 5, './csvs/quartic_polynomial.csv', 10)
+sh.python('pySRURGS.py', '-max_permitted_trees', 10, '-max_num_fit_params', 5, './csvs/quartic_polynomial.csv', 10)
 
 '''
 usage: pySRURGS.py [-h] [-run_ID RUN_ID] [-single] [-count]

@@ -172,15 +172,19 @@ toolbox.decorate("mate", gp.staticLimit(key=operator.attrgetter("height"), max_v
 toolbox.decorate("mutate", gp.staticLimit(key=operator.attrgetter("height"), max_value=17))
 toolbox.register("map",  futures.map)
     
-def filter_population(population, toolbox):
+def filter_population(population, toolbox):    
     for i in range(0, len(population)):
         individual = population[i]
         try:
             evaluate(individual)
         except:
             run_bool = True
+            iter = 0
             while run_bool:
                 new_indiv = toolbox.population(n=1)[0]
+                iter = iter + 1
+                if iter == 100:
+                    raise Exception("Too many iterations to generate a valid individual")
                 try:
                     evaluate(new_indiv)
                     population[i] = new_indiv
@@ -271,7 +275,7 @@ def varAnd_EnsureValid(population, toolbox, cxpb, mutpb):
                     is_offspring_valid = True
                     break
                 if max_iter == 10:
-                    [offspring[i]] = filter_population([offspring[i], toolbox)
+                    [offspring[i]] = filter_population([offspring[i]], toolbox)
             offspring[i] = valid_offspring[0]
             del offspring[i].fitness.values
     return offspring
@@ -312,7 +316,7 @@ def eaSimple(population, toolbox, cxpb, mutpb, ngen, verbose=__debug__):
             if best_ever.fitness.values[0] < best_ever.fitness.values[0]:
                 best_ever = best
         MSE = best_ever.fitness.values[0]
-        NMSE = MSE / np.std(dataset._y_data)
+        NMSE = np.nan_to_num(MSE / np.std(dataset._y_data))
     return population, logbook, best_ever
 
 def calc_total_evals(logbook):
@@ -330,7 +334,7 @@ def main():
                                   0.3,
                                   numgens)    
     with SqliteDict(path_to_db, autocommit=True) as results_dict:
-        results_dict['nevals'] = calc_total_evals(logbook) 
+        results_dict['n_evals'] = calc_total_evals(logbook) 
 
 if __name__ == "__main__":
     main()
