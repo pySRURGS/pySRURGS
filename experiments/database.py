@@ -10,8 +10,11 @@ from secret import *
 import pymysql
 import sshtunnel
 import platform 
+<<<<<<< HEAD
 import argparse 
 from sqlitedict import SqliteDict
+=======
+>>>>>>> f4693525dd09618611a8eb9bbf9de067f6324a2c
 
 try:
     import sh
@@ -167,6 +170,7 @@ def run_all_SRGP_jobs():
             i = i + 1
 
 if __name__ == '__main__':
+
     # Read the doc string at the top of this script.
     # Run this script in terminal with '-h' as an argument.
     parser = argparse.ArgumentParser(prog='database.py', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -183,4 +187,3 @@ if __name__ == '__main__':
         run_all_SRGP_jobs()
     if arguments.purge_db:
         purge_db()
-    
