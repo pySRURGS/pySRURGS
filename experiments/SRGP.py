@@ -172,15 +172,19 @@ toolbox.decorate("mate", gp.staticLimit(key=operator.attrgetter("height"), max_v
 toolbox.decorate("mutate", gp.staticLimit(key=operator.attrgetter("height"), max_value=17))
 toolbox.register("map",  futures.map)
     
-def filter_population(population, toolbox):
+def filter_population(population, toolbox):    
     for i in range(0, len(population)):
         individual = population[i]
         try:
             evaluate(individual)
         except:
             run_bool = True
+            iter = 0
             while run_bool:
                 new_indiv = toolbox.population(n=1)[0]
+                iter = iter + 1
+                if iter == 100:
+                    raise Exception("Too many iterations to generate a valid individual")
                 try:
                     evaluate(new_indiv)
                     population[i] = new_indiv
