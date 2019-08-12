@@ -118,7 +118,7 @@ Running in multi processor mode
 
 ```
 
-### Important details 
+### Important details
 
 All your data needs to be numeric.
 Your CSV file should have a header.
@@ -132,6 +132,12 @@ Do not use special characters or spaces in variable names.
 ## License
 
 This project is licensed under the GPL 3.0 License - see the [LICENSE](LICENSE) file for details
+
+## Community
+
+If you would like to contribute to the project or you need help please create an issue. 
+
+With regards to community suggested changes, I would comment as to whether it would be within the scope of the project to include the suggested changes. If both parties are in agreement, whomever is interested in developing the changes can make a pull request, or I will implement the suggested changes. 
 
 ## Acknowledgments
 
