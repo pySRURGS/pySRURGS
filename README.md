@@ -1,5 +1,6 @@
-![Binoculars](image/Gnome-system-search.jpg)
 
+![Binoculars](image/Gnome-system-search.jpg)
+[![Build Status](https://travis-ci.com/pySRURGS/pySRURGS.svg?branch=master)](https://travis-ci.com/pySRURGS/pySRURGS)
 # pySRURGS - Symbolic Regression by Uniform Random Global Search (in python)
 
 Symbolic regression is a type of data analysis problem where you search for the 
@@ -20,11 +21,11 @@ because of less computational overhead.
 7. User specified number of fitting parameters 
 8. User specified number of permitted unique binary trees, which determine the possible equation forms 
 9. User specified permitted functions 
-10. Developed and tested on Python3.6
+10. Developed and tested on Python 3.6
 
 ## Getting Started
 
-It's a python3 script. Just download it and run it via a terminal.
+It's a python3 script. Download it and run it via a terminal.
 
 ### Prerequisites
 
@@ -34,11 +35,11 @@ You can install the prerequisite packages with pip
 
 ### Installing
 
-Install the prerequisites then download the script.
+Clone the repo then install the prerequisites.
 
 ```
-pip install mpmath lmfit sympy pandas numpy parmap tqdm sqlitedict tabulate
 git clone https://github.com/pySRURGS/pySRURGS.git
+pip install -r requirements.txt
 ```
 
 ### Command line help
@@ -50,7 +51,7 @@ python3 pySRURGS.py -h
 The above command should render the following:
 
 ```
-usage: pySRURGS.py [-h] [-test TEST] [-run_ID RUN_ID] [-single] [-count]
+usage: pySRURGS.py [-h] [-run_ID RUN_ID] [-single] [-count]
                    [-benchmarks] [-funcs_arity_two FUNCS_ARITY_TWO]
                    [-funcs_arity_one FUNCS_ARITY_ONE]
                    [-max_num_fit_params MAX_NUM_FIT_PARAMS]
@@ -86,7 +87,7 @@ optional arguments:
   -max_num_fit_params MAX_NUM_FIT_PARAMS
                         the maximum number of fitting parameters permitted in
                         the generated models (default: 3)
-  -max_size_trees MAX_SIZE_TREES
+  -max_permitted_trees MAX_PERMITTED_TREES
                         the number of unique binary trees that are permitted
                         in the generated models - binary trees define the form
                         of the equation, increasing this number tends to
@@ -99,16 +100,18 @@ optional arguments:
 A sample problem is provided. The filename denotes the true equation.
 
 ```
-$ winpty python pySRURGS.py ./csvs/x1_squared_minus_five_x3.csv 10 2
-Running in single processor mode
-100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 10/10 [00:27<00:00,  2.74s/it]
-  Normalized Mean Squared Error        R^2  Equation, simplified                                                                                           Parameters
--------------------------------  ---------  -------------------------------------------------------------------------------------------------------------  ----------------------------------------------
-                        10.2672   0.963167  -(x0 - x1*((p1*p3 - x1*x3)/(p1*x1))**x3*(p3 - x0))*(p0*x1*(x0*(x1 + x3) - x1) - x0*sin(p2))/(x0*x1*(p3 - x0))  -4.74E-04,1.51E+04,2.14E-01,5.25E+03,-1.27E+04
-                        17.338    0.941908  x2 + p4*x3/p1**2 - p0**(-x1)*p4*x5*log(p0)/x4 - p0**(-x1)*x2*x5*log(p0)/x4                                     1.00E+00,1.69E+02,1.00E+00,1.00E+00,1.33E+05
-                        65.4971   0.742457  (2*p3 - p4**x2)*(-p0*p3*x0 + p0*x2 + x0*x2)*((-p2 + p3)**(x3/p0))**(-p1 + x2)/(p0*x0*sin(p1))                  1.88E+00,-1.15E+00,-3.12E+00,4.76E-01,1.07E-01
-                       111.863    0.461941  x5**(-x4)*(-x3**x5*(p4**p0 - 2*x5))**sinh(p0)*(p0*x5 - p1*x0)/(p1*(p2 - x1))                                   8.75E-01,5.85E-04,1.00E+00,1.00E+00,5.76E+00
-                       256.675   -1.05228   (x1 + x2)*(x2 + x4)*(p0 - p0**p1 + x2)*(p0 - x0 + x3 + x5)*log(p0)                                             1.03E+00,1.03E+00,1.00E+00,1.00E+00,1.00E+00
+
+$ winpty python pySRURGS.py -max_num_fit_params 3 -max_permitted_trees 2000 ./csvs/quartic_polynomial.csv 100
+Running in multi processor mode
+1008it [03:03,  7.78it/s]
+  Normalized Mean Squared Error       R^2  Equation, simplified                                                 Parameters
+-------------------------------  --------  -------------------------------------------------------------------  ---------------------------
+                     0.00518398  0.999871  (p2**p2)**p1*(p2**p2)**(p1*x) + ((p0**2 + p1)**x)**(-p2)             6.16E-01,3.41E+00,1.01E+00
+                     0.00623639  0.999845  p0**p2*(p0*x**p2 - p2)**(p1 + 1)*(p1**x)**p1                         3.11E+00,6.34E-01,1.43E+00
+                     0.0851371   0.997893  (p0**(p0 + 1) + p1*(p2 + x)**x)**(-p2*x*(p0 - 1)*(p1 + p2 - x))      1.36E+00,1.60E+00,2.85E-01
+                     0.108024    0.997381  (p0 + p1*(-p2 + p2**p1 - x + x**(2*p2)) - 1)/p1                      4.89E-01,1.10E+00,7.58E-01
+                     0.286993    0.99297   -p2*x**2*(p0 + 1)/(p0*(p2*(p0*x - p0 - p1 + x) + x)*(p0 + p1 + p2))  2.59E+00,6.91E+00,-2.73E-02
+
 ```
 
 ### Important details 

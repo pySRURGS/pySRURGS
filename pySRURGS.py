@@ -20,8 +20,7 @@ import pandas
 import argparse
 import numpy as np
 np.seterr(all='raise')
-import random 
-random.seed(0)
+import random
 import datetime
 import tabulate
 from sqlitedict import SqliteDict
@@ -1042,8 +1041,6 @@ def setup(path_to_csv, SR_config):
     f = len(SR_config._f_functions) # the number of functions of arity 1
     num_fit_param = SR_config._max_num_fit_params    
     dataset = Dataset(path_to_csv, num_fit_param, scaled=False)
-    if num_fit_param > dataset._x_data.shape[0]:
-        raise Exception("You have more fitting parameters than you do data points")
     m = dataset._m_terminals # the number of vars + number of fit params 
     if f == 0:
         enumerator = Enumerator2()
@@ -1203,6 +1200,4 @@ if __name__ == '__main__':
             uniform_random_global_search_once(path_to_db, path_to_csv, SRconfig)
     else:
         raise("Invalid mode")
-    compiled_results = compile_results(path_to_db, path_to_csv, SRconfig)
-    best_model = compiled_results._results[0]
-    
+    compile_results(path_to_db, path_to_csv, SRconfig)
