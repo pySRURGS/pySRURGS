@@ -275,7 +275,7 @@ def varAnd_EnsureValid(population, toolbox, cxpb, mutpb):
                     is_offspring_valid = True
                     break
                 if max_iter == 10:
-                    [offspring[i]] = filter_population([offspring[i], toolbox)
+                    [offspring[i]] = filter_population([offspring[i]], toolbox)
             offspring[i] = valid_offspring[0]
             del offspring[i].fitness.values
     return offspring
