@@ -312,7 +312,7 @@ def eaSimple(population, toolbox, cxpb, mutpb, ngen, verbose=__debug__):
             if best_ever.fitness.values[0] < best_ever.fitness.values[0]:
                 best_ever = best
         MSE = best_ever.fitness.values[0]
-        NMSE = MSE / np.std(dataset._y_data)
+        NMSE = np.nan_to_num(MSE / np.std(dataset._y_data))
     return population, logbook, best_ever
 
 def calc_total_evals(logbook):
@@ -330,7 +330,7 @@ def main():
                                   0.3,
                                   numgens)    
     with SqliteDict(path_to_db, autocommit=True) as results_dict:
-        results_dict['nevals'] = calc_total_evals(logbook) 
+        results_dict['n_evals'] = calc_total_evals(logbook) 
 
 if __name__ == "__main__":
     main()

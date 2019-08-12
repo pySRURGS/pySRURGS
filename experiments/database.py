@@ -11,6 +11,7 @@ import pymysql
 import sshtunnel
 import platform 
 import argparse 
+from sqlitedict import SqliteDict
 
 try:
     import sh
@@ -60,12 +61,13 @@ def submit_job_to_db(algo_argu_list):
                algorithm VARCHAR(200) NOT NULL,
                arguments VARCHAR(200) NOT NULL,
                finished TINYINT(1) NOT NULL,
+               n_evals INT NOT NULL,
                PRIMARY KEY ( job_ID )
             );'''
             mycursor = mydb.cursor()
             mycursor.execute(create_db_command)
-            sql = "INSERT INTO jobs (algorithm, arguments, finished) VALUES (%s, %s, %s)"
-            val = (algorithm, arguments, 0)
+            sql = "INSERT INTO jobs (algorithm, arguments, finished, n_evals) VALUES (%s, %s, %s, %s)"
+            val = (algorithm, arguments, 0, -1)
             mycursor.execute(sql, val)        
         mydb.commit()
         mydb.close()
@@ -120,7 +122,7 @@ def get_SRGP_job(finished=0):
         arguments[i] = arguments[i].replace('$PYSRURGSDIR',pySRURGS_dir)    
     return job_ID, arguments
 
-def set_SRGP_job_finished(job_ID):
+def set_SRGP_job_finished(n_evals, job_ID):
     with sshtunnel.SSHTunnelForwarder(
         ('ssh.pythonanywhere.com'),
         ssh_username=PYTHONANYWHERE_USERNAME, ssh_password=PYTHONANYWHERE_PASSWORD,
@@ -131,8 +133,8 @@ def set_SRGP_job_finished(job_ID):
                                              port=tunnel.local_bind_port,
                                              database=DATABASE_NAME)
         mycursor = mydb.cursor()                               
-        sql = "UPDATE jobs SET finished = 2 WHERE job_ID = %s"
-        val = (job_ID,)
+        sql = "UPDATE jobs SET finished = 2, n_evals = %s  WHERE job_ID = %s"
+        val = (n_evals,job_ID)
         mycursor.execute(sql, val)
         mydb.commit()
         mydb.close()            
@@ -141,20 +143,25 @@ def run_all_SRGP_jobs():
     i = 0
     for finished in range(0,2):
         job_ID, job_arguments = get_SRGP_job(finished)
+        sh.git('pull')
         while job_arguments is not None:
+            output_db = job_arguments[4]
             if ((job_arguments[0] != '-m') 
                or (job_arguments[1] != 'scoop') 
                or (job_arguments[2] != pySRURGS_dir+'/experiments/SRGP.py')):
                 raise Exception("SQL injection?")
-            try:
+            try:                
                 sh.python(*job_arguments)  
                 sh.git('pull')
-                sh.git('add', job_arguments[4])
-                sh.git('commit', '-m', os.path.basename(job_arguments[4]), job_arguments[4])
-                sh.git('push')                
+                sh.git('add', output_db)
+                sh.git('commit', '-m', os.path.basename(output_db), output_db)
+                sh.git('push')
             except sh.ErrorReturnCode as e:
-                print(e.stderr)
-            set_SRGP_job_finished(job_ID)
+                print(e.stderr)            
+            with SqliteDict(output_db, autocommit=True) as results_dict:
+                n_evals = results_dict['n_evals']
+            results_dict['best_result']
+            set_SRGP_job_finished(n_evals, job_ID)
             job_ID, job_arguments = get_SRGP_job(finished)
             print('finished a job', i)
             i = i + 1
