@@ -10,11 +10,8 @@ from secret import *
 import pymysql
 import sshtunnel
 import platform 
-<<<<<<< HEAD
 import argparse 
 from sqlitedict import SqliteDict
-=======
->>>>>>> f4693525dd09618611a8eb9bbf9de067f6324a2c
 
 try:
     import sh
@@ -145,22 +142,18 @@ def set_SRGP_job_finished(n_evals, job_ID):
 def run_all_SRGP_jobs():
     i = 0
     for finished in range(0,2):
-        job_ID, job_arguments = get_SRGP_job(finished)
-        sh.git('pull')
+        job_ID, job_arguments = get_SRGP_job(finished)        
         while job_arguments is not None:
             output_db = job_arguments[4]
             if ((job_arguments[0] != '-m') 
                or (job_arguments[1] != 'scoop') 
                or (job_arguments[2] != pySRURGS_dir+'/experiments/SRGP.py')):
                 raise Exception("SQL injection?")
-            try:                
-                sh.python(*job_arguments)  
-                sh.git('pull')
-                sh.git('add', output_db)
-                sh.git('commit', '-m', os.path.basename(output_db), output_db)
-                sh.git('push')
-            except sh.ErrorReturnCode as e:
-                print(e.stderr)            
+            sh.git('pull')            
+            sh.python(*job_arguments)  
+            sh.git('add', output_db)
+            sh.git('commit', '-m', os.path.basename(output_db), output_db)
+            sh.git('push')     
             with SqliteDict(output_db, autocommit=True) as results_dict:
                 n_evals = results_dict['n_evals']
             results_dict['best_result']
