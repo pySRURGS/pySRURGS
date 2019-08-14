@@ -160,7 +160,7 @@ def run_all_SRGP_jobs(placeholder):
         job_ID, job_arguments = get_SRGP_job(finished)        
         while job_arguments is not None:
             output_db = job_arguments[2]
-            if (job_arguments[0] != pySRURGS_dir+'/experiments/SRGP.py')):
+            if (job_arguments[0] != pySRURGS_dir+'/experiments/SRGP.py'):
                 raise Exception("SQL injection?")
             try:
                 sh.python(*job_arguments, _err="error.txt")
