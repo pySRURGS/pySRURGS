@@ -112,6 +112,19 @@ def remove_parameter_tags(equation_string):
     equation_string = equation_string.replace(fitting_param_suffix, '')
     return equation_string
     
+def remove_tags(equation_string):
+    # removes the fitting_param_prefix and fitting_var_prefix with nothing 
+    equation_string = remove_parameter_tags(equation_string)
+    equation_string = remove_variable_tags(equation_string)
+    return equation_string
+
+def remove_dict_tags(equation_string):
+    equation_string = equation_string.replace('df["', '')
+    equation_string = equation_string.replace('params["', '')
+    equation_string = equation_string.replace('"].value', '')
+    equation_string = equation_string.replace('"]', '')
+    return equation_string
+    
 def create_variable_list(m):
     if type(m) == str:
         my_vars = pandas.read_csv(m).keys()[:-1].tolist()
