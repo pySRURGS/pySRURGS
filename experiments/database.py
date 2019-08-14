@@ -13,6 +13,7 @@ import platform
 import argparse 
 from sqlitedict import SqliteDict
 import dropbox
+import multiprocessing as mp
 
 try:
     import sh
@@ -152,16 +153,14 @@ class TransferData:
         with open(file_from, 'rb') as f:
             dbx.files_upload(f.read(), file_to)
     
-def run_all_SRGP_jobs():
+def run_all_SRGP_jobs(placeholder):
     i = 0
     dropbox_trnsfer = TransferData(DROPBOX_KEY)
     for finished in range(0,2):
         job_ID, job_arguments = get_SRGP_job(finished)        
         while job_arguments is not None:
-            output_db = job_arguments[4]
-            if ((job_arguments[0] != '-m') 
-               or (job_arguments[1] != 'scoop') 
-               or (job_arguments[2] != pySRURGS_dir+'/experiments/SRGP.py')):
+            output_db = job_arguments[2]
+            if (job_arguments[0] != pySRURGS_dir+'/experiments/SRGP.py')):
                 raise Exception("SQL injection?")
             try:
                 sh.python(*job_arguments, _err="error.txt")
@@ -177,7 +176,6 @@ def run_all_SRGP_jobs():
             i = i + 1
 
 if __name__ == '__main__':
-
     # Read the doc string at the top of this script.
     # Run this script in terminal with '-h' as an argument.
     parser = argparse.ArgumentParser(prog='database.py', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -191,6 +189,7 @@ if __name__ == '__main__':
     if arguments.run_SRGP and arguments.purge_db:
         raise Exception("Cannot do both run SRGP jobs and purge database")
     if arguments.run_SRGP:
-        run_all_SRGP_jobs()
+        pool = mp.Pool()
+        pool.map(run_all_SRGP_jobs, [None]*mp.cpu_count())
     if arguments.purge_db:
         purge_db()
