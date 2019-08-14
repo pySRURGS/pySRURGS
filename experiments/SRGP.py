@@ -220,12 +220,8 @@ def varCross_EnsureValid(pair_individuals, toolbox, cxpb):
             try:
                 offspring[i - 1], offspring[i] = toolbox.mate(offspring[i - 1],
                                                           offspring[i])
-            except IndexError as e: 
-                if offspring[i - 1] == offspring[i]:
-                    return offspring
-                else:
-                    print(e)
-                    raise IndexError
+            except IndexError as e:
+                return offspring
             try:
                 toolbox.evaluate(offspring[i - 1])
                 valid_offspring.append(offspring[i - 1])
