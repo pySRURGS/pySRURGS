@@ -509,6 +509,8 @@ class Dataset(object):
         self._x_labels = x_labels
         self._y_data = y_data
         self._y_label = y_label
+        if np.std(self._y_data) == 0:
+            raise Exception("The data is invalid. All y values are the same.")
         self._data_properties = dict()
         self._data_properties.update(x_properties)
         self._data_properties.update(y_properties)
