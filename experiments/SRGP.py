@@ -14,17 +14,16 @@ from deap import base, creator, tools, gp, algorithms
 import operator
 import math
 import sympy
-import scoop
 import lmfit
 from sqlitedict import SqliteDict
 import pdb
-from scoop import futures
 import pickle
 import os
 import sys
 import multiprocessing as mp
 import argparse
 import pandas as pd
+from scoop.futures import map
 sys.path.append('./..')
 
 # making the codes analogous 
@@ -168,7 +167,7 @@ toolbox.register("select", tools.selTournament, tournsize=4)
 toolbox.register("mate", gp.cxOnePoint)
 toolbox.register("expr_mut", gp.genGrow, min_=0, max_=2)
 toolbox.register("mutate", gp.mutUniform, expr=toolbox.expr_mut, pset=pset)
-toolbox.register("map",  futures.map)
+toolbox.register("map",  map)
     
 def filter_population(population, toolbox):    
     for i in range(0, len(population)):

@@ -19,11 +19,11 @@ SR_config1, SR_config2 = pySRURGS.generate_benchmarks_SRconfigs()
 def run_SRGP(csv_path, path_to_db, numgens, popsize, int_max_params, 
              n_functions, f_functions=None):
     if f_functions is None or f_functions == '':
-        arguments = ' '.join(['-m', 'scoop', '$PYSRURGSDIR/experiments/SRGP.py', 
+        arguments = ' '.join(['$PYSRURGSDIR/experiments/SRGP.py', 
                               csv_path, path_to_db, str(numgens), str(popsize), 
                               str(int_max_params), n_functions])
     else:
-        arguments = ' '.join(['-m', 'scoop', '$PYSRURGSDIR/experiments/SRGP.py', 
+        arguments = ' '.join(['$PYSRURGSDIR/experiments/SRGP.py', 
                               csv_path, path_to_db, str(numgens), str(popsize), 
                               str(int_max_params), n_functions, '-f_functions', 
                               f_functions])
