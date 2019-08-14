@@ -1,6 +1,9 @@
 # Adapting https://github.com/usnistgov/pysr
 # to the pySRURGS code style and datastructure
 # Some improvements to performance through checking previously considered equations
+
+# TODO, remove the variable and parameter tags simplification.
+
 import warnings
 warnings.simplefilter('ignore')
 import scipy
@@ -25,8 +28,13 @@ import pandas as pd
 sys.path.append('./..')
 
 # making the codes analogous 
-from pySRURGS import add, mul, sub, div, pow, sin, cos, tan, log, exp, sinh, tanh, cosh
-from pySRURGS import Dataset, SymbolicRegressionConfig, simplify_equation_string, eval_equation, create_fitting_parameters, initialize_db, Result, check_goodness_of_fit
+from pySRURGS import (add, mul, sub, div, pow, sin, cos, tan,
+                      log, exp, sinh, tanh, cosh,
+                      Dataset, SymbolicRegressionConfig, eval_equation,
+                      simplify_equation_string, create_fitting_parameters,
+                      create_parameter_list, create_variable_list,
+                      initialize_db, check_goodness_of_fit, Result,
+                      clean_funcstring, remove_dict_tags)
 
 # load the arguments
 parser = argparse.ArgumentParser(prog='pySR.py', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -92,20 +100,20 @@ if 'cosh' in f_functions:
 if 'tanh' in f_functions:
     pset.addPrimitive(tanh, 1, name='tanh')
 
-# dynamically create DEAP variables based on the 
-# number of variables in our raw data
-for i in range(0,len(dataset._x_labels)):     
-    var_label = "df['" + dataset._x_labels[i] + "']"
+# dynamically create DEAP variables based on the var names and parameter names 
+var_names = create_variable_list(csv_path)
+for i in range(0,len(var_names)):     
+    var_label = var_names[i]
     deap_var_name = "ARG" + str(i)
     var_assignment_command = 'pset.renameArguments(' 
     var_assignment_command += deap_var_name + '="' + var_label + '")'
     eval(var_assignment_command)
 
-for int_param in range(0, int_max_params):# dynamically create DEAP 
-    var_label = "pd['p" + str(int_param) + "']"
-    deap_var_name = "ARG" + str(len(dataset._x_labels)+int_param)
+param_names = create_parameter_list(int_max_params)
+for i in range(0, int_max_params):
+    deap_var_name = "ARG" + str(len(var_names) + i)
     var_assignment_command = 'pset.renameArguments(' 
-    var_assignment_command += deap_var_name + '="' + var_label + '")'
+    var_assignment_command += deap_var_name + '="' + param_names[i] + '")'
     eval(var_assignment_command)
 
 #Define our 'Individual' class
@@ -116,40 +124,32 @@ creator.create('Individual',
                fitness=creator.FitnessMin,
                params=create_fitting_parameters(int_max_params))               
 
+def strip_dictionary_tags(dataset, equation_string):
+    terminals_list = dataset._terminals_list
+    for terminal in terminals_list:
+        equation_string = equation_string.replace("df['"+terminal+"']", terminal)
+        equation_string = equation_string.replace("pd['"+terminal+"']", terminal)
+    return equation_string
+
 #Define our evaluation function
-
-def stringify(individual):
-    """Return the expression in a human readable string.
-    """
-    string = ""
-    if type(individual) == list:
-        individual = individual[0]
-    stack = []
-    for node in individual:
-        stack.append((node, []))
-        while len(stack[-1][1]) == stack[-1][0].arity:
-            prim, args = stack.pop()
-            string = prim.format(*args)
-            if len(stack) == 0:
-                break  # If stack is empty, all nodes should have been seen
-            stack[-1][1].append(string)
-
-    return string
-
 def evaluate(individual):           
     if type(individual) == list:
         individual = individual[0]
     funcstring = str(individual)
-    simple_eqn = simplify_equation_string(funcstring, dataset)
+    funcstring_dict_form = clean_funcstring(funcstring)
+    funcstring_readable_form = remove_dict_tags(funcstring_dict_form)
+    simple_eqn = simplify_equation_string(funcstring_readable_form, dataset)
     with SqliteDict(path_to_db, autocommit=True) as results_dict:
         try: # if we have already attempted this equation, do not run again
             result = results_dict[simple_eqn]
             return (result._MSE,)
         except:
-            pass
-    (sum_of_squared_residuals, sum_of_squared_totals, 
+            pass  
+    (sum_of_squared_residuals, 
+    sum_of_squared_totals, 
     R2, fitted_params, 
-    residual) = check_goodness_of_fit(individual, individual.params, dataset)
+    residual) = check_goodness_of_fit(funcstring_dict_form, 
+                                      individual.params, dataset)    
     MSE = sum_of_squared_residuals/len(dataset._y_data)
     result = Result(simple_eqn, funcstring, MSE, R2, fitted_params)
     individual.params = fitted_params
@@ -168,8 +168,6 @@ toolbox.register("select", tools.selTournament, tournsize=4)
 toolbox.register("mate", gp.cxOnePoint)
 toolbox.register("expr_mut", gp.genGrow, min_=0, max_=2)
 toolbox.register("mutate", gp.mutUniform, expr=toolbox.expr_mut, pset=pset)
-toolbox.decorate("mate", gp.staticLimit(key=operator.attrgetter("height"), max_value=17))
-toolbox.decorate("mutate", gp.staticLimit(key=operator.attrgetter("height"), max_value=17))
 toolbox.register("map",  futures.map)
     
 def filter_population(population, toolbox):    
@@ -193,20 +191,11 @@ def filter_population(population, toolbox):
                     pass
     return population    
 
-def remove_tags(equation_string, dataset):
-    for var in dataset._x_labels:
-        var_working = "df['"+var+"']"
-        equation_string = equation_string.replace(var_working, var)
-    for var in range(0,int_max_params):
-        var = 'p'+str(var)        
-        var_working = "pd['"+var+"']"
-        equation_string = equation_string.replace(var_working, var)
-    return equation_string
-
 def check_against_db(individual):
     if type(individual) == list:
         individual = individual[0]
-    simple_eqn = simplify_equation_string(str(individual), dataset)
+    funcstring_stripped = strip_dictionary_tags(dataset, str(individual))
+    simple_eqn = simplify_equation_string(funcstring_stripped, dataset)
     with SqliteDict(path_to_db, autocommit=True) as results_dict:
         try: # if we have already attempted this equation, do not run again
             result = results_dict[simple_eqn]
@@ -217,69 +206,79 @@ def check_against_db(individual):
 
 def display_population(population):
     for ind in population:
-        print(remove_tags(str(ind), dataset))
+        #print(remove_tags(str(ind), dataset))
+        pass
 
+def varCross_EnsureValid(pair_individuals, toolbox, cxpb):
+    offspring = pair_individuals
+    i = 1
+    if random.random() < cxpb:
+        are_offspring_valid = False
+        valid_offspring = []
+        max_iter = 0
+        while are_offspring_valid == False:
+            max_iter = max_iter + 1
+            try:
+                offspring[i - 1], offspring[i] = toolbox.mate(offspring[i - 1],
+                                                          offspring[i])
+            except IndexError as e: 
+                if offspring[i - 1] == offspring[i]:
+                    return offspring
+                else:
+                    print(e)
+                    raise IndexError
+            try:
+                toolbox.evaluate(offspring[i - 1])
+                valid_offspring.append(offspring[i - 1])
+            except FloatingPointError:
+                pass
+            if len(valid_offspring) == 2:
+                are_offspring_valid = True
+                break
+            try:
+                toolbox.evaluate(offspring[i])
+                valid_offspring.append(offspring[i])
+            except FloatingPointError:
+                pass
+            if len(valid_offspring) == 2:
+                are_offspring_valid = True
+                break
+            if max_iter == 10:
+                [offspring[i - 1], offspring[i]] = filter_population([offspring[i - 1], 
+                                                                      offspring[i]], toolbox)
+        offspring[i - 1], offspring[i] = valid_offspring[0], valid_offspring[1]
+        del offspring[i - 1].fitness.values, offspring[i].fitness.values
+    return offspring
 
-def varAnd_EnsureValid(population, toolbox, cxpb, mutpb):
+def varMut_EnsureValid(individual, toolbox, mutpb):
     """custom varand which ensures that produced children do not evaluate 
     to a floatingpointerror
     """
-    offspring = [toolbox.clone(ind) for ind in population]
+    i=0
+    if random.random() < mutpb:
+        is_offspring_valid = False
+        valid_offspring = []
+        max_iter = 0
+        while is_offspring_valid == False:
+            max_iter = max_iter + 1
+            try:
+                [individual] = toolbox.mutate(individual)
+            except IndexError as e:
+                return individual
+            try:
+                toolbox.evaluate(individual)
+                valid_offspring.append(individual)
+            except FloatingPointError:
+                pass
+            if len(valid_offspring) == 1:
+                is_offspring_valid = True
+                break
+            if max_iter == 10:
+                [individual] = filter_population([individual], toolbox)
+        individual = valid_offspring[0]
+        del individual.fitness.values
+    return individual
 
-    # Apply crossover and mutation on the offspring
-    for i in range(1, len(offspring), 2):
-        if random.random() < cxpb:
-            are_offspring_valid = False
-            valid_offspring = []
-            max_iter = 0
-            while are_offspring_valid == False:
-                max_iter = max_iter + 1                 
-                offspring[i - 1], offspring[i] = toolbox.mate(offspring[i - 1],
-                                                              offspring[i])                
-                try:
-                    toolbox.evaluate(offspring[i - 1])
-                    valid_offspring.append(offspring[i - 1])
-                except FloatingPointError:
-                    pass
-                if len(valid_offspring) == 2:
-                    are_offspring_valid = True
-                    break
-                try:
-                    toolbox.evaluate(offspring[i])
-                    valid_offspring.append(offspring[i])
-                except FloatingPointError:
-                    pass
-                if len(valid_offspring) == 2:
-                    are_offspring_valid = True
-                    break
-                if max_iter == 10:
-                    [offspring[i - 1], offspring[i]] = filter_population([offspring[i - 1], 
-                                                                          offspring[i]], toolbox)
-            offspring[i - 1], offspring[i] = valid_offspring[0], valid_offspring[1]
-            del offspring[i - 1].fitness.values, offspring[i].fitness.values
-                    
-    for i in range(len(offspring)):
-        if random.random() < mutpb:
-            is_offspring_valid = False
-            valid_offspring = []
-            max_iter = 0
-            while is_offspring_valid == False:
-                max_iter = max_iter + 1
-                offspring[i], = toolbox.mutate(offspring[i])
-                try:
-                    toolbox.evaluate(offspring[i])
-                    valid_offspring.append(offspring[i])
-                except FloatingPointError:
-                    pass
-                if len(valid_offspring) == 1:
-                    is_offspring_valid = True
-                    break
-                if max_iter == 10:
-                    [offspring[i]] = filter_population([offspring[i]], toolbox)
-            offspring[i] = valid_offspring[0]
-            del offspring[i].fitness.values
-    return offspring
-        
 def eaSimple(population, toolbox, cxpb, mutpb, ngen, verbose=__debug__):
     population = filter_population(population, toolbox)
     logbook = tools.Logbook()
@@ -292,11 +291,33 @@ def eaSimple(population, toolbox, cxpb, mutpb, ngen, verbose=__debug__):
     logbook.record(gen=0, nevals=len(invalid_ind))
     best_ever = None
     # Begin the generational process
-    for gen in range(1, ngen + 1):        
+    for gen in range(1, ngen + 1):
         # Select the next generation individuals
         offspring = toolbox.select(population, len(population))
         # Vary the pool of individuals
-        offspring = varAnd_EnsureValid(offspring, toolbox, cxpb, mutpb)
+        ########################################################################
+        #CUSTOM IMPLEMENTATION, MULTIPROCESSING varAnd with validness ensured
+        ########################################################################
+        pairs = []
+        for i in range(1, len(offspring), 2):
+            pairs.append([offspring[i-1], offspring[i]])
+        first_child = offspring[0]
+        if len(offspring) % 2 == 0:
+            last_child = offspring[-1]
+        else:
+            last_child = []
+        npairs = len(pairs)
+        crossed_offspring = list(toolbox.map(varCross_EnsureValid, pairs, 
+                                             [toolbox]*npairs, [cxpb]*npairs))
+        temp_offspring = []
+        for i in range(0,len(crossed_offspring)):
+            temp_offspring.append(crossed_offspring[i][0])
+            temp_offspring.append(crossed_offspring[i][1])        
+        offspring = temp_offspring
+        nchild = len(offspring)
+        offspring = list(toolbox.map(varMut_EnsureValid, offspring, 
+                                     [toolbox]*nchild, [mutpb]*nchild))
+        ######################################################################## 
         offspring = filter_population(offspring, toolbox)
         # Evaluate the individuals with an invalid fitness
         offspring = list(toolbox.map(check_against_db, offspring))
