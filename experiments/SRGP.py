@@ -198,7 +198,7 @@ def check_against_db(individual):
     with SqliteDict(path_to_db, autocommit=True) as results_dict:
         try: # if we have already attempted this equation, do not run again
             result = results_dict[simple_eqn]
-            individual.fitness.value = result._MSE
+            individual.fitness.value = (result._MSE,)
         except:
             pass
     return individual
