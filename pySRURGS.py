@@ -112,6 +112,19 @@ def remove_parameter_tags(equation_string):
     equation_string = equation_string.replace(fitting_param_suffix, '')
     return equation_string
     
+def remove_tags(equation_string):
+    # removes the fitting_param_prefix and fitting_var_prefix with nothing 
+    equation_string = remove_parameter_tags(equation_string)
+    equation_string = remove_variable_tags(equation_string)
+    return equation_string
+
+def remove_dict_tags(equation_string):
+    equation_string = equation_string.replace('df["', '')
+    equation_string = equation_string.replace('params["', '')
+    equation_string = equation_string.replace('"].value', '')
+    equation_string = equation_string.replace('"]', '')
+    return equation_string
+    
 def create_variable_list(m):
     if type(m) == str:
         my_vars = pandas.read_csv(m).keys()[:-1].tolist()
@@ -496,6 +509,8 @@ class Dataset(object):
         self._x_labels = x_labels
         self._y_data = y_data
         self._y_label = y_label
+        if np.std(self._y_data) == 0:
+            raise Exception("The data is invalid. All y values are the same.")
         self._data_properties = dict()
         self._data_properties.update(x_properties)
         self._data_properties.update(y_properties)
