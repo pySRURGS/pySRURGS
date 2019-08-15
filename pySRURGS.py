@@ -1024,13 +1024,13 @@ def generate_benchmark(benchmark_name, SR_config):
                 dataset._dataframe[dataset._y_label] = y_calc
                 # save the test and train sets to file 
                 if zz == 0:
-                    path = benchmarks_dir + '/' + benchmark_name + '_train.csv'
+                    path1 = benchmarks_dir + '/' + benchmark_name + '_train.csv'
                 else:
-                    path = benchmarks_dir + '/' + benchmark_name + '_test.csv'
-                dataset._dataframe.to_csv(path, index=False)
-                path = benchmarks_dir + '/' + benchmark_name + '_params.txt'
+                    path1 = benchmarks_dir + '/' + benchmark_name + '_test.csv'
+                dataset._dataframe.to_csv(path1, index=False)
+                path2 = benchmarks_dir + '/' + benchmark_name + '_params.txt'
                 # save the problem parameters to a text file 
-                with open(path, "w") as text_file:
+                with open(path2, "w") as text_file:
                     msg = 'Permitted variables: ' + str(dataset._x_labels.tolist()) + '\n'
                     msg += 'Permitted fitting parameters: ' + str(list(fit_param_list.keys())) + '\n'
                     msg += 'Fitting parameters: ' 
@@ -1044,6 +1044,10 @@ def generate_benchmark(benchmark_name, SR_config):
             valid = True
             if eqn_simple == '0':
                 valid = False            
+            try:
+                dataset = Dataset(path1, 5)
+            except:
+                valid = False
         except FloatingPointError:
             pass
     
