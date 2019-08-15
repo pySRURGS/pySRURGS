@@ -186,7 +186,7 @@ def find_matching_SRGP_job(train):
                                              port=tunnel.local_bind_port,
                                              database=DATABASE_NAME)
         mycursor = mydb.cursor()                               
-        sql = "SELECT * FROM jobs WHERE arguments CONCAT('%', ' ', %s, ' ', '%') ;"
+        sql = "SELECT n_evals FROM jobs WHERE arguments CONCAT('%', ' ', %s, ' ', '%') ;"
         val = (train,)
         mycursor.execute(sql, val)
         myresult = mycursor.fetchone()
