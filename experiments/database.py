@@ -75,6 +75,7 @@ def submit_job_to_db(algo_argu_list):
         mydb.close()
 
 def purge_db():
+    sh.rm('../db/*SRGP*')
     with sshtunnel.SSHTunnelForwarder(
         ('ssh.pythonanywhere.com'),
         ssh_username=PYTHONANYWHERE_USERNAME, ssh_password=PYTHONANYWHERE_PASSWORD,
