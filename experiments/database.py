@@ -175,6 +175,25 @@ def run_all_SRGP_jobs(placeholder):
             print('finished a job', i)
             i = i + 1
 
+def find_matching_SRGP_job(train):    
+    with sshtunnel.SSHTunnelForwarder(
+        ('ssh.pythonanywhere.com'),
+        ssh_username=PYTHONANYWHERE_USERNAME, ssh_password=PYTHONANYWHERE_PASSWORD,
+        remote_bind_address=(DATABASE_HOSTNAME, 3306)) as tunnel:
+        mydb = pymysql.connect(user=PYTHONANYWHERE_USERNAME, 
+                                             password=DATABASE_PASSWORD,
+                                             host='127.0.0.1', 
+                                             port=tunnel.local_bind_port,
+                                             database=DATABASE_NAME)
+        mycursor = mydb.cursor()                               
+        sql = "SELECT * FROM jobs WHERE arguments CONCAT('%', ' ', %s, ' ', '%') ;"
+        val = (train,)
+        mycursor.execute(sql, val)
+        myresult = mycursor.fetchone()
+        mydb.commit()
+        mydb.close()
+    return myresult
+            
 if __name__ == '__main__':
     # Read the doc string at the top of this script.
     # Run this script in terminal with '-h' as an argument.
