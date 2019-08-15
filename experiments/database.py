@@ -175,7 +175,7 @@ def run_all_SRGP_jobs(placeholder):
             print('finished a job', i)
             i = i + 1
 
-def find_matching_SRGP_job(train):    
+def find_matching_SRGP_job_n_evals(train):    
     with sshtunnel.SSHTunnelForwarder(
         ('ssh.pythonanywhere.com'),
         ssh_username=PYTHONANYWHERE_USERNAME, ssh_password=PYTHONANYWHERE_PASSWORD,
