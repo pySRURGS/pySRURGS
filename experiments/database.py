@@ -1,7 +1,7 @@
 # For our experiements, we save the commands to a mysql database, and have computers 
 # call the database when they need a new job 
 # There is a file called secret.py which houses 
-# PYTHONANYWHERE_PASSWORD, PYTHONANYWHERE_USERNAME, DATABASE_HOSTNAME, DATABASE_NAME, DATABASE_PASSWORD
+# PYTHONANYWHERE_PASSWORD, PYTHONANYWHERE_USERNAME, DATABASE_HOSTNAME, DATABASE_NAME, DATABASE_PASSWORD, DROPBOX_KEY
 # and we don't want these saved to the git so I have added secret.py to .gitignore
 import sys 
 import os
@@ -14,6 +14,7 @@ import argparse
 from sqlitedict import SqliteDict
 import dropbox
 import multiprocessing as mp
+import glob
 
 try:
     import sh
@@ -175,11 +176,30 @@ def run_all_SRGP_jobs(placeholder):
             print('finished a job', i)
             i = i + 1
 
+def find_matching_SRGP_job_n_evals(train):    
+    with sshtunnel.SSHTunnelForwarder(
+        ('ssh.pythonanywhere.com'),
+        ssh_username=PYTHONANYWHERE_USERNAME, ssh_password=PYTHONANYWHERE_PASSWORD,
+        remote_bind_address=(DATABASE_HOSTNAME, 3306)) as tunnel:
+        mydb = pymysql.connect(user=PYTHONANYWHERE_USERNAME, 
+                                             password=DATABASE_PASSWORD,
+                                             host='127.0.0.1', 
+                                             port=tunnel.local_bind_port,
+                                             database=DATABASE_NAME)
+        mycursor = mydb.cursor()                               
+        sql = "SELECT n_evals FROM jobs WHERE arguments CONCAT('%', ' ', %s, ' ', '%') ;"
+        val = (train,)
+        mycursor.execute(sql, val)
+        myresult = mycursor.fetchone()
+        mydb.commit()
+        mydb.close()
+    return myresult
+            
 if __name__ == '__main__':
     # Read the doc string at the top of this script.
     # Run this script in terminal with '-h' as an argument.
     parser = argparse.ArgumentParser(prog='database.py', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument("-run_SRGP", help="run the code against all the SRGP problems in the mySQL database", action="store_true")
+    parser.add_argument("-run_SRGP", help="run the code against all the SRGP problems in the mySQL database. Deletes contents of ./../db/ directory", action="store_true")
     #parser.add_argument("run_SRURGS", help="run the code against all the SRURGS problems in the mySQL database")
     parser.add_argument("-purge_db", help="deletes all the jobs in the database", action="store_true")
     if len(sys.argv) < 2:
@@ -188,7 +208,10 @@ if __name__ == '__main__':
     arguments = parser.parse_args()
     if arguments.run_SRGP and arguments.purge_db:
         raise Exception("Cannot do both run SRGP jobs and purge database")
-    if arguments.run_SRGP:
+    if arguments.run_SRGP:        
+        files = glob.glob('./../db/*')
+        for f in files:
+            os.remove(f)
         pool = mp.Pool()
         pool.map(run_all_SRGP_jobs, [None]*mp.cpu_count())
     if arguments.purge_db:

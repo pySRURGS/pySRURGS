@@ -7,3 +7,4 @@ parmap
 tqdm
 sqlitedict
 tabulate
+matplotlib

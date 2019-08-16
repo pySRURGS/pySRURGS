@@ -3,15 +3,14 @@
 
 # pySRURGS - Symbolic Regression by Uniform Random Global Search (in python)
 [![Build Status](https://travis-ci.com/pySRURGS/pySRURGS.svg?branch=master)](https://travis-ci.com/pySRURGS/pySRURGS)
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-[![python versions](https://img.shields.io/badge/python-3.6%20%7C%203.7-blue)](https://www.python.org)
+[![License: GPL v3](image/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![python versions](image/python-3_6_3_7-blue.svg)](https://www.python.org)
 
 Symbolic regression is a type of data analysis problem where you search for the 
 equation of best fit for a numerical dataset. This package does this task by 
 randomly, with uniform probability of selection, guessing candidate solutions 
 and evaluating them. The No Free Lunch Theorem argues that this approach should 
-be equivalent to other approaches like Genetic Programming. It is probably faster 
-because of less computational overhead. 
+be equivalent to other approaches like Genetic Programming.
 
 ## Features 
 
@@ -55,11 +54,11 @@ python3 pySRURGS.py -h
 The above command should render the following:
 
 ```
-usage: pySRURGS.py [-h] [-run_ID RUN_ID] [-single] [-count]
-                   [-benchmarks] [-funcs_arity_two FUNCS_ARITY_TWO]
+usage: pySRURGS.py [-h] [-run_ID RUN_ID] [-single] [-count] [-benchmarks]
+                   [-plotting] [-funcs_arity_two FUNCS_ARITY_TWO]
                    [-funcs_arity_one FUNCS_ARITY_ONE]
                    [-max_num_fit_params MAX_NUM_FIT_PARAMS]
-                   [-max_size_trees MAX_SIZE_TREES]
+                   [-max_permitted_trees MAX_PERMITTED_TREES]
                    train iters
 
 positional arguments:
@@ -78,6 +77,9 @@ optional arguments:
   -benchmarks           Instead of doing symbolic regression, generate the 100
                         benchmark problems. No other processing performed.
                         (default: False)
+  -plotting             plot the best model against the data to
+                        ./image/plot.png and ./image/plot.svg - note only
+                        works for univariate datasets (default: False)
   -funcs_arity_two FUNCS_ARITY_TWO
                         a comma separated string listing the functions of
                         arity two you want to be considered.
@@ -99,13 +101,20 @@ optional arguments:
                         (default: 1000)
 ```
 
+### Important details
+
+All your data needs to be numeric.
+Your CSV file should have a header.
+Inside the csv, the dependent variable should be the rightmost column.
+Do not use special characters or spaces in variable names.
+
 ### An example
 
 A sample problem is provided. The filename denotes the true equation.
 
 ```
 
-$ winpty python pySRURGS.py -max_num_fit_params 3 -max_permitted_trees 2000 ./csvs/quartic_polynomial.csv 100
+$ winpty python pySRURGS.py -max_num_fit_params 3 -max_permitted_trees 2000 ./csvs/quartic_polynomial.csv 1000
 Running in multi processor mode
 1008it [03:03,  7.78it/s]
   Normalized Mean Squared Error       R^2  Equation, simplified                                                 Parameters
@@ -118,12 +127,7 @@ Running in multi processor mode
 
 ```
 
-### Important details
-
-All your data needs to be numeric.
-Your CSV file should have a header.
-Inside the csv, the dependent variable should be the rightmost column.
-Do not use special characters or spaces in variable names.
+[![Example performance](image/plot.svg)]
 
 ## Author
 
