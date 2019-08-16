@@ -430,7 +430,8 @@ def equation_generator2(i, r, s, dataset, enumerator, SRconfig, simpler=True):
         raise Exception("s is an index that must be smaller than B")
     k_i = en.get_k_i(i)
     j_i = en.get_j_i(i)
-    n_func_config = get_element_of_cartesian_product(SRconfig._n_functions, repeat=k_i, 
+    n_func_config = get_element_of_cartesian_product(SRconfig._n_functions, 
+                                                     repeat=k_i, 
                                                      index=r)
     term_config = get_element_of_cartesian_product(dataset._terminals_list, 
                                                    repeat=j_i, index=s)
@@ -447,15 +448,15 @@ def equation_generator2(i, r, s, dataset, enumerator, SRconfig, simpler=True):
     
 def random_equation(N, cum_weights, dataset, enumerator, SRconfig, details=False):
     '''
-        Generates a random equation given the number of permitted unique trees, N,
-        the probability of selection for each of those trees, cum_weights, a 
-        Dataset object, and an Enumerator object 
+        Generates a random equation given the number of permitted unique trees 
+        (N), the probability of selection for each of those trees (cum_weights), 
+        a Dataset object, and an Enumerator object 
         
         It works by generating the random numbers which specify the equation, 
         then passing those as arguments to equation_generator
         
-        The details specifier is used when generating benchmark problems,
-        for most usecases, it should be false.
+        The details argument is used when generating benchmark problems,
+        for most uses, it should be left as false.
     '''
     n = len(SRconfig._n_functions)
     f = len(SRconfig._f_functions)
@@ -1028,6 +1029,7 @@ def generate_benchmark(benchmark_name, SR_config):
                 else:
                     path1 = benchmarks_dir + '/' + benchmark_name + '_test.csv'
                 dataset._dataframe.to_csv(path1, index=False)
+                # test to see that the dataset can be loaded
                 dataset_test = Dataset(path1, 5)
                 path2 = benchmarks_dir + '/' + benchmark_name + '_params.txt'
                 # save the problem parameters to a text file 
