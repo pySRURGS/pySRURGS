@@ -55,10 +55,10 @@ The above command should render the following:
 
 ```
 usage: pySRURGS.py [-h] [-run_ID RUN_ID] [-single] [-count] [-benchmarks]
-                   [-funcs_arity_two FUNCS_ARITY_TWO]
+                   [-plotting] [-funcs_arity_two FUNCS_ARITY_TWO]
                    [-funcs_arity_one FUNCS_ARITY_ONE]
                    [-max_num_fit_params MAX_NUM_FIT_PARAMS]
-                   [-max_permitted_trees MAX_PERMITTED_TREES] [-plotting]
+                   [-max_permitted_trees MAX_PERMITTED_TREES]
                    train iters
 
 positional arguments:
@@ -77,6 +77,9 @@ optional arguments:
   -benchmarks           Instead of doing symbolic regression, generate the 100
                         benchmark problems. No other processing performed.
                         (default: False)
+  -plotting             plot the best model against the data to
+                        ./image/plot.png and ./image/plot.svg - note only
+                        works for univariate datasets (default: False)
   -funcs_arity_two FUNCS_ARITY_TWO
                         a comma separated string listing the functions of
                         arity two you want to be considered.
@@ -96,9 +99,6 @@ optional arguments:
                         of the equation, increasing this number tends to
                         increase the complexity of generated equations
                         (default: 1000)
-  -plotting             plot the best model against the data to
-                        ./image/plot.png and ./image/plot.svg - note only
-                        works for univariate datasets (default: False)
 ```
 
 ### Important details
