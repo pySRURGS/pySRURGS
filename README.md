@@ -99,6 +99,13 @@ optional arguments:
                         (default: 1000)
 ```
 
+### Important details
+
+All your data needs to be numeric.
+Your CSV file should have a header.
+Inside the csv, the dependent variable should be the rightmost column.
+Do not use special characters or spaces in variable names.
+
 ### An example
 
 A sample problem is provided. The filename denotes the true equation.
@@ -117,13 +124,6 @@ Running in multi processor mode
                      0.286993    0.99297   -p2*x**2*(p0 + 1)/(p0*(p2*(p0*x - p0 - p1 + x) + x)*(p0 + p1 + p2))  2.59E+00,6.91E+00,-2.73E-02
 
 ```
-
-### Important details
-
-All your data needs to be numeric.
-Your CSV file should have a header.
-Inside the csv, the dependent variable should be the rightmost column.
-Do not use special characters or spaces in variable names.
 
 ## Author
 
