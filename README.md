@@ -3,8 +3,8 @@
 
 # pySRURGS - Symbolic Regression by Uniform Random Global Search (in python)
 [![Build Status](https://travis-ci.com/pySRURGS/pySRURGS.svg?branch=master)](https://travis-ci.com/pySRURGS/pySRURGS)
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-[![python versions](https://img.shields.io/badge/python-3.6%20%7C%203.7-blue)](https://www.python.org)
+[![License: GPL v3](image/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![python versions](image/python-3_6_3_7-blue.svg)](https://www.python.org)
 
 Symbolic regression is a type of data analysis problem where you search for the 
 equation of best fit for a numerical dataset. This package does this task by 
