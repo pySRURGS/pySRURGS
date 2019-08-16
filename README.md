@@ -10,8 +10,7 @@ Symbolic regression is a type of data analysis problem where you search for the
 equation of best fit for a numerical dataset. This package does this task by 
 randomly, with uniform probability of selection, guessing candidate solutions 
 and evaluating them. The No Free Lunch Theorem argues that this approach should 
-be equivalent to other approaches like Genetic Programming. It is probably faster 
-because of less computational overhead. 
+be equivalent to other approaches like Genetic Programming.
 
 ## Features 
 
