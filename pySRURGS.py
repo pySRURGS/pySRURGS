@@ -27,6 +27,11 @@ from sqlitedict import SqliteDict
 import collections
 from itertools import repeat
 import multiprocessing as mp
+import matplotlib 
+matplotlib.use("TkAgg")
+import matplotlib.style
+matplotlib.style.use('ggplot')
+import matplotlib.pyplot as plt
 
 class SymbolicRegressionConfig(object):
     ''' 
@@ -430,7 +435,8 @@ def equation_generator2(i, r, s, dataset, enumerator, SRconfig, simpler=True):
         raise Exception("s is an index that must be smaller than B")
     k_i = en.get_k_i(i)
     j_i = en.get_j_i(i)
-    n_func_config = get_element_of_cartesian_product(SRconfig._n_functions, repeat=k_i, 
+    n_func_config = get_element_of_cartesian_product(SRconfig._n_functions, 
+                                                     repeat=k_i, 
                                                      index=r)
     term_config = get_element_of_cartesian_product(dataset._terminals_list, 
                                                    repeat=j_i, index=s)
@@ -447,15 +453,15 @@ def equation_generator2(i, r, s, dataset, enumerator, SRconfig, simpler=True):
     
 def random_equation(N, cum_weights, dataset, enumerator, SRconfig, details=False):
     '''
-        Generates a random equation given the number of permitted unique trees, N,
-        the probability of selection for each of those trees, cum_weights, a 
-        Dataset object, and an Enumerator object 
+        Generates a random equation given the number of permitted unique trees 
+        (N), the probability of selection for each of those trees (cum_weights), 
+        a Dataset object, and an Enumerator object 
         
         It works by generating the random numbers which specify the equation, 
         then passing those as arguments to equation_generator
         
-        The details specifier is used when generating benchmark problems,
-        for most usecases, it should be false.
+        The details argument is used when generating benchmark problems,
+        for most uses, it should be left as false.
     '''
     n = len(SRconfig._n_functions)
     f = len(SRconfig._f_functions)
@@ -746,12 +752,17 @@ class Enumerator2(object):
             j_i = left_j_i + right_j_i
         return j_i
 
-def create_fitting_parameters(max_params):
+def create_fitting_parameters(max_params, param_values=None):
+    # param_values must be None or a np.array of length max_params
     params = lmfit.Parameters()
     for int_param in range(0, max_params):
         param_name = 'p'+str(int_param)
         param_init_value=np.float(1)
         params.add(param_name, param_init_value)
+    if param_values is not None:
+        for int_param in range(0, max_params):
+            param_name = 'p'+str(int_param)
+            params[param_name].value = param_values[int_param]
     return params
 
 def eval_equation(params, function_string, my_data, mode='residual'):
@@ -766,6 +777,10 @@ def eval_equation(params, function_string, my_data, mode='residual'):
         residual = eval(eval_string)
         output = residual
     elif mode == 'y_calc':
+        y_value = eval(function_string)
+        output = y_value
+    elif type(mode) == dict:
+        df = mode
         y_value = eval(function_string)
         output = y_value
     # if model only has parameters and no data variables, we can have a
@@ -1028,6 +1043,8 @@ def generate_benchmark(benchmark_name, SR_config):
                 else:
                     path1 = benchmarks_dir + '/' + benchmark_name + '_test.csv'
                 dataset._dataframe.to_csv(path1, index=False)
+                # test to see that the dataset can be loaded
+                dataset_test = Dataset(path1, 5)
                 path2 = benchmarks_dir + '/' + benchmark_name + '_params.txt'
                 # save the problem parameters to a text file 
                 with open(path2, "w") as text_file:
@@ -1043,13 +1060,12 @@ def generate_benchmark(benchmark_name, SR_config):
                     text_file.write(msg)
             valid = True
             if eqn_simple == '0':
-                valid = False            
-            try:
-                dataset = Dataset(path1, 5)
-            except:
                 valid = False
-        except FloatingPointError:
-            pass
+            
+        except Exception as e:
+            print(e)
+            valid = False
+            
     
 def setup(path_to_csv, SR_config):
     # reads the configuration, the csv file, and creates needed objects
@@ -1078,9 +1094,7 @@ def create_db(path_to_csv, additional_name=None):
         db_name = './db/' + csv_name + '.sqlite'   
     return db_name
 
-def compile_results(path_to_db, path_to_csv, SRconfig):
-    # reads the generated .sqlite file to determine the best models, then 
-    # prints them to screen!
+def get_resultlist(path_to_db, path_to_csv, SRconfig):
     (_, _, _, _, _, dataset, _, _, _) = setup(path_to_csv, SRconfig)
     result_list = ResultList()
     with SqliteDict(path_to_db, autocommit=True) as results_dict:
@@ -1088,9 +1102,45 @@ def compile_results(path_to_db, path_to_csv, SRconfig):
         for eqn in keys:
             result = results_dict[eqn]
             result_list._results.append(result)
-    result_list.sort()    
+    return result_list, dataset
+    
+def compile_results(path_to_db, path_to_csv, SRconfig):
+    # reads the generated .sqlite file to determine the best models, then 
+    # prints them to screen!
+    result_list, dataset = get_resultlist(path_to_db, path_to_csv, SRconfig)
+    result_list.sort()
     result_list.print(dataset._y_data)
     return result_list
+
+def plot_results(path_to_db, path_to_csv, SRconfig):
+    # reads the generated .sqlite file to determine the best model, 
+    # then plots it against the raw data. saves the figure to plot.png    
+    result_list, dataset = get_resultlist(path_to_db, path_to_csv, SRconfig)
+    if len(dataset._x_labels) != 1:
+        raise Exception("We only plot univariate data")
+    result_list.sort()
+    best_model = result_list._results[0]
+    param_values = best_model._params
+    params_obj = create_fitting_parameters(SRconfig._max_num_fit_params, 
+                                           param_values=param_values)
+    equation_string = best_model._equation    
+    evaluatable_equation_string = equation_string
+    eval_eqn_string = clean_funcstring(equation_string)        
+    data_dict = dict()
+    xlabel = dataset._x_labels[0]
+    data_dict[xlabel] = np.linspace(np.min(dataset._x_data), 
+                                                           np.max(dataset._x_data))
+    y_calc = eval_equation(params_obj, eval_eqn_string, dataset, mode=data_dict)
+    plt.plot(data_dict[xlabel], y_calc, 'b-', label=dataset._y_label+' calculated')
+    plt.plot(dataset._x_data, dataset._y_data, 'ro', label=dataset._y_label+' original data')
+    plt.xlabel(dataset._x_labels[0])
+    plt.ylabel(dataset._y_label)
+    plt.title('quartic polynomial example')
+    plt.legend()
+    plt.savefig('image/plot.svg')
+    plt.savefig('image/plot.png')
+    
+    
 
 def generate_benchmarks_SRconfigs():
     SR_config1 = SymbolicRegressionConfig(n_functions=['add','sub','mul','div'],
@@ -1166,10 +1216,11 @@ if __name__ == '__main__':
     parser.add_argument("-single", help="run in single processing mode", action="store_true")
     parser.add_argument("-count", help="Instead of doing symbolic regression, just count out how many possible equations for this configuration. No other processing performed.", action="store_true")
     parser.add_argument("-benchmarks", help="Instead of doing symbolic regression, generate the 100 benchmark problems. No other processing performed.", action="store_true")
+    parser.add_argument("-plotting", help="plot the best model against the data to ./image/plot.png and ./image/plot.svg - note only works for univariate datasets", action="store_true")
     parser.add_argument("-funcs_arity_two", help="a comma separated string listing the functions of arity two you want to be considered. Permitted:add,sub,mul,div,pow", default='add,sub,mul,div,pow')
     parser.add_argument("-funcs_arity_one", help="a comma separated string listing the functions of arity one you want to be considered. Permitted:sin,cos,tan,exp,log,sinh,cosh,tanh")
     parser.add_argument("-max_num_fit_params", help="the maximum number of fitting parameters permitted in the generated models", default=3, type=int)
-    parser.add_argument("-max_permitted_trees", help="the number of unique binary trees that are permitted in the generated models - binary trees define the form of the equation, increasing this number tends to increase the complexity of generated equations", default=1000, type=int)
+    parser.add_argument("-max_permitted_trees", help="the number of unique binary trees that are permitted in the generated models - binary trees define the form of the equation, increasing this number tends to increase the complexity of generated equations", default=1000, type=int)    
     if len(sys.argv) < 2:
         parser.print_usage()
         sys.exit(1)
@@ -1183,6 +1234,7 @@ if __name__ == '__main__':
     n_funcs = n_funcs.split(',')
     n_funcs = check_validity_suggested_functions(n_funcs, 2)     
     f_funcs = arguments.funcs_arity_one
+    plotting = arguments.plotting
     if f_funcs is None:
         f_funcs = []
     else:
@@ -1220,3 +1272,5 @@ if __name__ == '__main__':
     else:
         raise("Invalid mode")
     compile_results(path_to_db, path_to_csv, SRconfig)
+    if plotting == True:
+        plot_results(path_to_db, path_to_csv, SRconfig)
