@@ -1220,7 +1220,7 @@ if __name__ == '__main__':
     parser.add_argument("-funcs_arity_one", help="a comma separated string listing the functions of arity one you want to be considered. Permitted:sin,cos,tan,exp,log,sinh,cosh,tanh")
     parser.add_argument("-max_num_fit_params", help="the maximum number of fitting parameters permitted in the generated models", default=3, type=int)
     parser.add_argument("-max_permitted_trees", help="the number of unique binary trees that are permitted in the generated models - binary trees define the form of the equation, increasing this number tends to increase the complexity of generated equations", default=1000, type=int)
-    parser.add_argument("-plotting", help="if data is univariate, then we plot it along with the best SRURGS model", action="store_true")
+    parser.add_argument("-plotting", help="plot the best model against the data to ./image/plot.png and ./image/plot.svg - note only works for univariate datasets", action="store_true")
     if len(sys.argv) < 2:
         parser.print_usage()
         sys.exit(1)
