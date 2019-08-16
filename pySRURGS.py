@@ -1028,6 +1028,7 @@ def generate_benchmark(benchmark_name, SR_config):
                 else:
                     path1 = benchmarks_dir + '/' + benchmark_name + '_test.csv'
                 dataset._dataframe.to_csv(path1, index=False)
+                dataset_test = Dataset(path1, 5)
                 path2 = benchmarks_dir + '/' + benchmark_name + '_params.txt'
                 # save the problem parameters to a text file 
                 with open(path2, "w") as text_file:
@@ -1043,13 +1044,12 @@ def generate_benchmark(benchmark_name, SR_config):
                     text_file.write(msg)
             valid = True
             if eqn_simple == '0':
-                valid = False            
-            try:
-                dataset = Dataset(path1, 5)
-            except:
                 valid = False
-        except FloatingPointError:
-            pass
+            
+        except Exception as e:
+            print(e)
+            valid = False
+            
     
 def setup(path_to_csv, SR_config):
     # reads the configuration, the csv file, and creates needed objects
