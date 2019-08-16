@@ -114,7 +114,7 @@ A sample problem is provided. The filename denotes the true equation.
 
 ```
 
-$ winpty python pySRURGS.py -max_num_fit_params 3 -max_permitted_trees 2000 ./csvs/quartic_polynomial.csv 100
+$ winpty python pySRURGS.py -max_num_fit_params 3 -max_permitted_trees 2000 ./csvs/quartic_polynomial.csv 1000
 Running in multi processor mode
 1008it [03:03,  7.78it/s]
   Normalized Mean Squared Error       R^2  Equation, simplified                                                 Parameters
