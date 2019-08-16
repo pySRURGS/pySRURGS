@@ -14,6 +14,7 @@ import argparse
 from sqlitedict import SqliteDict
 import dropbox
 import multiprocessing as mp
+import glob
 
 try:
     import sh
@@ -198,7 +199,7 @@ if __name__ == '__main__':
     # Read the doc string at the top of this script.
     # Run this script in terminal with '-h' as an argument.
     parser = argparse.ArgumentParser(prog='database.py', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument("-run_SRGP", help="run the code against all the SRGP problems in the mySQL database", action="store_true")
+    parser.add_argument("-run_SRGP", help="run the code against all the SRGP problems in the mySQL database. Deletes contents of ./../db/ directory", action="store_true")
     #parser.add_argument("run_SRURGS", help="run the code against all the SRURGS problems in the mySQL database")
     parser.add_argument("-purge_db", help="deletes all the jobs in the database", action="store_true")
     if len(sys.argv) < 2:
@@ -207,7 +208,10 @@ if __name__ == '__main__':
     arguments = parser.parse_args()
     if arguments.run_SRGP and arguments.purge_db:
         raise Exception("Cannot do both run SRGP jobs and purge database")
-    if arguments.run_SRGP:
+    if arguments.run_SRGP:        
+        files = glob.glob('./../db/*')
+        for f in files:
+            os.remove(f)
         pool = mp.Pool()
         pool.map(run_all_SRGP_jobs, [None]*mp.cpu_count())
     if arguments.purge_db:
