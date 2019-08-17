@@ -43,7 +43,16 @@ def int_finished_meaning(my_int):
     int_dict = {0: 'not_run', 1: 'running', 2:'finished'}
     return int_dict[my_int]
 
+def get_db_path(arguments_string):
+    arguments = arguments_string.split(' ')
+    for i in arguments:
+        if '.db' in i:
+            db_name = i.split('/')[-1]
+            return db_name
+    raise Exception("Not able to find db")
+
 def submit_job_to_db(algo_argu_list):
+    # job_ID is the database file name 
     num_job = len(algo_argu_list)
     with sshtunnel.SSHTunnelForwarder(('ssh.pythonanywhere.com'),
         ssh_username=PYTHONANYWHERE_USERNAME, ssh_password=PYTHONANYWHERE_PASSWORD,
@@ -60,7 +69,7 @@ def submit_job_to_db(algo_argu_list):
             algorithm = job[0]
             arguments = job[1]
             create_db_command = '''CREATE TABLE IF NOT EXISTS jobs(
-               job_ID INT NOT NULL AUTO_INCREMENT,
+               job_ID VARCHAR(200) NOT NULL,
                algorithm VARCHAR(200) NOT NULL,
                arguments VARCHAR(200) NOT NULL,
                finished TINYINT(1) NOT NULL,
@@ -69,8 +78,9 @@ def submit_job_to_db(algo_argu_list):
             );'''
             mycursor = mydb.cursor()
             mycursor.execute(create_db_command)
-            sql = "INSERT INTO jobs (algorithm, arguments, finished, n_evals) VALUES (%s, %s, %s, %s)"
-            val = (algorithm, arguments, 0, -1)
+            sql = "INSERT INTO jobs (job_ID, algorithm, arguments, finished, n_evals) VALUES (%s, %s, %s, %s, %s)"
+            db_path = get_db_path(arguments)
+            val = (db_path, algorithm, arguments, 0, -1)
             mycursor.execute(sql, val)        
         mydb.commit()
         mydb.close()
@@ -90,6 +100,14 @@ def purge_db():
         mycursor.execute(sql)
         mydb.commit()
         mydb.close()
+
+def get_SRURGS_job(finished=0):
+    job_ID, arguments = get_job(finished, algorithm='SRURGS')
+    return job_ID, arguments
+
+def get_SRGP_job(finished=0):
+    job_ID, arguments = get_job(finished, algorithm='SRGP')
+    return job_ID, arguments
     
 def get_job(finished=0, algorithm="SRGP"):
     with sshtunnel.SSHTunnelForwarder(
@@ -126,7 +144,7 @@ def get_job(finished=0, algorithm="SRGP"):
         arguments[i] = arguments[i].replace('$PYSRURGSDIR',pySRURGS_dir)    
     return job_ID, arguments
 
-def set_SRGP_job_finished(n_evals, job_ID):
+def set_job_finished(n_evals, job_ID):
     with sshtunnel.SSHTunnelForwarder(
         ('ssh.pythonanywhere.com'),
         ssh_username=PYTHONANYWHERE_USERNAME, ssh_password=PYTHONANYWHERE_PASSWORD,
@@ -172,11 +190,10 @@ def run_all_SRGP_jobs(placeholder):
             dropbox_trnsfer.upload_file(output_db, '/'+os.path.basename(output_db))
             with SqliteDict(output_db, autocommit=True) as results_dict:
                 n_evals = results_dict['n_evals']
-            set_SRGP_job_finished(n_evals, job_ID)
+            set_job_finished(n_evals, job_ID)
             job_ID, job_arguments = get_SRGP_job(finished)
             print('finished a job', i)
             i = i + 1
-
 
 def run_all_SRURGS_jobs(placeholder):
     i = 0
@@ -185,7 +202,7 @@ def run_all_SRURGS_jobs(placeholder):
         job_ID, job_arguments = get_SRURGS_job(finished)        
         while job_arguments is not None:
             output_db = job_arguments[2]
-            if (job_arguments[0] != pySRURGS_dir+'/experiments/SRGP.py'):
+            if (job_arguments[0] != pySRURGS_dir+'/pySRURGS.py'):
                 raise Exception("SQL injection?")
             try:
                 sh.python(*job_arguments, _err="error.txt")
@@ -195,7 +212,7 @@ def run_all_SRURGS_jobs(placeholder):
             dropbox_trnsfer.upload_file(output_db, '/'+os.path.basename(output_db))
             with SqliteDict(output_db, autocommit=True) as results_dict:
                 n_evals = results_dict['n_evals']
-            set_SRGP_job_finished(n_evals, job_ID)
+            set_job_finished(n_evals, job_ID)
             job_ID, job_arguments = get_SRGP_job(finished)
             print('finished a job', i)
             i = i + 1
@@ -232,8 +249,8 @@ def find_matching_SRURGS_job(SRURGS_db):
                                              port=tunnel.local_bind_port,
                                              database=DATABASE_NAME)
         mycursor = mydb.cursor()                               
-        sql = 'SELECT n_evals FROM jobs WHERE arguments LIKE %s AND algorithm = "SRURGS";'
-        val = ('%'+SRURGS_db+'%',)
+        sql = 'SELECT n_evals FROM jobs WHERE job_ID = %s;'
+        val = (SRURGS_db,)
         mycursor.execute(sql, val)
         myresult = mycursor.fetchone()
         if myresult is not None:
