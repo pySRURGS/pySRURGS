@@ -42,6 +42,7 @@ Clone the repo then install the prerequisites.
 
 ```
 git clone https://github.com/pySRURGS/pySRURGS.git
+cd pySRURGS
 pip install -r requirements.txt
 ```
 
@@ -106,7 +107,7 @@ optional arguments:
 All your data needs to be numeric.
 Your CSV file should have a header.
 Inside the csv, the dependent variable should be the rightmost column.
-Do not use special characters or spaces in variable names.
+Do not use special characters or spaces in variable names. Do not start variable names with numbers.
 
 ### An example
 
@@ -127,7 +128,7 @@ Running in multi processor mode
 
 ```
 
-[![Example performance](image/plot.svg)]
+![Example performance](image/plot.svg)
 
 ## Author
 
