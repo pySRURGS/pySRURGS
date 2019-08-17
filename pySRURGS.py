@@ -1089,9 +1089,9 @@ def create_db(path_to_csv, additional_name=None):
     csv_basename = os.path.basename(path_to_csv)
     csv_name = csv_basename[:-4]    
     if additional_name is not None:
-        db_name = './db/' + csv_name + additional_name + '.sqlite'   
+        db_name = './db/' + csv_name + additional_name + '.db'   
     else:
-        db_name = './db/' + csv_name + '.sqlite'   
+        db_name = './db/' + csv_name + '.db'   
     return db_name
 
 def get_resultlist(path_to_db, path_to_csv, SRconfig):
@@ -1220,7 +1220,8 @@ if __name__ == '__main__':
     parser.add_argument("-funcs_arity_two", help="a comma separated string listing the functions of arity two you want to be considered. Permitted:add,sub,mul,div,pow", default='add,sub,mul,div,pow')
     parser.add_argument("-funcs_arity_one", help="a comma separated string listing the functions of arity one you want to be considered. Permitted:sin,cos,tan,exp,log,sinh,cosh,tanh")
     parser.add_argument("-max_num_fit_params", help="the maximum number of fitting parameters permitted in the generated models", default=3, type=int)
-    parser.add_argument("-max_permitted_trees", help="the number of unique binary trees that are permitted in the generated models - binary trees define the form of the equation, increasing this number tends to increase the complexity of generated equations", default=1000, type=int)    
+    parser.add_argument("-max_permitted_trees", help="the number of unique binary trees that are permitted in the generated models - binary trees define the form of the equation, increasing this number tends to increase the complexity of generated equations", default=1000, type=int)
+    parser.add_argument("-path_to_db", help="the absolute or relative path to the database file where we will save results", default=None)
     if len(sys.argv) < 2:
         parser.print_usage()
         sys.exit(1)
@@ -1230,12 +1231,13 @@ if __name__ == '__main__':
     max_attempts = arguments.iters
     count_M = arguments.count
     benchmarks = arguments.benchmarks
+    path_to_db = arguments.path_to_db
     n_funcs = arguments.funcs_arity_two    
     n_funcs = n_funcs.split(',')
     n_funcs = check_validity_suggested_functions(n_funcs, 2)     
     f_funcs = arguments.funcs_arity_one
     plotting = arguments.plotting
-    if f_funcs is None:
+    if f_funcs is None or f_funcs == '':
         f_funcs = []
     else:
         f_funcs = f_funcs.split(',')
@@ -1258,7 +1260,8 @@ if __name__ == '__main__':
         print("Number possible equations:", number_possible_equations)        
         exit(0)
     run_ID = arguments.run_ID
-    path_to_db = create_db(path_to_csv, run_ID)
+    if path_to_db is None:
+        path_to_db = create_db(path_to_csv, run_ID)    
     os.makedirs('./db', exist_ok=True) 
     if single_processing_mode == False:
         print("Running in multi processor mode")
