@@ -91,7 +91,7 @@ def purge_db():
         mydb.commit()
         mydb.close()
     
-def get_SRGP_job(finished=0):
+def get_job(finished=0, algorithm="SRGP"):
     with sshtunnel.SSHTunnelForwarder(
         ('ssh.pythonanywhere.com'),
         ssh_username=PYTHONANYWHERE_USERNAME, ssh_password=PYTHONANYWHERE_PASSWORD,
@@ -104,9 +104,10 @@ def get_SRGP_job(finished=0):
         mycursor = mydb.cursor()                               
         sql = '''SELECT job_ID, arguments FROM jobs
                 WHERE finished = %s
+                AND algorithm = %s
                 ORDER BY RAND()
                 LIMIT 1'''
-        val = (finished,)
+        val = (finished, algorithm)
         mycursor.execute(sql, val)
         myresult = mycursor.fetchone()
         if myresult is None:
@@ -176,6 +177,29 @@ def run_all_SRGP_jobs(placeholder):
             print('finished a job', i)
             i = i + 1
 
+
+def run_all_SRURGS_jobs(placeholder):
+    i = 0
+    dropbox_trnsfer = TransferData(DROPBOX_KEY)
+    for finished in range(0,2):
+        job_ID, job_arguments = get_SRURGS_job(finished)        
+        while job_arguments is not None:
+            output_db = job_arguments[2]
+            if (job_arguments[0] != pySRURGS_dir+'/experiments/SRGP.py'):
+                raise Exception("SQL injection?")
+            try:
+                sh.python(*job_arguments, _err="error.txt")
+            except:
+                print(sh.cat('error.txt'))
+                continue
+            dropbox_trnsfer.upload_file(output_db, '/'+os.path.basename(output_db))
+            with SqliteDict(output_db, autocommit=True) as results_dict:
+                n_evals = results_dict['n_evals']
+            set_SRGP_job_finished(n_evals, job_ID)
+            job_ID, job_arguments = get_SRGP_job(finished)
+            print('finished a job', i)
+            i = i + 1
+
 def find_matching_SRGP_job_n_evals(SRGP_db):    
     with sshtunnel.SSHTunnelForwarder(
         ('ssh.pythonanywhere.com'),
@@ -223,7 +247,7 @@ if __name__ == '__main__':
     # Run this script in terminal with '-h' as an argument.
     parser = argparse.ArgumentParser(prog='database.py', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("-run_SRGP", help="run the code against all the SRGP problems in the mySQL database. Deletes contents of ./../db/ directory", action="store_true")
-    #parser.add_argument("run_SRURGS", help="run the code against all the SRURGS problems in the mySQL database")
+    parser.add_argument("run_SRURGS", help="run the code against all the SRURGS problems in the mySQL database")
     parser.add_argument("-purge_db", help="deletes all the jobs in the database", action="store_true")
     if len(sys.argv) < 2:
         parser.print_usage()
@@ -231,11 +255,17 @@ if __name__ == '__main__':
     arguments = parser.parse_args()
     if arguments.run_SRGP and arguments.purge_db:
         raise Exception("Cannot do both run SRGP jobs and purge database")
-    if arguments.run_SRGP:        
+    if arguments.run_SRGP:
         files = glob.glob('./../db/*')
         for f in files:
             os.remove(f)
         pool = mp.Pool()
         pool.map(run_all_SRGP_jobs, [None]*mp.cpu_count())
+    if arguments.run_SRURGS:
+        files = glob.glob('./../db/*SRURGS*')
+        for f in files:
+            os.remove(f)
+        pool = mp.Pool()
+        pool.map(run_all_SRURGS_jobs, [None]*mp.cpu_count())
     if arguments.purge_db:
         purge_db()
