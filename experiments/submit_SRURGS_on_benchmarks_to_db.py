@@ -49,6 +49,7 @@ def generate_list_of_experiments(SR_config, start_index, count_experiments, n_ru
     max_num_fit_params = SR_config._max_num_fit_params
     max_permitted_trees = SR_config._max_permitted_trees
     for z in range(start_index,start_index+count_experiments):
+        print("Experiment", z, "Out of "+str(start_index+count_experiments))        
         train = '$PYSRURGSDIR/csvs/benchmarks/'+str(z)+'_train.csv'
         for j in range(0,n_runs):
             run_ID = str(j)
@@ -73,8 +74,10 @@ def generate_list_of_experiments(SR_config, start_index, count_experiments, n_ru
 
 
 if __name__ == '__main__':
+    print('about to generate jobs')
     jobs1 = generate_list_of_experiments(SR_config1, 0, 20, 10)
-    jobs2 = generate_list_of_experiments(SR_config2, 20, 80, 10)    
+    jobs2 = generate_list_of_experiments(SR_config2, 20, 80, 10)
+    print('about to submit jobs')
     database.submit_job_to_db(jobs1)
     database.submit_job_to_db(jobs2)
     
