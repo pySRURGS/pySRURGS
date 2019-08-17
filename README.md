@@ -128,7 +128,7 @@ Running in multi processor mode
 
 ```
 
-[![Example performance](image/plot.svg)]
+![Example performance](image/plot.svg)
 
 ## Author
 
