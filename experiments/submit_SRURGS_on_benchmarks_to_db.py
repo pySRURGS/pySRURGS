@@ -3,7 +3,7 @@ import os
 sys.path.append('./..')
 import pySRURGS
 import database
-
+import pdb
 
 # TODO - change the code so that 'iters' reflects the number of iterations 
 # run by the corresponding SRGP run
@@ -20,26 +20,24 @@ except ImportError:
 
 SR_config1, SR_config2 = pySRURGS.generate_benchmarks_SRconfigs()
 
-def run_SRURGS(SRconfig, start_index, count_experiments):
-    # nruns determined by the number of runs in the corresponding SRGP 
-    funcs_arity_two = ','.join(SR_config._n_functions)
-    funcs_arity_one = ','.join(SR_config._f_functions)
-    max_num_fit_params = SR_config._max_num_fit_params
-    max_size_trees = SR_config._max_size_trees
-    # first twenty problems
-    for z in range(start_index,count_experiments):
-        print("Experiment number:", z)
-        train = '$PYSRURGS/benchmarks/'+str(z)+'_train.csv'
-        iters = find_matching_SRGP_job_n_evals(train)[0]
-        for j in range(0,n_runs):
-            print("Run number:", j)
-            run_ID = str(j)        
-            command = ['python', 'pySRURGS.py',
-                       '-run_ID', run_ID,
-                       '-funcs_arity_two', funcs_arity_two,
-                       '-max_num_fit_params', str(max_num_fit_params),
-                       '-max_size_trees', str(max_size_trees),
-                       str(train), str(iters)]
+def run_SRURGS(n_evals, csv_path, path_to_db, max_num_fit_params, max_permitted_trees, 
+               funcs_arity_two, funcs_arity_one=None):
+    if funcs_arity_one is not None or funcs_arity_one != '':
+        arguments = ' '.join(['$PYSRURGSDIR/pySRURGS.py',
+                              '-funcs_arity_two', funcs_arity_two,
+                              '-max_num_fit_params', str(max_num_fit_params),
+                              '-max_permitted_trees', str(max_permitted_trees),
+                              '-path_to_db', path_to_db,
+                              csv_path, str(n_evals)])
+    else:
+        arguments = ' '.join(['$PYSRURGSDIR/pySRURGS.py', 
+                              '-funcs_arity_two', funcs_arity_two,
+                              '-funcs_arity_one', funcs_arity_one,
+                              '-max_num_fit_params', str(max_num_fit_params),
+                              '-max_permitted_trees', str(max_permitted_trees),
+                              '-path_to_db', path_to_db,
+                              csv_path, str(n_evals)])
+    return arguments 
 
 def give_db_path(path_to_csv, run_ID):
     return '$PYSRURGSDIR/db/'+os.path.basename(path_to_csv)[:-3]+run_ID+'.SRURGS.db'
@@ -49,21 +47,34 @@ def generate_list_of_experiments(SR_config, start_index, count_experiments, n_ru
     funcs_arity_two = ','.join(SR_config._n_functions)
     funcs_arity_one = ','.join(SR_config._f_functions)
     max_num_fit_params = SR_config._max_num_fit_params
-    max_size_trees = SR_config._max_permitted_trees
-    for z in range(start_index,count_experiments):
+    max_permitted_trees = SR_config._max_permitted_trees
+    for z in range(start_index,start_index+count_experiments):
         train = '$PYSRURGSDIR/csvs/benchmarks/'+str(z)+'_train.csv'
         for j in range(0,n_runs):
             run_ID = str(j)
-            path_to_db = give_db_path(train, run_ID)             
-            algorithm = 'SRURGS'
-            arguments = run_SRURGS(SR_config, start_index, count_experiments)
+            path_to_db = give_db_path(train, run_ID)
+            SRGP_db = path_to_db.replace("SRURGS", "SRGP")
+            SRGP_db = SRGP_db.split('/')[-1]
+            n_evals = database.find_matching_SRGP_job_n_evals(SRGP_db)
+            if n_evals == -1:
+                continue
+            SRURGS_db = path_to_db.split('/')[-1]            
+            SRURGS_check = database.find_matching_SRURGS_job(path_to_db)
+            if SRURGS_check is None:
+                pass
+            else: # job already exists, don't resubmit 
+                continue 
+            algorithm = 'SRURGS'               
+            arguments = run_SRURGS(n_evals, train, path_to_db, 
+                                   max_num_fit_params, max_permitted_trees, 
+                                   funcs_arity_two, funcs_arity_one)
             list_of_jobs.append([algorithm, arguments])
     return list_of_jobs
 
 
 if __name__ == '__main__':
     jobs1 = generate_list_of_experiments(SR_config1, 0, 20, 10)
-    jobs2 = generate_list_of_experiments(SR_config2, 20, 80, 10)
-    #database.submit_job_to_db(jobs1)
+    jobs2 = generate_list_of_experiments(SR_config2, 20, 80, 10)    
+    database.submit_job_to_db(jobs1)
     database.submit_job_to_db(jobs2)
     
