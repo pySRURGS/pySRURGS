@@ -176,7 +176,7 @@ def run_all_SRGP_jobs(placeholder):
             print('finished a job', i)
             i = i + 1
 
-def find_matching_SRGP_job_n_evals(train):    
+def find_matching_SRGP_job_n_evals(SRGP_db):    
     with sshtunnel.SSHTunnelForwarder(
         ('ssh.pythonanywhere.com'),
         ssh_username=PYTHONANYWHERE_USERNAME, ssh_password=PYTHONANYWHERE_PASSWORD,
@@ -187,14 +187,37 @@ def find_matching_SRGP_job_n_evals(train):
                                              port=tunnel.local_bind_port,
                                              database=DATABASE_NAME)
         mycursor = mydb.cursor()                               
-        sql = "SELECT n_evals FROM jobs WHERE arguments CONCAT('%', ' ', %s, ' ', '%') ;"
-        val = (train,)
+        sql = 'SELECT n_evals FROM jobs WHERE arguments LIKE %s;'
+        val = ('%'+SRGP_db+'%',)
         mycursor.execute(sql, val)
         myresult = mycursor.fetchone()
+        if myresult is not None:
+            myresult = myresult[0]
         mydb.commit()
         mydb.close()
     return myresult
             
+def find_matching_SRURGS_job(SRURGS_db):    
+    with sshtunnel.SSHTunnelForwarder(
+        ('ssh.pythonanywhere.com'),
+        ssh_username=PYTHONANYWHERE_USERNAME, ssh_password=PYTHONANYWHERE_PASSWORD,
+        remote_bind_address=(DATABASE_HOSTNAME, 3306)) as tunnel:
+        mydb = pymysql.connect(user=PYTHONANYWHERE_USERNAME, 
+                                             password=DATABASE_PASSWORD,
+                                             host='127.0.0.1', 
+                                             port=tunnel.local_bind_port,
+                                             database=DATABASE_NAME)
+        mycursor = mydb.cursor()                               
+        sql = 'SELECT n_evals FROM jobs WHERE arguments LIKE %s AND algorithm = "SRURGS";'
+        val = ('%'+SRURGS_db+'%',)
+        mycursor.execute(sql, val)
+        myresult = mycursor.fetchone()
+        if myresult is not None:
+            myresult = myresult[0]
+        mydb.commit()
+        mydb.close()
+    return myresult
+
 if __name__ == '__main__':
     # Read the doc string at the top of this script.
     # Run this script in terminal with '-h' as an argument.
