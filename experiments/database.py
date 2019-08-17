@@ -264,7 +264,7 @@ if __name__ == '__main__':
     # Run this script in terminal with '-h' as an argument.
     parser = argparse.ArgumentParser(prog='database.py', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("-run_SRGP", help="run the code against all the SRGP problems in the mySQL database. Deletes contents of ./../db/ directory", action="store_true")
-    parser.add_argument("run_SRURGS", help="run the code against all the SRURGS problems in the mySQL database")
+    parser.add_argument("-run_SRURGS", help="run the code against all the SRURGS problems in the mySQL database")
     parser.add_argument("-purge_db", help="deletes all the jobs in the database", action="store_true")
     if len(sys.argv) < 2:
         parser.print_usage()
