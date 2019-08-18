@@ -967,8 +967,13 @@ def initialize_db(path_to_db):
 
 def assign_n_evals(path_to_db):
     with SqliteDict(path_to_db, autocommit=True) as results_dict: 
-        n_evals = len(list(results_dict.keys())) - 1
-        results_dict['n_evals'] = n_evals
+        keys = list(results_dict.keys())
+        n_evals = len(keys)
+        if 'best_eqn' in keys:
+            n_evals = n_evals - 1
+        if 'n_evals' in keys:
+            n_evals = n_evals - 1
+    return n_evals
                 
 def uniform_random_global_search_once(path_to_db, path_to_csv, SRconfig):
     # Run SRURGS once
@@ -1279,6 +1284,7 @@ if __name__ == '__main__':
                              [path_to_db]*max_attempts,
                              path_to_csv, SRconfig, pm_pbar=True)
         print("Making sure we meet the iters value")
+        n_evals = assign_n_evals(path_to_db)
         for i in range(0, max_attempts - n_evals):
             uniform_random_global_search_once(path_to_db, path_to_csv, SRconfig)
         assign_n_evals(path_to_db)
