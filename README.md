@@ -107,7 +107,7 @@ optional arguments:
 All your data needs to be numeric.
 Your CSV file should have a header.
 Inside the csv, the dependent variable should be the rightmost column.
-Do not use special characters or spaces in variable names. Do not start variable names with numbers.
+Do not use special characters or spaces in variable names and start variable names with a letter.
 
 ### An example
 
