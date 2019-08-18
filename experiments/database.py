@@ -31,7 +31,7 @@ sshtunnel.TUNNEL_TIMEOUT = 15.0
 
 # This portion of the script is specific to my home computing setup.
 if platform.system() == 'Windows':
-    pySRURGS_dir = 'C:/Users/sohra/Google Drive (fischerproject2018@gmail.com)/pySRURGS'
+    pySRURGS_dir = PYSRURGS_DIR 
 elif platform.system() == 'Linux':
     pySRURGS_dir = '/home/brain/pySRURGS'
 else:
@@ -120,7 +120,7 @@ def get_job(finished=0, algorithm="SRGP"):
                                              port=tunnel.local_bind_port,
                                              database=DATABASE_NAME)
         mycursor = mydb.cursor()                               
-        sql = '''SELECT job_ID, arguments FROM jobs
+        sql = '''SELECT job_ID, arguments, n_evals FROM jobs
                 WHERE finished = %s
                 AND algorithm = %s
                 ORDER BY RAND()
@@ -131,7 +131,8 @@ def get_job(finished=0, algorithm="SRGP"):
         if myresult is None:
             return None
         job_ID = myresult[0]
-        arguments = myresult[1]      
+        arguments = myresult[1]
+        n_evals = myresult[2]
         sql = "UPDATE jobs SET finished = 1 WHERE job_ID = %s"
         val = (job_ID,)
         mycursor.execute(sql, val)
@@ -199,12 +200,18 @@ def run_all_SRURGS_jobs(placeholder):
     i = 0
     dropbox_trnsfer = TransferData(DROPBOX_KEY)
     for finished in range(0,2):
-        job_ID, job_arguments = get_SRURGS_job(finished)        
+        job_ID, job_arguments = get_SRURGS_job(finished)
+        SRGP_db = job_ID.replace("SRURGS", "SRGP")
+        n_evals = find_matching_SRGP_job_n_evals(SRGP_db)
+        if n_evals == -1:
+            # this job has not been completed on the SRGP side.
+            continue
         while job_arguments is not None:
             output_db = job_arguments[2]
             if (job_arguments[0] != pySRURGS_dir+'/pySRURGS.py'):
                 raise Exception("SQL injection?")
             try:
+                job_arguments.append(str(n_evals))
                 sh.python(*job_arguments, _err="error.txt")
             except:
                 print(sh.cat('error.txt'))
@@ -213,7 +220,7 @@ def run_all_SRURGS_jobs(placeholder):
             with SqliteDict(output_db, autocommit=True) as results_dict:
                 n_evals = results_dict['n_evals']
             set_job_finished(n_evals, job_ID)
-            job_ID, job_arguments = get_SRGP_job(finished)
+            job_ID, job_arguments = get_SRURGS_job(finished)
             print('finished a job', i)
             i = i + 1
 
@@ -228,8 +235,8 @@ def find_matching_SRGP_job_n_evals(SRGP_db):
                                              port=tunnel.local_bind_port,
                                              database=DATABASE_NAME)
         mycursor = mydb.cursor()                               
-        sql = 'SELECT n_evals FROM jobs WHERE arguments LIKE %s;'
-        val = ('%'+SRGP_db+'%',)
+        sql = 'SELECT n_evals FROM jobs WHERE job_ID = %s;'
+        val = (SRGP_db,)
         mycursor.execute(sql, val)
         myresult = mycursor.fetchone()
         if myresult is not None:
@@ -264,7 +271,7 @@ if __name__ == '__main__':
     # Run this script in terminal with '-h' as an argument.
     parser = argparse.ArgumentParser(prog='database.py', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("-run_SRGP", help="run the code against all the SRGP problems in the mySQL database. Deletes contents of ./../db/ directory", action="store_true")
-    parser.add_argument("-run_SRURGS", help="run the code against all the SRURGS problems in the mySQL database")
+    parser.add_argument("-run_SRURGS", help="run the code against all the SRURGS problems in the mySQL database", action='store_true')
     parser.add_argument("-purge_db", help="deletes all the jobs in the database", action="store_true")
     if len(sys.argv) < 2:
         parser.print_usage()
@@ -282,7 +289,7 @@ if __name__ == '__main__':
         files = glob.glob('./../db/*SRURGS*')
         for f in files:
             os.remove(f)
-        pool = mp.Pool()
-        pool.map(run_all_SRURGS_jobs, [None]*mp.cpu_count())
+        # SRURGS runs in multiprocessing by default, no need to do a mp.pool 
+        run_all_SRURGS_jobs(None)
     if arguments.purge_db:
         purge_db()
