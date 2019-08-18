@@ -143,7 +143,7 @@ def get_job(finished=0, algorithm="SRGP"):
         mycursor.execute(sql, val)
         myresult = mycursor.fetchone()
         if myresult is None:
-            return None
+            return None, None
         job_ID = myresult[0]
         arguments = myresult[1]
         n_evals = myresult[2]
@@ -304,6 +304,6 @@ if __name__ == '__main__':
         for f in files:
             os.remove(f)
         # SRURGS runs in multiprocessing by default, no need to do a mp.pool 
-        run_all_SRURGS_jobs(None)
+        run_all_SRURGS_jobs(None)           
     if arguments.purge_db:
         purge_db()
