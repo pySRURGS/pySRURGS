@@ -204,7 +204,7 @@ def run_all_SRGP_jobs(placeholder):
                 continue
             dropbox_trnsfer.upload_file(output_db, '/'+os.path.basename(output_db))
             with SqliteDict(output_db, autocommit=True) as results_dict:
-                n_evals = results_dict['n_evals']
+                n_evals = results_dict['n_evals']            
             set_job_finished(n_evals, job_ID)
             job_ID, job_arguments = get_SRGP_job(finished)
             print('finished a job', i)
@@ -226,6 +226,7 @@ def run_all_SRURGS_jobs(placeholder):
                 (';' in ''.join(job_arguments))):
                 raise Exception("SQL injection?")
             try:
+                job_arguments[-1] = str(20)
                 sh.python(*job_arguments, _err="error.txt")
             except:
                 print(sh.cat('error.txt'))
