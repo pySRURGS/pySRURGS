@@ -42,42 +42,46 @@ def run_SRURGS(n_evals, csv_path, path_to_db, max_num_fit_params, max_permitted_
 def give_db_path(path_to_csv, run_ID):
     return '$PYSRURGSDIR/db/'+os.path.basename(path_to_csv)[:-3]+run_ID+'.SRURGS.db'
 
-def generate_list_of_experiments(SR_config, start_index, count_experiments, n_runs):
+def generate_list_of_experiments(SR_config1, SR_config_2):    
+    # select all the jobs that are SRGP and n_eval != -1
+    sql = 'SELECT job_ID,n_evals from jobs WHERE algorithm = "SRGP" and n_evals != -1;'
+    results = database.run_select_qry(sql)
     list_of_jobs = []
-    funcs_arity_two = ','.join(SR_config._n_functions)
-    funcs_arity_one = ','.join(SR_config._f_functions)
-    max_num_fit_params = SR_config._max_num_fit_params
-    max_permitted_trees = SR_config._max_permitted_trees
-    for z in range(start_index,start_index+count_experiments):
-        print("Experiment", z, "Out of "+str(start_index+count_experiments))        
-        train = '$PYSRURGSDIR/csvs/benchmarks/'+str(z)+'_train.csv'
-        for j in range(0,n_runs):
-            run_ID = str(j)
-            path_to_db = give_db_path(train, run_ID)
-            SRGP_db = path_to_db.replace("SRURGS", "SRGP")
-            SRGP_db = SRGP_db.split('/')[-1]
-            n_evals = database.find_matching_SRGP_job_n_evals(SRGP_db)
-            if n_evals == -1:
-                continue
-            SRURGS_db = path_to_db.split('/')[-1]            
-            SRURGS_check = database.find_matching_SRURGS_job(path_to_db)
-            if SRURGS_check is None:
-                pass
-            else: # job already exists, don't resubmit 
-                continue 
-            algorithm = 'SRURGS'               
-            arguments = run_SRURGS(n_evals, train, path_to_db, 
+    # use the appropriate SR_config based on the number
+    for job in results:
+        job_ID = job[0]
+        n_evals = job[1]
+        exp_num = int(job_ID.split('_')[0])
+        if int(exp_num) < 20:
+            SR_config = SR_config1
+        else:
+            SR_config = SR_config2
+        # assign the SRURGS parameter values
+        train = '$PYSRURGSDIR/csvs/benchmarks/'+str(exp_num)+'_train.csv'
+        # INSERT with IGNORE so just insert all the finished SRGP jobs 
+        run_ID = job_ID.split('.')[1]
+        path_to_db = give_db_path(train, run_ID)
+        algorithm = 'SRURGS'         
+        funcs_arity_two = ','.join(SR_config._n_functions)
+        funcs_arity_one = ','.join(SR_config._f_functions)
+        max_num_fit_params = SR_config._max_num_fit_params
+        max_permitted_trees = SR_config._max_permitted_trees
+        arguments = run_SRURGS(n_evals, train, path_to_db, 
                                    max_num_fit_params, max_permitted_trees, 
                                    funcs_arity_two, funcs_arity_one)
-            list_of_jobs.append([algorithm, arguments])
+        try:
+            n_eval2 = int(arguments.split(' ')[-1])
+            if n_eval2 < 20000:
+                pdb.set_trace()
+        except:
+            pdb.set_trace()
+        list_of_jobs.append([algorithm, arguments])
     return list_of_jobs
 
 
 if __name__ == '__main__':
     print('about to generate jobs')
-    jobs1 = generate_list_of_experiments(SR_config1, 0, 20, 10)
-    jobs2 = generate_list_of_experiments(SR_config2, 20, 80, 10)
+    jobs = generate_list_of_experiments(SR_config1, SR_config2)
     print('about to submit jobs')
-    database.submit_job_to_db(jobs1)
-    database.submit_job_to_db(jobs2)
+    database.submit_job_to_db(jobs)
     
