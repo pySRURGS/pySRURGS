@@ -964,6 +964,11 @@ def initialize_db(path_to_db):
             results_dict['best_result'] = Result(None, None, np.inf, None, None)
     return 
 
+def assign_n_evals(path_to_db):
+    with SqliteDict(path_to_db, autocommit=True) as results_dict: 
+        n_evals = len(list(results_dict.keys())) - 1
+        results_dict['n_evals'] = n_evals
+                
 def uniform_random_global_search_once(path_to_db, path_to_csv, SRconfig):
     # Run SRURGS once
     (f, n, m, cum_weights, N, dataset, enumerator, _, _) = setup(path_to_csv, SRconfig)
@@ -1100,6 +1105,8 @@ def get_resultlist(path_to_db, path_to_csv, SRconfig):
     with SqliteDict(path_to_db, autocommit=True) as results_dict:
         keys = results_dict.keys()
         for eqn in keys:
+            if eqn == 'n_evals':
+                continue
             result = results_dict[eqn]
             result_list._results.append(result)
     return result_list, dataset
@@ -1268,6 +1275,7 @@ if __name__ == '__main__':
         results = parmap.map(uniform_random_global_search_once, 
                              [path_to_db]*max_attempts,
                              path_to_csv, SRconfig, pm_pbar=True)
+        assign_n_evals(path_to_db)
     elif single_processing_mode == True:
         print("Running in single processor mode")
         for i in tqdm.tqdm(range(0,max_attempts)):
