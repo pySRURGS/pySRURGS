@@ -304,6 +304,6 @@ if __name__ == '__main__':
         for f in files:
             os.remove(f)
         # SRURGS runs in multiprocessing by default, no need to do a mp.pool 
-        run_all_SRURGS_jobs(None)
+        run_all_SRURGS_jobs(None)           
     if arguments.purge_db:
         purge_db()
