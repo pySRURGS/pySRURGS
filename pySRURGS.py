@@ -60,12 +60,13 @@ benchmarks_x_domain = [0, 10]
 benchmarks_fit_param_domain = [-10, 10]
 benchmarks_dir = './csvs/benchmarks'
 benchmarks_summary_tsv = './benchmarks_summary.tsv'
+memoize_funcs = False
 ##### END GLOBALS
 
 def memoize(func):
     cache = dict()
     def memoized_func(*args):
-        if args in cache:
+        if args in cache and memoize_funcs == True:
             return cache[args]
         result = func(*args)
         cache[args] = result
@@ -966,8 +967,13 @@ def initialize_db(path_to_db):
 
 def assign_n_evals(path_to_db):
     with SqliteDict(path_to_db, autocommit=True) as results_dict: 
-        n_evals = len(list(results_dict.keys())) - 1
-        results_dict['n_evals'] = n_evals
+        keys = list(results_dict.keys())
+        n_evals = len(keys)
+        if 'best_eqn' in keys:
+            n_evals = n_evals - 1
+        if 'n_evals' in keys:
+            n_evals = n_evals - 1
+    return n_evals
                 
 def uniform_random_global_search_once(path_to_db, path_to_csv, SRconfig):
     # Run SRURGS once
@@ -1142,8 +1148,6 @@ def plot_results(path_to_db, path_to_csv, SRconfig):
     plt.plot(dataset._x_data, dataset._y_data, 'ro', label=dataset._y_label+' original data')
     plt.xlabel(dataset._x_labels[0])
     plt.ylabel(dataset._y_label)
-    plt.title('quartic polynomial example')
-    plt.legend()
     plt.savefig('image/plot.svg')
     plt.savefig('image/plot.png')
     
@@ -1219,6 +1223,7 @@ if __name__ == '__main__':
     parser.add_argument("train", help="absolute or relative file path to the csv file housing the training data")
     parser.add_argument("iters", help="the number of equations to be attempted in this run", type=int)
     #TODO parser.add_argument("-test", help="absolute or relative file path to the csv file housing the testing data")
+    parser.add_argument("-memoize_funcs", help="memoize the computations. If you are running large `iters` and you do not have massive ram, do not use this option.", action="store_true")
     parser.add_argument("-run_ID", help="some text that uniquely identifies this run", required=False)
     parser.add_argument("-single", help="run in single processing mode", action="store_true")
     parser.add_argument("-count", help="Instead of doing symbolic regression, just count out how many possible equations for this configuration. No other processing performed.", action="store_true")
@@ -1244,6 +1249,7 @@ if __name__ == '__main__':
     n_funcs = check_validity_suggested_functions(n_funcs, 2)     
     f_funcs = arguments.funcs_arity_one
     plotting = arguments.plotting
+    memoize_funcs = arguments.memoize_funcs
     if f_funcs is None or f_funcs == '':
         f_funcs = []
     else:
@@ -1275,6 +1281,10 @@ if __name__ == '__main__':
         results = parmap.map(uniform_random_global_search_once, 
                              [path_to_db]*max_attempts,
                              path_to_csv, SRconfig, pm_pbar=True)
+        print("Making sure we meet the iters value")
+        n_evals = assign_n_evals(path_to_db)
+        for i in range(0, max_attempts - n_evals):
+            uniform_random_global_search_once(path_to_db, path_to_csv, SRconfig)
         assign_n_evals(path_to_db)
     elif single_processing_mode == True:
         print("Running in single processor mode")
