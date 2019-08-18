@@ -222,10 +222,10 @@ def run_all_SRURGS_jobs(placeholder):
             continue
         while job_arguments is not None:
             output_db = job_arguments[2]
-            if (job_arguments[0] != pySRURGS_dir+'/pySRURGS.py'):
+            if ((job_arguments[0] != pySRURGS_dir+'/pySRURGS.py') or 
+                (';' in ''.join(job_arguments))):
                 raise Exception("SQL injection?")
-            try:                
-                pdb.set_trace()
+            try:
                 sh.python(*job_arguments, _err="error.txt")
             except:
                 print(sh.cat('error.txt'))
