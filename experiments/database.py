@@ -1,7 +1,7 @@
 # For our experiements, we save the commands to a mysql database, and have computers 
 # call the database when they need a new job 
 # There is a file called secret.py which houses 
-# PYTHONANYWHERE_PASSWORD, PYTHONANYWHERE_USERNAME, DATABASE_HOSTNAME, DATABASE_NAME, DATABASE_PASSWORD, DROPBOX_KEY
+# PYTHONANYWHERE_PASSWORD, PYTHONANYWHERE_USERNAME, DATABASE_HOSTNAME, DATABASE_NAME, DATABASE_PASSWORD, DROPBOX_KEY, PYSRURGS_DIR (on windows)
 # and we don't want these saved to the git so I have added secret.py to .gitignore
 import sys 
 import os
@@ -51,6 +51,20 @@ def get_db_path(arguments_string):
             return db_name
     raise Exception("Not able to find db")
 
+def run_select_qry(sql):
+    with sshtunnel.SSHTunnelForwarder(('ssh.pythonanywhere.com'),
+        ssh_username=PYTHONANYWHERE_USERNAME, ssh_password=PYTHONANYWHERE_PASSWORD,
+        remote_bind_address=(DATABASE_HOSTNAME, 3306)) as tunnel:
+        mydb = pymysql.connect(user=PYTHONANYWHERE_USERNAME, 
+                                                 password=DATABASE_PASSWORD,
+                                                 host='127.0.0.1', 
+                                                 port=tunnel.local_bind_port,
+                                                 database=DATABASE_NAME)
+        mycursor = mydb.cursor()
+        mycursor.execute(sql)
+        myresult = mycursor.fetchall()
+        return myresult
+
 def submit_job_to_db(algo_argu_list):
     # job_ID is the database file name 
     num_job = len(algo_argu_list)
@@ -71,14 +85,14 @@ def submit_job_to_db(algo_argu_list):
             create_db_command = '''CREATE TABLE IF NOT EXISTS jobs(
                job_ID VARCHAR(200) NOT NULL,
                algorithm VARCHAR(200) NOT NULL,
-               arguments VARCHAR(200) NOT NULL,
+               arguments VARCHAR(400) NOT NULL,
                finished TINYINT(1) NOT NULL,
                n_evals INT NOT NULL,
                PRIMARY KEY ( job_ID )
             );'''
             mycursor = mydb.cursor()
             mycursor.execute(create_db_command)
-            sql = "INSERT INTO jobs (job_ID, algorithm, arguments, finished, n_evals) VALUES (%s, %s, %s, %s, %s)"
+            sql = "INSERT IGNORE INTO jobs (job_ID, algorithm, arguments, finished, n_evals) VALUES (%s, %s, %s, %s, %s)"
             db_path = get_db_path(arguments)
             val = (db_path, algorithm, arguments, 0, -1)
             mycursor.execute(sql, val)        
@@ -190,7 +204,7 @@ def run_all_SRGP_jobs(placeholder):
                 continue
             dropbox_trnsfer.upload_file(output_db, '/'+os.path.basename(output_db))
             with SqliteDict(output_db, autocommit=True) as results_dict:
-                n_evals = results_dict['n_evals']
+                n_evals = results_dict['n_evals']            
             set_job_finished(n_evals, job_ID)
             job_ID, job_arguments = get_SRGP_job(finished)
             print('finished a job', i)
@@ -207,11 +221,11 @@ def run_all_SRURGS_jobs(placeholder):
             # this job has not been completed on the SRGP side.
             continue
         while job_arguments is not None:
-            output_db = job_arguments[2]
-            if (job_arguments[0] != pySRURGS_dir+'/pySRURGS.py'):
+            output_db = job_arguments[-3]
+            if ((job_arguments[0] != pySRURGS_dir+'/pySRURGS.py') or 
+                (';' in ''.join(job_arguments))):
                 raise Exception("SQL injection?")
             try:
-                job_arguments.append(str(n_evals))
                 sh.python(*job_arguments, _err="error.txt")
             except:
                 print(sh.cat('error.txt'))
