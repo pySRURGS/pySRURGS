@@ -43,7 +43,7 @@ Clone the repo then install the prerequisites.
 ```
 git clone https://github.com/pySRURGS/pySRURGS.git
 cd pySRURGS
-pip install -r requirements.txt
+pip install -r requirements.txt --user
 ```
 
 ### Command line help
