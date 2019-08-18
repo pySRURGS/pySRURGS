@@ -226,7 +226,6 @@ def run_all_SRURGS_jobs(placeholder):
                 (';' in ''.join(job_arguments))):
                 raise Exception("SQL injection?")
             try:
-                job_arguments[-1] = str(20)
                 sh.python(*job_arguments, _err="error.txt")
             except:
                 print(sh.cat('error.txt'))
