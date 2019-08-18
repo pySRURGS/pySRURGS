@@ -8,3 +8,4 @@ tqdm
 sqlitedict
 tabulate
 matplotlib
+scipy
