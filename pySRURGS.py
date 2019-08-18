@@ -1148,8 +1148,6 @@ def plot_results(path_to_db, path_to_csv, SRconfig):
     plt.plot(dataset._x_data, dataset._y_data, 'ro', label=dataset._y_label+' original data')
     plt.xlabel(dataset._x_labels[0])
     plt.ylabel(dataset._y_label)
-    plt.title('quartic polynomial example')
-    plt.legend()
     plt.savefig('image/plot.svg')
     plt.savefig('image/plot.png')
     
