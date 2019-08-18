@@ -143,7 +143,7 @@ def get_job(finished=0, algorithm="SRGP"):
         mycursor.execute(sql, val)
         myresult = mycursor.fetchone()
         if myresult is None:
-            return None
+            return None, None
         job_ID = myresult[0]
         arguments = myresult[1]
         n_evals = myresult[2]
