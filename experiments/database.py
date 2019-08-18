@@ -1,7 +1,7 @@
 # For our experiements, we save the commands to a mysql database, and have computers 
 # call the database when they need a new job 
 # There is a file called secret.py which houses 
-# PYTHONANYWHERE_PASSWORD, PYTHONANYWHERE_USERNAME, DATABASE_HOSTNAME, DATABASE_NAME, DATABASE_PASSWORD, DROPBOX_KEY
+# PYTHONANYWHERE_PASSWORD, PYTHONANYWHERE_USERNAME, DATABASE_HOSTNAME, DATABASE_NAME, DATABASE_PASSWORD, DROPBOX_KEY, PYSRURGS_DIR (on windows)
 # and we don't want these saved to the git so I have added secret.py to .gitignore
 import sys 
 import os
