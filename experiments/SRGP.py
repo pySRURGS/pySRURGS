@@ -2,8 +2,6 @@
 # to the pySRURGS code style and datastructure
 # Some improvements to performance through checking previously considered equations
 
-# TODO, remove the variable and parameter tags simplification.
-
 import warnings
 warnings.simplefilter('ignore')
 import scipy
@@ -329,7 +327,7 @@ def eaSimple(population, toolbox, cxpb, mutpb, ngen, verbose=__debug__):
             best_ever = min(population, key=lambda ind: ind.fitness.values[0])
         else:
             best = min(population, key=lambda ind: ind.fitness.values[0])
-            if best_ever.fitness.values[0] < best_ever.fitness.values[0]:
+            if best.fitness.values[0] < best_ever.fitness.values[0]:
                 best_ever = best
         MSE = best_ever.fitness.values[0]
         NMSE = np.nan_to_num(MSE / np.std(dataset._y_data))
