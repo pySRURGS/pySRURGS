@@ -69,12 +69,6 @@ def generate_list_of_experiments(SR_config1, SR_config_2):
         arguments = run_SRURGS(n_evals, train, path_to_db, 
                                    max_num_fit_params, max_permitted_trees, 
                                    funcs_arity_two, funcs_arity_one)
-        try:
-            n_eval2 = int(arguments.split(' ')[-1])
-            if n_eval2 < 20000:
-                pdb.set_trace()
-        except:
-            pdb.set_trace()
         list_of_jobs.append([algorithm, arguments])
     return list_of_jobs
 
