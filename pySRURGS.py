@@ -30,7 +30,7 @@ import multiprocessing as mp
 import matplotlib 
 matplotlib.use("TkAgg")
 import matplotlib.style
-matplotlib.style.use('ggplot')
+matplotlib.style.use('seaborn-colorblind')
 import matplotlib.pyplot as plt
 
 class SymbolicRegressionConfig(object):
