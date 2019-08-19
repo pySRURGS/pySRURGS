@@ -55,11 +55,13 @@ python3 pySRURGS.py -h
 The above command should render the following:
 
 ```
-usage: pySRURGS.py [-h] [-run_ID RUN_ID] [-single] [-count] [-benchmarks]
-                   [-plotting] [-funcs_arity_two FUNCS_ARITY_TWO]
+usage: pySRURGS.py [-h] [-memoize_funcs] [-run_ID RUN_ID] [-single] [-count]
+                   [-benchmarks] [-plotting]
+                   [-funcs_arity_two FUNCS_ARITY_TWO]
                    [-funcs_arity_one FUNCS_ARITY_ONE]
                    [-max_num_fit_params MAX_NUM_FIT_PARAMS]
                    [-max_permitted_trees MAX_PERMITTED_TREES]
+                   [-path_to_db PATH_TO_DB]
                    train iters
 
 positional arguments:
@@ -69,6 +71,9 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
+  -memoize_funcs        memoize the computations. If you are running large
+                        `iters` and you do not have massive ram, do not use
+                        this option. (default: False)
   -run_ID RUN_ID        some text that uniquely identifies this run (default:
                         None)
   -single               run in single processing mode (default: False)
@@ -100,6 +105,9 @@ optional arguments:
                         of the equation, increasing this number tends to
                         increase the complexity of generated equations
                         (default: 1000)
+  -path_to_db PATH_TO_DB
+                        the absolute or relative path to the database file
+                        where we will save results (default: None)
 ```
 
 ### Important details
