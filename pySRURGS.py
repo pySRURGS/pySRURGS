@@ -968,11 +968,12 @@ def initialize_db(path_to_db):
 def assign_n_evals(path_to_db):
     with SqliteDict(path_to_db, autocommit=True) as results_dict: 
         keys = list(results_dict.keys())
-        n_evals = len(keys)
+        n_evals = len(keys)        
         if 'best_eqn' in keys:
             n_evals = n_evals - 1
         if 'n_evals' in keys:
             n_evals = n_evals - 1
+        results_dict['n_evals'] = n_evals
     return n_evals
                 
 def uniform_random_global_search_once(path_to_db, path_to_csv, SRconfig):
