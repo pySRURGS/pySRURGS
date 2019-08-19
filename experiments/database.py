@@ -192,8 +192,10 @@ def run_all_SRGP_jobs(placeholder):
     i = 0
     dropbox_trnsfer = TransferData(DROPBOX_KEY)
     for finished in range(0,2):
+        print("Looking for a job to run")
         job_ID, job_arguments = get_SRGP_job(finished)        
         while job_arguments is not None:
+            print("Got a job to run")
             output_db = job_arguments[2]
             if (job_arguments[0] != pySRURGS_dir+'/experiments/SRGP.py'):
                 raise Exception("SQL injection?")
