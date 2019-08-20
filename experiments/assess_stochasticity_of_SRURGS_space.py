@@ -22,14 +22,16 @@ def main(max_permitted_trees, max_num_fit_params, i, r0, s0):
     n = len(SR_config._n_functions)
     A = en.get_A(n, i)
     B = en.get_B(dataset._m_terminals, i)
-    data = np.ones((125,81))
+    rows = 125
+    cols = 81
+    data = np.ones((rows,cols))
     print(A)
     print(B)
     x_data = []
     y_data = []
-    for r in range(r0, r0+125):
+    for r in range(r0, r0+rows):
         print(r, A)        
-        for s in range(s0, s0+81):           
+        for s in range(s0, s0+cols):           
             try:
                 eqn = pySRURGS.equation_generator2(i, r, s, dataset, en, SR_config, simpler=False)
             except:
@@ -56,10 +58,10 @@ def main(max_permitted_trees, max_num_fit_params, i, r0, s0):
     ax.yaxis.set_major_locator(MaxNLocator(integer=True))
     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
     scat = ax.scatter(x_data, y_data, c=data.flatten())
-    cbar = plt.colorbar(scat, ax=ax, boundaries=np.linspace(0,1,100))
+    cbar = plt.colorbar(scat, ax=ax, boundaries=np.linspace(0,1,10))
     cbar.set_label('R^2')
-    plt.xlabel("r - the configuration of the functions")
-    plt.ylabel("s - the configuration of the terminals")
+    plt.xlabel("r")
+    plt.ylabel("s")
     plt.tight_layout()
     plt.show()
     plt.clf()
