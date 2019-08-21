@@ -31,12 +31,12 @@ a = []
 b = []
 
 for srurgs_result in srurgs_files:
-    path_to_srurgs_db = srurgs_result
-    print(path_to_srurgs_db)
+    path_to_srurgs_db = srurgs_result    
     with SqliteDict(path_to_stats_db, autocommit=True) as results_dict: 
         try:
             MSE_SRGP, MSE_SRURGS = results_dict[path_to_srurgs_db]
         except KeyError:
+            print(path_to_srurgs_db)
             problem_name_srurgs = os.path.basename(srurgs_result)
             problem_name_srgp = problem_name_srurgs.replace("SRURGS", "SRGP")
             for file in srgp_files:
@@ -53,7 +53,9 @@ for srurgs_result in srurgs_files:
             SRURGS_result_list.sort()
             SRGP_result_list, dataset = pySRURGS.get_resultlist(path_to_srgp_db, path_to_csv, SR_config)
             SRGP_result_list.sort()
-            results_dict[path_to_srurgs_db] = (SRGP_result_list._results[0]._MSE, SRURGS_result_list._results[0]._MSE)
+            MSE_SRGP = SRGP_result_list._results[0]._MSE
+            MSE_SRURGS = SRURGS_result_list._results[0]._MSE
+            results_dict[path_to_srurgs_db] = (MSE_SRGP, MSE_SRURGS)
     a.append(MSE_SRGP)
     b.append(MSE_SRURGS)
 stat, p_val = ttest_rel(a, b)
