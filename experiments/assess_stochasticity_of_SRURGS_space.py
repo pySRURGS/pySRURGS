@@ -58,7 +58,7 @@ def main(max_permitted_trees, max_num_fit_params, i, r0, s0):
     ax.yaxis.set_major_locator(MaxNLocator(integer=True))
     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
     scat = ax.scatter(x_data, y_data, c=data.flatten())
-    cbar = plt.colorbar(scat, ax=ax, boundaries=np.linspace(0,1,10))
+    cbar = plt.colorbar(scat, ax=ax, boundaries=np.linspace(0,1,100))
     cbar.set_label('R^2')
     plt.xlabel("r")
     plt.ylabel("s")
