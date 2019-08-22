@@ -1168,10 +1168,10 @@ def generate_benchmarks_SRconfigs():
 def generate_benchmarks():
     SR_config1, SR_config2 = generate_benchmarks_SRconfigs()
     # first set is from 0 - 19 inclusive
-    for z in range(0, 19):
+    for z in range(0, 20):
         print("Generating benchmark:", z, "out of:", 99)
         generate_benchmark(str(z), SR_config1)
-    for z in range(20, 99):
+    for z in range(20, 100):
         print("Generating benchmark:", z, "out of:", 99)
         generate_benchmark(str(z), SR_config2)
     print("Outputting a summary to ", benchmarks_summary_tsv)
@@ -1217,6 +1217,15 @@ def check_validity_suggested_functions(suggested_funcs, arity):
                 raise Exception(msg)
     return suggested_funcs
 
+def count_number_equations(path_to_csv, SRconfig):
+    (f, n, m, cum_weights, N, dataset, enumerator, _, _) = setup(path_to_csv, SRconfig)
+    if f == 0:
+        number_possible_equations = enumerator.get_M(N,n,m)
+    else:
+        number_possible_equations = enumerator.get_M(N,f,n,m)    
+    print("Number possible equations:", number_possible_equations)        
+    return number_possible_equations
+
 if __name__ == '__main__':
     # Read the doc string at the top of this script.
     # Run this script in terminal with '-h' as an argument.
@@ -1249,13 +1258,13 @@ if __name__ == '__main__':
     n_funcs = n_funcs.split(',')
     n_funcs = check_validity_suggested_functions(n_funcs, 2)     
     f_funcs = arguments.funcs_arity_one
-    plotting = arguments.plotting
-    memoize_funcs = arguments.memoize_funcs
     if f_funcs is None or f_funcs == '':
         f_funcs = []
     else:
         f_funcs = f_funcs.split(',')
         f_funcs = check_validity_suggested_functions(f_funcs, 1)    
+    plotting = arguments.plotting    
+    memoize_funcs = arguments.memoize_funcs    
     max_num_fit_params = arguments.max_num_fit_params
     max_permitted_trees = arguments.max_permitted_trees
     SRconfig = SymbolicRegressionConfig(n_funcs, f_funcs, 
@@ -1266,13 +1275,9 @@ if __name__ == '__main__':
         generate_benchmarks()
         exit(0)
     if count_M == True:
-        (f, n, m, cum_weights, N, dataset, enumerator, _, _) = setup(path_to_csv, SRconfig)
-        if f == 0:
-            number_possible_equations = enumerator.get_M(N,n,m)
-        else:
-            number_possible_equations = enumerator.get_M(N,f,n,m)
-        print("Number possible equations:", number_possible_equations)        
+        count_number_equations(path_to_csv, SRconfig)
         exit(0)
+    
     run_ID = arguments.run_ID
     if path_to_db is None:
         path_to_db = create_db(path_to_csv, run_ID)    
