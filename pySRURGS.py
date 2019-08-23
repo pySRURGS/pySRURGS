@@ -1055,10 +1055,8 @@ def generate_benchmark(benchmark_name, SRconfig):
                     text_file.write(msg)
             valid = True
             if eqn_simple == '0':
-                valid = False
-            
+                valid = False            
         except Exception as e:
-            print(e)
             valid = False
             
     
