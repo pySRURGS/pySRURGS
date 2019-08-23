@@ -90,8 +90,9 @@ def run_python_tests():
     for benchmark_file in benchmarks:
         os.remove(benchmark_file)
     # test the generation of benchmarks 
-    pySRURGS.generate_benchmarks()
+    pySRURGS.generate_benchmarks()  
     # test max_num_fit_params 0 
+    max_attempts = 20
     SRconfig = pySRURGS.SymbolicRegressionConfig(n_funcs, f_funcs, 0, max_permitted_trees)
     for i in tqdm.tqdm(range(0,max_attempts)):
         pySRURGS.uniform_random_global_search_once(path_to_db, path_to_csv, SRconfig)
