@@ -865,31 +865,13 @@ def ith_full_binary_tree2(i):
         tree = '[' + left +', ' +right + ']'
     return tree
 
-def print_some_trees(nn):
-    trees = []
-    en = Enumerator()
-    for i in range(0,nn):
-        tree = ith_full_binary_tree(i)
-        k_i = en.get_k_i(i)
-        j_i = en.get_j_i(i)
-        print(i, get_left_right_bits(i), j_i, k_i, tree)
-
-def print_some_trees2(nn):
-    # for the case of zero functions of arity one 
-    trees = []
-    en = Enumerator2()
-    for i in range(0,nn):
-        tree = ith_full_binary_tree2(i)
-        try:
-            [left, right] = get_left_right_bits(i-1)           
-        except:
-            [left, right] = [np.nan, np.nan]
-        k_i = en.get_k_i(i)
-        j_i = en.get_j_i(i)
-        print(i, [left,right], j_i, k_i, tree)
-
 @memoize    
 def get_cum_weights(N, f, n, m, enumerator):
+    ''' Since we want uniform random global search, we need to assign different 
+        probabilities of selection for each binary tree. Different binary trees 
+        have different number of configurations, and we want each configuration 
+        to have the same likelihood of selection.        
+    '''
     en = enumerator
     weights = [en.get_G(f, i)*en.get_A(n, i)*en.get_B(m, i) for i in range(0,N)]
     weights = np.array(weights)
