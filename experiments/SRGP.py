@@ -188,7 +188,7 @@ def filter_population(population, toolbox):
                     evaluate(new_indiv)
                     population[i] = new_indiv
                     run_bool = False
-                except FloatingPointError, InfanticideException:
+                except (FloatingPointError, InfanticideException):
                     pass
     return population    
 
