@@ -124,6 +124,6 @@ def run_python_tests():
     print('Finished run_python_tests')
 
 if __name__ == '__main__':
-    #run_command_line_tests()
+    run_command_line_tests()
     run_python_tests()
 
