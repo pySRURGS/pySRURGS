@@ -1,16 +1,90 @@
 import sh
 import os
 import sys 
+import glob
+import pySRURGS
 
-sh.python('pySRURGS.py', './csvs/quartic_polynomial.csv', 10)
-sh.python('pySRURGS.py', '-single', './csvs/quartic_polynomial.csv', 10)
-sh.python('pySRURGS.py', '-count', './csvs/quartic_polynomial.csv', 10)
-sh.python('pySRURGS.py', '-benchmarks', './csvs/quartic_polynomial.csv', 10)
-sh.python('pySRURGS.py', '-max_num_fit_params', 0, './csvs/quartic_polynomial.csv', 10)
-sh.python('pySRURGS.py', '-max_num_fit_params', 5, './csvs/quartic_polynomial.csv', 10)
-sh.python('pySRURGS.py', '-funcs_arity_two', 'add,sub,div', '-max_num_fit_params', 5, './csvs/quartic_polynomial.csv', 10)
-sh.python('pySRURGS.py', '-funcs_arity_one', 'tan,exp', '-max_num_fit_params', 5, './csvs/quartic_polynomial.csv', 10)
-sh.python('pySRURGS.py', '-max_permitted_trees', 10, '-max_num_fit_params', 5, './csvs/quartic_polynomial.csv', 10)
+dbs_dir = './db'
+qrtic_polynml_csv = './csvs/quartic_polynomial.csv'
+benchmarks_dir = './csvs/benchmarks'
+
+def run_command_line_tests():
+    # Command line interface
+    sh.python('pySRURGS.py', qrtic_polynml_csv, 10)
+    sh.python('pySRURGS.py', '-single', qrtic_polynml_csv, 10)
+    sh.python('pySRURGS.py', '-count', qrtic_polynml_csv, 10)
+    sh.python('pySRURGS.py', '-benchmarks', qrtic_polynml_csv, 10)
+    sh.python('pySRURGS.py', '-max_num_fit_params', 0, qrtic_polynml_csv, 10)
+    sh.python('pySRURGS.py', '-max_num_fit_params', 5, qrtic_polynml_csv, 10)
+    sh.python('pySRURGS.py', '-funcs_arity_two', 'add,sub,div', '-max_num_fit_params', 5, qrtic_polynml_csv, 10)
+    sh.python('pySRURGS.py', '-funcs_arity_one', 'tan,exp', '-max_num_fit_params', 5, qrtic_polynml_csv, 10)
+    sh.python('pySRURGS.py', '-max_permitted_trees', 10, '-max_num_fit_params', 5, qrtic_polynml_csv, 10)
+
+def run_python_tests():
+    # Python level code
+    # load the default command line values
+    defaults = pySRURGS.defaults_dict
+    n_funcs = defaults['funcs_arity_two']
+    f_funcs = defaults['funcs_arity_one']
+    max_num_fit_params = defaults['max_num_fit_params']
+    max_permitted_trees = defaults['max_permitted_trees']
+    # assign the arguments used for later assessment of the algorithm
+    path_to_db = os.path.join(dbs_dir, 'quartic_polynomial.db')
+    path_to_csv = qrtic_polynml_csv
+    SRconfig = pySRURGS.SymbolicRegressionConfig(n_funcs, f_funcs, max_num_fit_params, max_permitted_trees)
+    # the the -count functionality
+    num_equations = pySRURGS.count_number_equations(path_to_csv, SRconfig)
+    max_attempts = 5
+    # test the basic functionality
+    for i in range(0,max_attempts):
+        pySRURGS.uniform_random_global_search_once(path_to_db, path_to_csv, SRconfig)
+    assert type(num_equations) == float
+    print(num_equations)
+    # get the MSE of the first run 
+    result_list = pySRURGS.compile_results(path_to_db, path_to_csv, SRconfig)
+    MSE_1st_run = result_list._results[0]._MSE
+    # test the multiprocessing functionality and that MSE decreases with 1000 runs
+    max_attempts = 1000
+    for i in tqdm.tqdm(range(0,max_attempts)):
+        pySRURGS.uniform_random_global_search_once(path_to_db, path_to_csv, SRconfig)
+    result_list = pySRURGS.compile_results(path_to_db, path_to_csv, SRconfig)
+    MSE_2nd_run = result_list._results[0]._MSE
+    assert MSE_2nd_run < MSE_1st_run
+    print(num_equations)    
+    # first remove all the benchmark files from the repository 
+    benchmarks = glob.glob(os.path.join(benchmarks_dir, '*'))
+    for benchmark file in benchmarks:
+        os.remove(benchmark)
+    # test the generation of benchmarks 
+    pySRURGS.generate_benchmarks()
+    # test max_num_fit_params 0 
+    SRconfig = pySRURGS.SymbolicRegressionConfig(n_funcs, f_funcs, 0, max_permitted_trees)
+    for i in range(0,max_attempts):
+        pySRURGS.uniform_random_global_search_once(path_to_db, path_to_csv, SRconfig)
+    # test max_num_fit_params 5
+    SRconfig = pySRURGS.SymbolicRegressionConfig(n_funcs, f_funcs, 5, max_permitted_trees)
+    for i in range(0,max_attempts):
+        pySRURGS.uniform_random_global_search_once(path_to_db, path_to_csv, SRconfig)
+    # test funcs_arity_two = 'add,sub,div'
+    test_n_funcs = 'add,sub,div'
+    SRconfig_test_n_funcs = pySRURGS.SymbolicRegressionConfig(test_n_funcs, f_funcs, 5, max_permitted_trees)
+    for i in range(0,max_attempts):
+        pySRURGS.uniform_random_global_search_once(path_to_db, path_to_csv, SRconfig)
+    # test funcs_arity_one = 'tan,exp'
+    test_f_funcs = 'tan,exp'
+    SRconfig_test_n_funcs = pySRURGS.SymbolicRegressionConfig(n_funcs, test_f_funcs, 5, max_permitted_trees)
+    for i in range(0,max_attempts):
+        pySRURGS.uniform_random_global_search_once(path_to_db, path_to_csv, SRconfig)
+    # test max_permitted_trees = 10
+    test_max_permitted_trees = 10
+    SRconfig_test_n_funcs = pySRURGS.SymbolicRegressionConfig(n_funcs, test_f_funcs, 5, test_max_permitted_trees)
+    for i in range(0,max_attempts):
+        pySRURGS.uniform_random_global_search_once(path_to_db, path_to_csv, SRconfig)
+    
+
+if __name__ == '__main__':
+    run_command_line_tests()
+    run_python_tests()
 
 '''
 usage: pySRURGS.py [-h] [-run_ID RUN_ID] [-single] [-count]
