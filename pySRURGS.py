@@ -978,14 +978,13 @@ def uniform_random_global_search_once(path_to_db, path_to_csv, SRconfig):
                     raise FloatingPointError
                 except:
                     pass
-            params = create_fitting_parameters(dataset._int_max_params)
-        
-            (sum_of_squared_residuals, 
-                sum_of_squared_totals, 
-                R2,
-                params_fitted,
-                residual) = check_goodness_of_fit(eqn_str, params, dataset)
-            valid = True
+            params = create_fitting_parameters(dataset._int_max_params)        
+            (sum_of_squared_residuals, sum_of_squared_totals, 
+            R2, params_fitted,
+            residual) = check_goodness_of_fit(eqn_str, params, dataset)                
+            if np.isnan(R2) or np.isnan(sum_of_squared_totals):
+                raise FloatingPointError
+            valid = True            
         except FloatingPointError:
             pass
     MSE = sum_of_squared_residuals
@@ -997,7 +996,7 @@ def uniform_random_global_search_once(path_to_db, path_to_csv, SRconfig):
             results_dict['best_result'] = best_result            
     return result
 
-def generate_benchmark(benchmark_name, SR_config):
+def generate_benchmark(benchmark_name, SRconfig):
     # x_domain is [lower_bound, upper_bound]
     (f, n, m, cum_weights, N, dataset, 
      enumerator, n_functions, f_functions) = setup(path_to_toy_csv, SRconfig)
