@@ -375,9 +375,12 @@ def equation_generator(i, q, r, s, dataset, enumerator, SRconfig, simpler=True):
     '''
         Generates the random equation 
         i is in the domain [0, N-1], and specifies which binary tree to use 
-        q is in the domain [0, G-1], and specifies which function of arity 1 configuration
-        r is in the domain [0, A-1], and specifies which function of arity 2 configuration
-        s is in the domain [0, B-1], and specifies which terminal configuration        
+        q is in the domain [0, G-1], and specifies which configuration of  
+            arity 1 functions
+        r is in the domain [0, A-1], and specifies which configuration of 
+            arity 2 functions
+        s is in the domain [0, B-1], and specifies which configuration of 
+            terminals
     '''
     en = enumerator
     f = len(SRconfig._f_functions)
@@ -457,7 +460,8 @@ def equation_generator2(i, r, s, dataset, enumerator, SRconfig, simpler=True):
         tree = tree.replace('.', term, 1)
     return tree
     
-def random_equation(N, cum_weights, dataset, enumerator, SRconfig, details=False):
+def random_equation(N, cum_weights, dataset, enumerator, SRconfig, 
+                    details=False):
     '''
         Generates a random equation given the number of permitted unique trees 
         (N), the probability of selection for each of those trees (cum_weights), 
@@ -476,25 +480,27 @@ def random_equation(N, cum_weights, dataset, enumerator, SRconfig, details=False
     q = enumerator.get_q(f, i)
     r = enumerator.get_r(n, i)
     s = enumerator.get_s(m, i)   
-    equation_string = equation_generator(i, q, r, s, dataset, enumerator, SRconfig, 
-                                         simpler=True)
+    equation_string = equation_generator(i, q, r, s, dataset, enumerator, 
+                                         SRconfig, simpler=True)
     if details == False:
         return equation_string
     else:   
         original_equation_string = equation_generator(i, q, r, s, dataset, 
                                                       enumerator, SRconfig, 
                                                       simpler=False)        
-        return [original_equation_string, equation_string, N, n, f, m, i, q, r, s]
+    result = [original_equation_string, equation_string, N, n, f, m, i, q, r, s]
+    return 
     
-def random_equation2(N, cum_weights, dataset, enumerator, SRconfig, details=False):
+def random_equation2(N, cum_weights, dataset, enumerator, SRconfig, 
+                     details=False):
     # for the case where there are zero functions of arity one 
     n = len(SRconfig._n_functions)
     m = dataset._m_terminals
     i = random.choices(range(0, N), cum_weights=cum_weights, k=1)[0]
     r = enumerator.get_r(n, i)
     s = enumerator.get_s(m, i)   
-    equation_string = equation_generator2(i, r, s, dataset, enumerator, SRconfig,
-                                          simpler=True)
+    equation_string = equation_generator2(i, r, s, dataset, enumerator, 
+                                          SRconfig, simpler=True)
     if details == False:
         return equation_string
     else:   
@@ -825,7 +831,8 @@ def check_goodness_of_fit(individual, params, my_data):
                                 args=(funcstring, my_data),
                                 method='leastsq', nan_policy='propagate')
         residual = result.residual
-        y_calc = eval_equation(result.params, funcstring, my_data, mode='y_calc')
+        y_calc = eval_equation(result.params, funcstring, my_data, 
+                               mode='y_calc')
         params_dict_to_store = result.params
     else:
         residual = eval_equation(params, funcstring, my_data)
@@ -903,8 +910,8 @@ class ResultList(object):
         self._results = sorted(self._results, key=lambda x: x._MSE)
     def print(self, y_data, top=5):
         table = []
-        header = ["Normalized Mean Squared Error", "R^2", "Equation, simplified", 
-                  "Parameters"]
+        header = ["Normalized Mean Squared Error", "R^2", 
+                  "Equation, simplified", "Parameters"]
         for i in range(0, top):
             row = self._results[i].summarize()
             row[0] = row[0]/np.std(y_data)
@@ -937,7 +944,8 @@ class Result(object):
         n_params = dataset._int_max_params
         parameters = create_fitting_parameters(n_params, self._params)
         eqn_original_cleaned = clean_funcstring(self._equation)
-        y_calc = eval_equation(parameters, eqn_original_cleaned, dataset, mode='y_calc')        
+        y_calc = eval_equation(parameters, eqn_original_cleaned, dataset, 
+                               mode='y_calc')        
         return y_calc
 
 def initialize_db(path_to_db):
@@ -962,18 +970,22 @@ def assign_n_evals(path_to_db):
                 
 def uniform_random_global_search_once(path_to_db, path_to_csv, SRconfig):
     # Run SRURGS once
-    (f, n, m, cum_weights, N, dataset, enumerator, _, _) = setup(path_to_csv, SRconfig)
+    (f, n, m, cum_weights, N, dataset, enumerator, _, _) = setup(path_to_csv, 
+                                                                 SRconfig)
     valid = False
     while valid == False:
         if f == 0:
-            eqn_str = random_equation2(N, cum_weights, dataset, enumerator, SRconfig)
+            eqn_str = random_equation2(N, cum_weights, dataset, enumerator, 
+                                       SRconfig)
         else:    
-            eqn_str = random_equation(N, cum_weights, dataset, enumerator, SRconfig)
+            eqn_str = random_equation(N, cum_weights, dataset, enumerator, 
+                                      SRconfig)
         try:
             simple_eqn = simplify_equation_string(eqn_str, dataset)
             initialize_db(path_to_db)    
             with SqliteDict(path_to_db, autocommit=True) as results_dict:
-                try: # if we have already attempted this equation, do not run again
+                # if we have already attempted this equation, do not run again
+                try: 
                     result = results_dict[simple_eqn]
                     raise FloatingPointError
                 except:
@@ -1030,7 +1042,8 @@ def generate_benchmark(benchmark_name, SRconfig):
                 dataset._dataframe.columns = dataset._x_labels.tolist() + [dataset._y_label]
                 dataset._data_dict = dataset.get_data_dict()
                 # calculate y for the sample problem 
-                y_calc = eval_equation(fit_param_list, eqn_original_cleaned, dataset, mode='y_calc')
+                y_calc = eval_equation(fit_param_list, eqn_original_cleaned, 
+                                       dataset, mode='y_calc')
                 dataset._dataframe[dataset._y_label] = y_calc
                 # save the test and train sets to file 
                 if zz == 0:
@@ -1124,17 +1137,17 @@ def plot_results(path_to_db, path_to_csv, SRconfig):
     data_dict = dict()
     xlabel = dataset._x_labels[0]
     data_dict[xlabel] = np.linspace(np.min(dataset._x_data), 
-                                                           np.max(dataset._x_data))
+                                    np.max(dataset._x_data))
     y_calc = eval_equation(params_obj, eval_eqn_string, dataset, mode=data_dict)
-    plt.plot(data_dict[xlabel], y_calc, 'b-', label=dataset._y_label+' calculated')
-    plt.plot(dataset._x_data, dataset._y_data, 'ro', label=dataset._y_label+' original data')
+    plt.plot(data_dict[xlabel], y_calc, 'b-', 
+             label=dataset._y_label+' calculated')
+    plt.plot(dataset._x_data, dataset._y_data, 'ro', 
+             label=dataset._y_label+' original data')
     plt.xlabel(dataset._x_labels[0])
     plt.ylabel(dataset._y_label)
     plt.savefig('image/plot.svg')
     plt.savefig('image/plot.png')
-    
-    
-
+       
 def generate_benchmarks_SRconfigs():
     SR_config1 = SymbolicRegressionConfig(n_functions=['add','sub','mul','div'],
                                           f_functions=[],
