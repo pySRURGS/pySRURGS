@@ -61,7 +61,8 @@ benchmarks_fit_param_domain = [-10, 10]
 benchmarks_dir = './csvs/benchmarks'
 benchmarks_summary_tsv = './benchmarks_summary.tsv'
 memoize_funcs = False
-defaults_dict = {'funcs_arity_two': 'add,sub,mul,div,pow',
+defaults_dict = {'funcs_arity_one': None,
+                 'funcs_arity_two': 'add,sub,mul,div,pow',
                  'max_num_fit_params': 3,
                  'max_permitted_trees':1000,
                  'path_to_db': None}
