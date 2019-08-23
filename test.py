@@ -25,7 +25,7 @@ def run_python_tests():
     # load the default command line values
     defaults = pySRURGS.defaults_dict
     n_funcs = defaults['funcs_arity_two']
-    f_funcs = defaults['funcs_arity_one']
+    f_funcs = None
     max_num_fit_params = defaults['max_num_fit_params']
     max_permitted_trees = defaults['max_permitted_trees']
     # assign the arguments used for later assessment of the algorithm
