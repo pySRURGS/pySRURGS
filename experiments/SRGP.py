@@ -113,6 +113,10 @@ for i in range(0, int_max_params):
     var_assignment_command += deap_var_name + '="' + param_names[i] + '")'
     eval(var_assignment_command)
 
+class InfanticideException(object):
+    def __init__(self):
+        pass
+
 #Define our 'Individual' class
 creator.create('FitnessMin', base.Fitness, weights=(-1.0,))
 creator.create('Individual',
@@ -139,7 +143,7 @@ def evaluate(individual):
     with SqliteDict(path_to_db, autocommit=True) as results_dict:
         try: # if we have already attempted this equation, do not run again
             result = results_dict[simple_eqn]
-            return (result._MSE,)
+            raise InfanticideException("Don't run the same equation twice")
         except:
             pass  
     (sum_of_squared_residuals, 
@@ -184,7 +188,7 @@ def filter_population(population, toolbox):
                     evaluate(new_indiv)
                     population[i] = new_indiv
                     run_bool = False
-                except FloatingPointError:
+                except FloatingPointError, InfanticideException:
                     pass
     return population    
 
