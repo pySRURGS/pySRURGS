@@ -53,8 +53,8 @@ def run_python_tests():
     print(num_equations)    
     # first remove all the benchmark files from the repository 
     benchmarks = glob.glob(os.path.join(benchmarks_dir, '*'))
-    for benchmark file in benchmarks:
-        os.remove(benchmark)
+    for benchmark_file in benchmarks:
+        os.remove(benchmark_file)
     # test the generation of benchmarks 
     pySRURGS.generate_benchmarks()
     # test max_num_fit_params 0 
