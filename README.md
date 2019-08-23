@@ -12,7 +12,8 @@ equation of best fit for a numerical dataset. This package does this task by
 randomly, with uniform probability of selection, guessing candidate solutions 
 and evaluating them. The No Free Lunch Theorem argues that random search should 
 be equivalent to other approaches like Genetic Programming when assessing algorithm 
-performing over all possible problems.
+performing over all possible problems. This software should be useful for data analysts
+and researchers working on symbolic regression problems.
 
 ## Features 
 
