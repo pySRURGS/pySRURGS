@@ -911,7 +911,6 @@ class Result(object):
     '''
         Class to save a single result of SRURGS
         Permits easy printing
-        TODO add predict functionality
     '''
     def __init__(self, simple_equation, equation, MSE, R2, params):
         self._simple_equation = simple_equation
@@ -930,13 +929,11 @@ class Result(object):
         summary.append(parameters_str)
         return summary
     def predict(self, dataset):
-        pass
-        #TODO
-        #parameters = create_parameter_list(dataset._m_terminals)
-        #for i in range(0,dataset._m_terminals):
-        #    parameters['p'+str(i)].value = fitting_parameters[i]
-        #y_calc = eval_equation(fit_param_list, eqn_original_cleaned, dataset, mode='y_calc')
-        
+        n_params = dataset._int_max_params
+        parameters = create_fitting_parameters(n_params, self._params)
+        eqn_original_cleaned = clean_funcstring(self._equation)
+        y_calc = eval_equation(parameters, eqn_original_cleaned, dataset, mode='y_calc')        
+        return y_calc
 
 def initialize_db(path_to_db):
     # initialize the SQLiteDict 
