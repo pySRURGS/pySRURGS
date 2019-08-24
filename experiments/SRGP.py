@@ -113,7 +113,7 @@ for i in range(0, int_max_params):
     var_assignment_command += deap_var_name + '="' + param_names[i] + '")'
     eval(var_assignment_command)
 
-class InfanticideException(object):
+class InfanticideException(Exception):
     def __init__(self):
         pass
 
@@ -145,7 +145,7 @@ def evaluate(individual):
             result = results_dict[simple_eqn]
             raise InfanticideException("Don't run the same equation twice")
         except:
-            pass  
+            pass
     (sum_of_squared_residuals, 
     sum_of_squared_totals, 
     R2, fitted_params, 
@@ -167,7 +167,7 @@ toolbox.register("lambdify", gp.compile, pset=pset)
 toolbox.register("evaluate", evaluate)
 toolbox.register("select", tools.selTournament, tournsize=4)
 toolbox.register("mate", gp.cxOnePoint)
-toolbox.register("expr_mut", gp.genGrow, min_=0, max_=2)
+toolbox.register("expr_mut", gp.genGrow, min_=0, max_=4)
 toolbox.register("mutate", gp.mutUniform, expr=toolbox.expr_mut, pset=pset)
 toolbox.register("map",  map)
     
@@ -327,12 +327,15 @@ def eaSimple(population, toolbox, cxpb, mutpb, ngen, verbose=__debug__):
         # Append the current generation statistics to the logbook
         nevals = len(invalid_ind)
         logbook.record(gen=gen, nevals=nevals)
-        if best_ever is None:
-            best_ever = min(population, key=lambda ind: ind.fitness.values[0])
-        else:
-            best = min(population, key=lambda ind: ind.fitness.values[0])
-            if best.fitness.values[0] < best_ever.fitness.values[0]:
-                best_ever = best
+        try:
+            if best_ever is None:
+                best_ever = min(population, key=lambda ind: ind.fitness.values[0])
+            else:
+                best = min(population, key=lambda ind: ind.fitness.values[0])
+                if best.fitness.values[0] < best_ever.fitness.values[0]:
+                    best_ever = best
+        except:
+            pdb.set_trace()
         MSE = best_ever.fitness.values[0]
         NMSE = np.nan_to_num(MSE / np.std(dataset._y_data))
     return population, logbook, best_ever
