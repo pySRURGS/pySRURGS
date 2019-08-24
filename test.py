@@ -37,8 +37,6 @@ def run_command_line_tests():
     print('Finished single cpu run')
     sh.python('pySRURGS.py', '-count', qrtic_polynml_csv, 10)
     print('Finished count equations run')
-    sh.python('pySRURGS.py', '-benchmarks', qrtic_polynml_csv, 10)
-    print('Finished benchmark generation run')
     sh.python('pySRURGS.py', '-max_num_fit_params', 0, qrtic_polynml_csv, 10)
     print('Finished zero fit params run')
     sh.python('pySRURGS.py', '-max_num_fit_params', 5, qrtic_polynml_csv, 10)
