@@ -343,23 +343,6 @@ def simplify_equation_string(eqn_str, dataset):
         This replaces add(a,b) with a + b 
         Also uses sympy for algebraic simplification 
     '''
-    z = True 
-    while z == True:
-        z = False
-        for operator_name, operator_symbol in opers_dict.items():            
-            pattern = operator_name + '\(([^,]+?), ([^,]+?)\)'
-            match = re.search(pattern, eqn_str)
-            if match is not None:
-                z = True             
-                first_argument = match.groups(0)[0]
-                second_argument = match.groups(0)[1]
-                replacement = '[' + first_argument + operator_symbol
-                replacement += second_argument + ']'
-                prefix = eqn_str[:match.start()]
-                suffix = eqn_str[match.end():]
-                eqn_str = prefix + replacement + suffix
-    eqn_str = eqn_str.replace('[', '(')
-    eqn_str = eqn_str.replace(']', ')')
     s = sympy.sympify(eqn_str, locals = dataset._sympy_namespace)
     try:
         eqn_str = str(sympy.simplify(s))
@@ -908,12 +891,12 @@ class ResultList(object):
         self._results = []
     def sort(self):
         self._results = sorted(self._results, key=lambda x: x._MSE)
-    def print(self, y_data, top=5):
+    def print(self, y_data, top=5, mode='succinct'):
         table = []
         header = ["Normalized Mean Squared Error", "R^2", 
                   "Equation, simplified", "Parameters"]
         for i in range(0, top):
-            row = self._results[i].summarize()
+            row = self._results[i].summarize(mode)
             row[0] = row[0]/np.std(y_data)
             table.append(row)
         table_string = tabulate.tabulate(table, headers=header)
@@ -932,8 +915,11 @@ class Result(object):
         self._params = np.array(params)
     def print(self):        
         print(str_e(self._MSE), str_e(self._R2), self._simple_equation)
-    def summarize(self):
-        summary = [self._MSE, self._R2, self._simple_equation]
+    def summarize(self, mode='succinct'):
+        if mode == 'succinct':
+            summary = [self._MSE, self._R2, self._simple_equation]
+        elif mode == 'detailed':
+            summary = [self._MSE, self._R2, self._simple_equation, self._equation]
         parameters = []
         for param in self._params:
             parameters.append(str_e(param))
