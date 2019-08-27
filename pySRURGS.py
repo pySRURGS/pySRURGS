@@ -823,10 +823,9 @@ def random_equation(N, cum_weights, dataset, enumerator, SRconfig,
     if details == False:
         return equation_string
     else:   
-        original_equation_string = equation_generator(i, q, r, s, dataset, 
-                                                      enumerator, SRconfig)
-    result = [original_equation_string, equation_string, N, n, f, m, i, q, r, s]
-    return 
+        result = [original_equation_string, equation_string, 
+        N, n, f, m, i, q, r, s]    
+        return result
     
 def random_equation2(N, cum_weights, dataset, enumerator, SRconfig, 
                      details=False):
@@ -866,7 +865,7 @@ def random_equation2(N, cum_weights, dataset, enumerator, SRconfig,
         equation_string: string
             A randomly generated pySRURGS equation string 
     if `details` == True:
-        [equation_string, N, n, f, m, i, q, r, s]
+        [equation_string, N, n, m, i, q, r, s]
     """
     n = len(SRconfig._n_functions)
     m = dataset._m_terminals
@@ -878,9 +877,8 @@ def random_equation2(N, cum_weights, dataset, enumerator, SRconfig,
     if details == False:
         return equation_string
     else:   
-        original_equation_string = equation_generator2(i, r, s, dataset, 
-                                                       enumerator, SRconfig)
-        return [original_equation_string, equation_string, N, n, m, i, r, s]
+        result = [equation_string, N, n, m, i, r, s]
+        return result
 
 class Dataset(object):
     """
@@ -1990,6 +1988,7 @@ def generate_benchmark(benchmark_name, SRconfig):
             if eqn_simple == '0':
                 valid = False            
         except Exception as e:
+            print(e)
             valid = False
             
     
