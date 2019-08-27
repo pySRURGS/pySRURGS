@@ -1697,7 +1697,7 @@ class ResultList(object):
     def print(self, y_data, top=5, mode='succinct'):
         """
         Prints the Normalized Mean Squared Error, R^2, Equation (simplified), 
-        and Parameters values for the top results_dict. Run `self._sort` prior 
+        and Parameters values for the top results_dict. Run `self.sort` prior 
         to executing `self.print`.
         
         Parameters
