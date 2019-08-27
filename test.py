@@ -93,9 +93,9 @@ def test_python_code():
     # get the MSE of the first run 
     result_list = pySRURGS.compile_results(path_to_db, path_to_csv, SRconfig)
     (_, _, _, _, _, dataset, _, _, _) = pySRURGS.setup(path_to_csv, SRconfig)
-    MSE_calc = (result_list._results[0].predict(dataset) - dataset._y_data)**2/len(dataset._y_data)
-    print(MSE_calc, MSE_1st_run)
+    MSE_calc = (result_list._results[0].predict(dataset) - dataset._y_data)**2/len(dataset._y_data)    
     MSE_1st_run = result_list._results[0]._MSE
+    print(MSE_calc, MSE_1st_run)
     # test the multiprocessing functionality and that MSE decreases with 1000 runs
     max_attempts = 100
     for i in tqdm.tqdm(range(0,max_attempts)):
