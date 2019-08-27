@@ -318,7 +318,7 @@ def create_parameter_list(m):
         my_pars.append(make_parameter_name('p'+str(i)))
     return my_pars
 
-
+@memoize
 def get_bits(x):
     ''' Gets the odd and even bits of a binary number in string format. Used by 
     `get_left_right_bits`.
@@ -329,7 +329,7 @@ def get_bits(x):
     odd_bits = x[1::2]
     return odd_bits, even_bits
 
-
+@memoize
 def get_left_right_bits(my_int):
     """
     Converts an integer to binary and returns two integers, representing the odd
@@ -488,7 +488,7 @@ def div(x, y):
 def pow(x, y):
     return np.power(x,y)
 
-
+@memoize
 def mempower(a,b):
     """
     Same as pow, but able to handle extremely large values, and memoized.
@@ -1019,7 +1019,7 @@ class Enumerator(object):
     >>> en.get_M(1000, 5, 5, 5)
     """
     
-    
+    @memoize
     def get_M(self, N, f, n, m):
         """
         Calculate the total number of equations for this symbolic regression 
@@ -1056,7 +1056,7 @@ class Enumerator(object):
             return count
         M = mpmath.nsum(get_count, [0, N-1])
         return M    
-    
+    @memoize
     def get_G(self, f, i):
         """
         Calculate the total number of configurations of the functions of arity 
@@ -1106,7 +1106,7 @@ class Enumerator(object):
         A = mempower(n,k)
         A = int(A)
         return A
-    
+    @memoize
     def get_B(self, m, i):
         """
         Calculate the total number of configurations of the terminals for the 
@@ -1146,7 +1146,7 @@ class Enumerator(object):
         B = self.get_B(m, i)
         s = random.randint(0, B-1)
         return s
-    
+    @memoize
     def get_l_i(self, i):
         ''' 
             from `f` functions of arity one, pick `l_i `
@@ -1166,7 +1166,7 @@ class Enumerator(object):
             right_l_i = self.get_l_i(right_int)
             l_i = left_l_i + right_l_i + 1
         return l_i
-    
+    @memoize
     def get_k_i(self, i):
         ''' 
             from `n` functions of arity two, pick `k_i`
@@ -1186,7 +1186,7 @@ class Enumerator(object):
             right_k_i = self.get_k_i(right_int)
             k_i = left_k_i + right_k_i + 1
         return k_i
-    
+    @memoize
     def get_j_i(self, i):
         ''' 
             from `m` terminals, pick `j_i`
@@ -1226,7 +1226,7 @@ class Enumerator2(object):
     >>> en.get_M(1000, 5, 5)
     """
     
-    
+    @memoize
     def get_M(self, N, n, m):
         """
         Calculate the total number of equations for this symbolic regression 
@@ -1258,7 +1258,7 @@ class Enumerator2(object):
             return count
         M = mpmath.nsum(get_count, [0, N-1])
         return M    
-    
+    @memoize
     def get_A(self, n, i):
         """
         Calculate the total number of configurations of the functions of arity 
@@ -1283,7 +1283,7 @@ class Enumerator2(object):
         A = mempower(n,k)
         A = int(A)
         return A
-    
+    @memoize
     def get_B(self, m, i):
         """
         Calculate the total number of configurations of the terminals for the 
@@ -1318,7 +1318,7 @@ class Enumerator2(object):
         B = self.get_B(m, i)
         s = random.randint(0, B-1)
         return s
-    
+    @memoize
     def get_k_i(self, i):
         ''' 
             from `n` functions of arity two, pick `k_i` 
@@ -1336,7 +1336,7 @@ class Enumerator2(object):
             right_k_i = self.get_k_i(right_int)
             k_i = left_k_i + right_k_i + 1
         return k_i
-    
+    @memoize
     def get_j_i(self, i):
         ''' 
             from `m` terminals, pick `j_i`
@@ -1544,7 +1544,7 @@ def check_goodness_of_fit(individual, params, my_data):
              residual)
     return result
 
-
+@memoize
 def ith_full_binary_tree(i):
     """
     Generates the `i`th binary tree. Use ith_full_binary_tree2 when no functions
@@ -1574,7 +1574,7 @@ def ith_full_binary_tree(i):
         tree = '[' + left +', ' +right + ']'
     return tree
 
-
+@memoize
 def ith_full_binary_tree2(i):
     """
     Generates the `i`th binary tree. Use ith_full_binary_tree when functions
@@ -1602,7 +1602,7 @@ def ith_full_binary_tree2(i):
         tree = '[' + left +', ' +right + ']'
     return tree
 
-    
+@memoize
 def get_cum_weights(N, f, n, m, enumerator):
     """
     Generates the relative probabilities of selecting the `i`th binary tree.
@@ -1643,7 +1643,7 @@ def get_cum_weights(N, f, n, m, enumerator):
     cum_weights = np.array(weights)/np.sum(weights)
     return cum_weights
 
-
+@memoize
 def get_cum_weights2(N, n, m, enumerator):
     """
     Generates the relative probabilities of selecting the `i`th binary tree.
