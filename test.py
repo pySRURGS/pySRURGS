@@ -10,6 +10,7 @@ import pdb
 import pySRURGS
 import mpmath
 import tqdm
+import numpy as np
 from pySRURGS import Result
 try:
     import sh
