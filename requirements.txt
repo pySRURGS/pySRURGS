@@ -10,3 +10,5 @@ tabulate
 matplotlib
 scipy
 python-coveralls
+pytest
+pytest-cov
