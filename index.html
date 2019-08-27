@@ -88,8 +88,8 @@ scaled:&nbsp;Boolean<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
 Returns<br>
 -------<br>
-<a href="#Dataset">Dataset</a><br>
-&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;pySRURGS&nbsp;dataset&nbsp;<a href="builtins.html#object">object</a>,&nbsp;which&nbsp;houses&nbsp;a&nbsp;variety&nbsp;of&nbsp;attributes&nbsp;including<br>
+self<br>
+&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;pySRURGS.<a href="#Dataset">Dataset</a>&nbsp;<a href="builtins.html#object">object</a>,&nbsp;which&nbsp;houses&nbsp;a&nbsp;variety&nbsp;of&nbsp;attributes&nbsp;including<br>
 &nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;numerical&nbsp;data,&nbsp;the&nbsp;sympy&nbsp;namespace,&nbsp;the&nbsp;data&nbsp;dict&nbsp;used&nbsp;in&nbsp;evaluating&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;equation&nbsp;string,&nbsp;etc.<br>
 &nbsp;<br>
@@ -134,9 +134,9 @@ problem.&nbsp;Use&nbsp;`<a href="#Enumerator2">Enumerator2</a>`&nbsp;instead&nbs
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
 Returns<br>
 -------<br>
-<a href="#Enumerator">Enumerator</a><br>
-&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;pySRURGS&nbsp;<a href="#Enumerator">Enumerator</a>&nbsp;<a href="builtins.html#object">object</a>&nbsp;which&nbsp;houses&nbsp;various&nbsp;methods&nbsp;for&nbsp;the&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;enumeration.<br>
+self<br>
+&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;pySRURGS.<a href="#Enumerator">Enumerator</a>&nbsp;<a href="builtins.html#object">object</a>&nbsp;which&nbsp;houses&nbsp;various&nbsp;methods&nbsp;for&nbsp;the&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;enumeration&nbsp;of&nbsp;the&nbsp;problem&nbsp;space.<br>
 &nbsp;<br>
 Example<br>
 --------<br>
@@ -161,7 +161,7 @@ i:&nbsp;int&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
 Returns<br>
 -------<br>
-A:&nbsp;mpmath&nbsp;integer<br>
+A:&nbsp;mpmath.ctx_mp_python.mpf&nbsp;(int)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;number&nbsp;of&nbsp;possible&nbsp;configurations&nbsp;of&nbsp;functions&nbsp;of&nbsp;arity&nbsp;two</tt></dd></dl>
 
 <dl><dt><a name="Enumerator-get_B"><strong>get_B</strong></a>(self, m, i)</dt><dd><tt>Calculate&nbsp;the&nbsp;total&nbsp;number&nbsp;of&nbsp;configurations&nbsp;of&nbsp;the&nbsp;terminals&nbsp;for&nbsp;the&nbsp;<br>
@@ -179,7 +179,7 @@ i:&nbsp;int&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
 Returns<br>
 -------<br>
-B:&nbsp;mpmath&nbsp;integer<br>
+B:&nbsp;mpmath.ctx_mp_python.mpf&nbsp;(int)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;number&nbsp;of&nbsp;possible&nbsp;configurations&nbsp;of&nbsp;terminals</tt></dd></dl>
 
 <dl><dt><a name="Enumerator-get_G"><strong>get_G</strong></a>(self, f, i)</dt><dd><tt>Calculate&nbsp;the&nbsp;total&nbsp;number&nbsp;of&nbsp;configurations&nbsp;of&nbsp;the&nbsp;functions&nbsp;of&nbsp;arity&nbsp;<br>
@@ -197,7 +197,7 @@ i:&nbsp;int&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
 Returns<br>
 -------<br>
-G:&nbsp;mpmath&nbsp;integer<br>
+G:&nbsp;mpmath.ctx_mp_python.mpf&nbsp;(int)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;number&nbsp;of&nbsp;possible&nbsp;configurations&nbsp;of&nbsp;functions&nbsp;of&nbsp;arity&nbsp;one</tt></dd></dl>
 
 <dl><dt><a name="Enumerator-get_M"><strong>get_M</strong></a>(self, N, f, n, m)</dt><dd><tt>Calculate&nbsp;the&nbsp;total&nbsp;number&nbsp;of&nbsp;equations&nbsp;for&nbsp;this&nbsp;symbolic&nbsp;regression&nbsp;<br>
@@ -223,7 +223,7 @@ m:&nbsp;int&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
 Returns<br>
 -------<br>
-M:&nbsp;mpmath&nbsp;integer<br>
+M:&nbsp;mpmath.ctx_mp_python.mpf&nbsp;(int)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;number&nbsp;of&nbsp;possible&nbsp;equations&nbsp;in&nbsp;this&nbsp;symbolic&nbsp;regression&nbsp;problem</tt></dd></dl>
 
 <dl><dt><a name="Enumerator-get_j_i"><strong>get_j_i</strong></a>(self, i)</dt><dd><tt>from&nbsp;`m`&nbsp;terminals,&nbsp;pick&nbsp;`j_i`<br>
@@ -233,7 +233,9 @@ M:&nbsp;mpmath&nbsp;integer<br>
 `k_i`&nbsp;is&nbsp;the&nbsp;number&nbsp;of&nbsp;non-leaf&nbsp;nodes&nbsp;<br>
 in&nbsp;the&nbsp;tree&nbsp;corresponding&nbsp;to&nbsp;`i`</tt></dd></dl>
 
-<dl><dt><a name="Enumerator-get_l_i"><strong>get_l_i</strong></a>(self, i)</dt></dl>
+<dl><dt><a name="Enumerator-get_l_i"><strong>get_l_i</strong></a>(self, i)</dt><dd><tt>from&nbsp;`f`&nbsp;functions&nbsp;of&nbsp;arity&nbsp;one,&nbsp;pick&nbsp;`l_i&nbsp;`<br>
+`l_i`&nbsp;is&nbsp;the&nbsp;number&nbsp;of&nbsp;non-leaf&nbsp;nodes&nbsp;of&nbsp;arity&nbsp;one&nbsp;<br>
+in&nbsp;the&nbsp;tree&nbsp;corresponding&nbsp;to&nbsp;`i`</tt></dd></dl>
 
 <dl><dt><a name="Enumerator-get_q"><strong>get_q</strong></a>(self, f, i)</dt><dd><tt>Generates&nbsp;a&nbsp;random&nbsp;integer&nbsp;between&nbsp;0&nbsp;and&nbsp;`G`&nbsp;-&nbsp;1,&nbsp;inclusive</tt></dd></dl>
 
@@ -262,8 +264,9 @@ problem.&nbsp;Use&nbsp;`<a href="#Enumerator">Enumerator</a>`&nbsp;instead&nbsp;
 Returns<br>
 -------<br>
 <a href="#Enumerator">Enumerator</a><br>
-&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;pySRURGS&nbsp;<a href="#Enumerator">Enumerator</a>&nbsp;<a href="builtins.html#object">object</a>&nbsp;which&nbsp;houses&nbsp;various&nbsp;methods&nbsp;for&nbsp;the&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;enumeration.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;pySRURGS.<a href="#Enumerator2">Enumerator2</a>&nbsp;<a href="builtins.html#object">object</a>&nbsp;which&nbsp;houses&nbsp;various&nbsp;methods&nbsp;for&nbsp;the&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;enumeration&nbsp;of&nbsp;the&nbsp;problem&nbsp;space&nbsp;for&nbsp;case&nbsp;where&nbsp;only&nbsp;functions&nbsp;of&nbsp;arity<br>
+&nbsp;&nbsp;&nbsp;&nbsp;two&nbsp;are&nbsp;permitted.<br>
 &nbsp;<br>
 Example<br>
 --------<br>
@@ -288,7 +291,7 @@ i:&nbsp;int&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
 Returns<br>
 -------<br>
-A:&nbsp;mpmath&nbsp;integer<br>
+A:&nbsp;mpmath.ctx_mp_python.mpf&nbsp;(int)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;number&nbsp;of&nbsp;possible&nbsp;configurations&nbsp;of&nbsp;functions&nbsp;of&nbsp;arity&nbsp;two</tt></dd></dl>
 
 <dl><dt><a name="Enumerator2-get_B"><strong>get_B</strong></a>(self, m, i)</dt><dd><tt>Calculate&nbsp;the&nbsp;total&nbsp;number&nbsp;of&nbsp;configurations&nbsp;of&nbsp;the&nbsp;terminals&nbsp;for&nbsp;the&nbsp;<br>
@@ -306,7 +309,7 @@ i:&nbsp;int&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
 Returns<br>
 -------<br>
-B:&nbsp;mpmath&nbsp;integer<br>
+B:&nbsp;mpmath.ctx_mp_python.mpf&nbsp;(int)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;number&nbsp;of&nbsp;possible&nbsp;configurations&nbsp;of&nbsp;terminals</tt></dd></dl>
 
 <dl><dt><a name="Enumerator2-get_M"><strong>get_M</strong></a>(self, N, n, m)</dt><dd><tt>Calculate&nbsp;the&nbsp;total&nbsp;number&nbsp;of&nbsp;equations&nbsp;for&nbsp;this&nbsp;symbolic&nbsp;regression&nbsp;<br>
@@ -328,11 +331,12 @@ m:&nbsp;int&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
 Returns<br>
 -------<br>
-M:&nbsp;mpmath&nbsp;integer<br>
+M:&nbsp;mpmath.ctx_mp_python.mpf&nbsp;(int)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;number&nbsp;of&nbsp;possible&nbsp;equations&nbsp;in&nbsp;this&nbsp;symbolic&nbsp;regression&nbsp;problem</tt></dd></dl>
 
 <dl><dt><a name="Enumerator2-get_j_i"><strong>get_j_i</strong></a>(self, i)</dt><dd><tt>from&nbsp;`m`&nbsp;terminals,&nbsp;pick&nbsp;`j_i`<br>
-`j_i`&nbsp;is&nbsp;the&nbsp;number&nbsp;of&nbsp;leafs&nbsp;in&nbsp;the&nbsp;tree&nbsp;corresponding&nbsp;to&nbsp;`i`</tt></dd></dl>
+`j_i`&nbsp;is&nbsp;the&nbsp;number&nbsp;of&nbsp;leafs&nbsp;<br>
+in&nbsp;the&nbsp;tree&nbsp;corresponding&nbsp;to&nbsp;`i`</tt></dd></dl>
 
 <dl><dt><a name="Enumerator2-get_k_i"><strong>get_k_i</strong></a>(self, i)</dt><dd><tt>from&nbsp;`n`&nbsp;functions&nbsp;of&nbsp;arity&nbsp;two,&nbsp;pick&nbsp;`k_i`&nbsp;<br>
 `k_i`&nbsp;is&nbsp;the&nbsp;number&nbsp;of&nbsp;non-leaf&nbsp;nodes&nbsp;<br>
@@ -499,8 +503,8 @@ max_permitted_trees:&nbsp;int&nbsp;<br>
 &nbsp;<br>
 Returns<br>
 -------<br>
-<a href="#SymbolicRegressionConfig">SymbolicRegressionConfig</a><br>
-&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;symbolic&nbsp;regression&nbsp;problem&nbsp;configuration&nbsp;<a href="builtins.html#object">object</a>,&nbsp;with&nbsp;attributes&nbsp;<br>
+self<br>
+&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;pySRURGS.<a href="#SymbolicRegressionConfig">SymbolicRegressionConfig</a>&nbsp;<a href="builtins.html#object">object</a>,&nbsp;with&nbsp;attributes&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;self.<strong>_n_functions</strong>,&nbsp;self.<strong>_f_functions</strong>,&nbsp;self.<strong>_max_num_fit_params</strong>,&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;self.<strong>_max_permitted_trees</strong>.<br>
 &nbsp;<br>
@@ -647,7 +651,22 @@ SRconfig:&nbsp;pySRURGS.<a href="#SymbolicRegressionConfig">SymbolicRegressionCo
 &nbsp;<br>
 Returns<br>
 -------<br>
-number_possible_equations:&nbsp;mpmath&nbsp;int</tt></dd></dl>
+number_possible_equations:&nbsp;mpmath.ctx_mp_python.mpf&nbsp;(int)</tt></dd></dl>
+ <dl><dt><a name="-count_parameters_in_equation_string"><strong>count_parameters_in_equation_string</strong></a>(equation_string)</dt><dd><tt>Reads&nbsp;the&nbsp;equation&nbsp;string&nbsp;and&nbsp;determines&nbsp;the&nbsp;number&nbsp;of&nbsp;fitting&nbsp;parameters.<br>
+Assumes&nbsp;that&nbsp;fitting&nbsp;parameter&nbsp;names&nbsp;are&nbsp;in&nbsp;the&nbsp;form&nbsp;'p'&nbsp;+&nbsp;str(myint)<br>
+and&nbsp;that&nbsp;myint&nbsp;starts&nbsp;with&nbsp;0&nbsp;indexing.<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+equation_string:&nbsp;string&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;pySRURGS&nbsp;generated&nbsp;equation&nbsp;string.&nbsp;Should&nbsp;have&nbsp;fitting&nbsp;parameter&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;prefix/suffix&nbsp;still&nbsp;in&nbsp;place.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+Returns<br>
+-------<br>
+num_params:&nbsp;int<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;minimum&nbsp;number&nbsp;of&nbsp;fitting&nbsp;parameters&nbsp;needed&nbsp;to&nbsp;recreate&nbsp;the&nbsp;search&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;space&nbsp;used&nbsp;to&nbsp;generate&nbsp;this&nbsp;equation&nbsp;string.</tt></dd></dl>
  <dl><dt><a name="-create_db_name"><strong>create_db_name</strong></a>(path_to_csv, additional_name=None)</dt><dd><tt>Generates&nbsp;a&nbsp;name&nbsp;of&nbsp;a&nbsp;SqliteDict&nbsp;file&nbsp;based&nbsp;on&nbsp;the&nbsp;CSV&nbsp;filename<br>
 &nbsp;<br>
 Parameters<br>
@@ -854,7 +873,8 @@ None<br>
 &nbsp;<br>
 Returns<br>
 -------<br>
-SR_config1,&nbsp;SR_config2&nbsp;&nbsp;&nbsp;&nbsp;<br>
+result:&nbsp;tuple<br>
+&nbsp;&nbsp;(SR_config1,&nbsp;SR_config2)&nbsp;&nbsp;&nbsp;<br>
 &nbsp;<br>
 Notes<br>
 ------<br>
@@ -867,7 +887,8 @@ SR_config2:&nbsp;pySRURGS.<a href="#SymbolicRegressionConfig">SymbolicRegression
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;f_functions=['sin','sinh','exp'],<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;max_num_fit_params=5,<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;max_permitted_trees=200)</tt></dd></dl>
- <dl><dt><a name="-get_bits"><strong>get_bits</strong></a>(x)</dt></dl>
+ <dl><dt><a name="-get_bits"><strong>get_bits</strong></a>(x)</dt><dd><tt>Gets&nbsp;the&nbsp;odd&nbsp;and&nbsp;even&nbsp;bits&nbsp;of&nbsp;a&nbsp;binary&nbsp;number&nbsp;in&nbsp;string&nbsp;format.&nbsp;Used&nbsp;by&nbsp;<br>
+`get_left_right_bits`.</tt></dd></dl>
  <dl><dt><a name="-get_cum_weights"><strong>get_cum_weights</strong></a>(N, f, n, m, enumerator)</dt><dd><tt>Generates&nbsp;the&nbsp;relative&nbsp;probabilities&nbsp;of&nbsp;selecting&nbsp;the&nbsp;`i`th&nbsp;binary&nbsp;tree.<br>
 Sums&nbsp;to&nbsp;1.&nbsp;Ensures&nbsp;that&nbsp;each&nbsp;equation&nbsp;has&nbsp;equal&nbsp;probability&nbsp;of&nbsp;selection.<br>
 Gives&nbsp;increasing&nbsp;probability&nbsp;with&nbsp;increasing&nbsp;`i`,&nbsp;because&nbsp;larger&nbsp;values&nbsp;<br>
@@ -1035,7 +1056,7 @@ Returns<br>
 tree:&nbsp;string&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;binary&nbsp;tree&nbsp;represented&nbsp;using&nbsp;[.,.]&nbsp;to&nbsp;represent&nbsp;a&nbsp;full&nbsp;binary&nbsp;tree,<br>
 &nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;'.'&nbsp;to&nbsp;represent&nbsp;terminals.</tt></dd></dl>
- <dl><dt><a name="-log"><strong>log</strong></a>(x)</dt></dl>
+ <dl><dt><a name="-log"><strong>log</strong></a>(x)</dt><dd><tt>Note,&nbsp;this&nbsp;is&nbsp;actually&nbsp;<a href="#-log">log</a>(abs(x))</tt></dd></dl>
  <dl><dt><a name="-make_parameter_name"><strong>make_parameter_name</strong></a>(par)</dt><dd><tt>Converts&nbsp;a&nbsp;fitting&nbsp;parameter&nbsp;name&nbsp;to&nbsp;pySRURGS&nbsp;safe&nbsp;parameter&nbsp;name.&nbsp;Prevents&nbsp;<br>
 string&nbsp;manipulations&nbsp;on&nbsp;parameter&nbsp;names&nbsp;from&nbsp;affecting&nbsp;function&nbsp;names.<br>
 &nbsp;<br>
@@ -1081,12 +1102,12 @@ b:&nbsp;int&nbsp;<br>
 &nbsp;<br>
 Returns<br>
 -------<br>
-result:&nbsp;mpmath&nbsp;integer<br>
+result:&nbsp;mpmath.ctx_mp_python.mpf&nbsp;(int)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;`a&nbsp;**&nbsp;b`</tt></dd></dl>
  <dl><dt><a name="-mul"><strong>mul</strong></a>(x, y)</dt></dl>
  <dl><dt><a name="-plot_results"><strong>plot_results</strong></a>(path_to_db, path_to_csv, SRconfig)</dt><dd><tt>Reads&nbsp;the&nbsp;generated&nbsp;SqliteDict&nbsp;file&nbsp;to&nbsp;determine&nbsp;the&nbsp;best&nbsp;model,&nbsp;<br>
 then&nbsp;plots&nbsp;it&nbsp;against&nbsp;the&nbsp;raw&nbsp;data.&nbsp;saves&nbsp;the&nbsp;figure&nbsp;to&nbsp;'./image/plot.png'<br>
-and&nbsp;'./image/plot.svg'<br>
+and&nbsp;'./image/plot.svg'.&nbsp;Only&nbsp;works&nbsp;for&nbsp;univariate&nbsp;data.<br>
 &nbsp;<br>
 Parameters<br>
 ----------<br>
@@ -1098,10 +1119,15 @@ path_to_csv:&nbsp;string<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<br>
 SRconfig:&nbsp;pySRUGS.<a href="#SymbolicRegressionConfig">SymbolicRegressionConfig</a><br>
 &nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;symbolic&nbsp;regression&nbsp;problem's&nbsp;configuration&nbsp;<a href="builtins.html#object">object</a><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;<br>
 Returns<br>
 -------<br>
-None</tt></dd></dl>
+None&nbsp;&nbsp;<br>
+&nbsp;<br>
+&nbsp;<br>
+Raises<br>
+------<br>
+Exception,&nbsp;if&nbsp;data&nbsp;is&nbsp;not&nbsp;univariate.</tt></dd></dl>
  <dl><dt><a name="-pow"><strong>pow</strong></a>(x, y)</dt></dl>
  <dl><dt><a name="-random_equation"><strong>random_equation</strong></a>(N, cum_weights, dataset, enumerator, SRconfig, details=False)</dt><dd><tt>Generates&nbsp;a&nbsp;random&nbsp;equation&nbsp;string.&nbsp;Generating&nbsp;the&nbsp;random&nbsp;numbers&nbsp;which&nbsp;<br>
 specify&nbsp;the&nbsp;equation,&nbsp;then&nbsp;passes&nbsp;those&nbsp;as&nbsp;arguments&nbsp;to&nbsp;equation_generator.&nbsp;<br>
@@ -1163,7 +1189,7 @@ enumerator:&nbsp;pySRURGS.<a href="#Enumerator2">Enumerator2</a><br>
 &nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;`<a href="#Enumerator2">Enumerator2</a>`&nbsp;<a href="builtins.html#object">object</a>&nbsp;for&nbsp;the&nbsp;symbolic&nbsp;regression&nbsp;problem<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<br>
 SRconfig:&nbsp;pySRURGS.<a href="#SymbolicRegressionConfig">SymbolicRegressionConfig</a><br>
-&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;`<a href="#SymbolicRegressionConfig">SymbolicRegressionConfig</a>`&nbsp;for&nbsp;the&nbsp;symbolic&nbsp;regression&nbsp;problem&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;`<a href="#SymbolicRegressionConfig">SymbolicRegressionConfig</a>`&nbsp;<a href="builtins.html#object">object</a>&nbsp;for&nbsp;the&nbsp;symbolic&nbsp;regression&nbsp;problem&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<br>
 details:&nbsp;Boolean&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Determines&nbsp;the&nbsp;output&nbsp;type&nbsp;<br>
@@ -1254,7 +1280,7 @@ df:&nbsp;pandas.DataFrame&nbsp;<a href="builtins.html#object">object</a><br>
 &nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;same&nbsp;`df`&nbsp;but&nbsp;with&nbsp;its&nbsp;independent&nbsp;variables&nbsp;scaled&nbsp;according&nbsp;to&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;`scale_type`&nbsp;which&nbsp;is&nbsp;specified&nbsp;by&nbsp;`get_scale_type`&nbsp;function</tt></dd></dl>
  <dl><dt><a name="-setup"><strong>setup</strong></a>(path_to_csv, SR_config)</dt><dd><tt>Reads&nbsp;the&nbsp;CSV&nbsp;file&nbsp;and&nbsp;the&nbsp;<a href="#SymbolicRegressionConfig">SymbolicRegressionConfig</a>&nbsp;and&nbsp;generates&nbsp;the&nbsp;<br>
-integers&nbsp;that&nbsp;define&nbsp;the&nbsp;problem.<br>
+integers&nbsp;and&nbsp;pySRURGS&nbsp;objects&nbsp;that&nbsp;define&nbsp;the&nbsp;problem.<br>
 &nbsp;<br>
 Parameters<br>
 ----------<br>
