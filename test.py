@@ -65,8 +65,8 @@ def test_python_code():
     max_num_fit_params = defaults['max_num_fit_params']
     max_permitted_trees = defaults['max_permitted_trees']
     # assign the arguments used for later assessment of the algorithm
-    path_to_db = x1sqrd_db
-    path_to_csv = x1sqrd_csv
+    path_to_db = qrtic_polynml_db
+    path_to_csv = qrtic_polynml_csv
     try:
         os.remove(path_to_db)
     except:
@@ -125,9 +125,9 @@ def test_python_code():
     test_max_permitted_trees = 10
     SRconfig_test_permitted_trees = pySRURGS.SymbolicRegressionConfig(n_funcs, f_funcs, 5, test_max_permitted_trees)
     for i in tqdm.tqdm(range(0,max_attempts)):
-        pySRURGS.uniform_random_global_search_once(qrtic_polynml_db, qrtic_polynml_csv, SRconfig_test_permitted_trees)
+        pySRURGS.uniform_random_global_search_once(path_to_db, path_to_csv, SRconfig_test_permitted_trees)
     # plot results 
-    pySRURGS.plot_results(qrtic_polynml_db, qrtic_polynml_csv, SRconfig)
+    pySRURGS.plot_results(path_to_db, path_to_csv, SRconfig)
     # generate benchmarks
     pySRURGS.generate_benchmarks()
     print('Finished run_python_tests')
