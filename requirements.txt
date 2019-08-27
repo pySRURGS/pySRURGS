@@ -9,3 +9,4 @@ sqlitedict
 tabulate
 matplotlib
 scipy
+python-coveralls
