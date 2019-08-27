@@ -40,7 +40,7 @@ random search on the symbolic regression problem and the creation of
 
 We use a novel methodology for the enumeration of full binary trees 
 [@Tychonievich:2013] and extend it for the symbolic regression problem. This 
-enumeration allows to ensure that all equations have an equal probability of
+enumeration allows us to ensure that all equations have an equal probability of
 being selected. ``pySRURGS`` is a command line script, allowing the user to
 specify the nature and size of the search space and the number of equations that
 will be attempted by the random search. ``pySRURGS`` performs fitting parameter
