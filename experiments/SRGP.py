@@ -132,45 +132,54 @@ def strip_dictionary_tags(dataset, equation_string):
         equation_string = equation_string.replace("pd['"+terminal+"']", terminal)
     return equation_string
 
-#Define our evaluation function
-def evaluate(individual):           
-    if type(individual) == list:
-        individual = individual[0]
-    funcstring = str(individual)
-    funcstring_dict_form = clean_funcstring(funcstring)
-    funcstring_readable_form = remove_dict_tags(funcstring_dict_form)
-    simple_eqn = simplify_equation_string(funcstring_readable_form, dataset)
-    with SqliteDict(path_to_db, autocommit=True) as results_dict:
-        try: # if we have already attempted this equation, do not run again
-            result = results_dict[simple_eqn]
-            raise InfanticideException("Don't run the same equation twice")
-        except:
-            pass
-    (sum_of_squared_residuals, 
-    sum_of_squared_totals, 
-    R2, fitted_params, 
-    residual) = check_goodness_of_fit(funcstring_dict_form, 
-                                      individual.params, dataset)    
-    MSE = sum_of_squared_residuals/len(dataset._y_data)
-    result = Result(simple_eqn, funcstring, MSE, R2, fitted_params)
-    individual.params = fitted_params
-    with SqliteDict(path_to_db, autocommit=True) as results_dict:
-        results_dict[simple_eqn] = result    
-    return (MSE,)
-  
+
 #Construct our toolbox
 toolbox = base.Toolbox()
 toolbox.register('expr', gp.genGrow, pset=pset, min_=1, max_=10)
 toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.expr)
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 toolbox.register("lambdify", gp.compile, pset=pset)
-toolbox.register("evaluate", evaluate)
 toolbox.register("select", tools.selTournament, tournsize=4)
 toolbox.register("mate", gp.cxOnePoint)
 toolbox.register("expr_mut", gp.genGrow, min_=0, max_=4)
 toolbox.register("mutate", gp.mutUniform, expr=toolbox.expr_mut, pset=pset)
-toolbox.register("map",  map)
-    
+toolbox.register("map",  map)    
+
+#Define our evaluation function
+def evaluate(individual):
+    # replace invalid equations with a random new equation
+    if type(individual) == list:
+        individual = individual[0]
+    valid = False
+    while valid == False:  
+        funcstring = str(individual)
+        funcstring_dict_form = clean_funcstring(funcstring)
+        funcstring_readable_form = remove_dict_tags(funcstring_dict_form)        
+        try:
+            simple_eqn = simplify_equation_string(funcstring_readable_form, dataset)
+            with SqliteDict(path_to_db, autocommit=True) as results_dict:
+                try: # if we have already attempted this equation, do not run again
+                    result = results_dict[simple_eqn]
+                    raise InfanticideException("Don't run the same equation twice")
+                except:
+                    pass
+            (sum_of_squared_residuals, 
+            sum_of_squared_totals, 
+            R2, fitted_params, 
+            residual) = check_goodness_of_fit(funcstring_dict_form, 
+                                              individual.params, dataset)    
+            MSE = sum_of_squared_residuals/len(dataset._y_data)
+            valid = True
+        except (FloatingPointError, InfanticideException):
+            individual = toolbox.population(n=1)[0]      
+    result = Result(simple_eqn, funcstring, MSE, R2, fitted_params)
+    individual.params = fitted_params
+    with SqliteDict(path_to_db, autocommit=True) as results_dict:
+        results_dict[simple_eqn] = result    
+    return (MSE,)
+  
+toolbox.register("evaluate", evaluate)
+
 def filter_population(population, toolbox):    
     for i in range(0, len(population)):
         individual = population[i]
@@ -191,19 +200,6 @@ def filter_population(population, toolbox):
                 except (FloatingPointError, InfanticideException):
                     pass
     return population    
-
-def check_against_db(individual):
-    if type(individual) == list:
-        individual = individual[0]
-    funcstring_stripped = strip_dictionary_tags(dataset, str(individual))
-    simple_eqn = simplify_equation_string(funcstring_stripped, dataset)
-    with SqliteDict(path_to_db, autocommit=True) as results_dict:
-        try: # if we have already attempted this equation, do not run again
-            result = results_dict[simple_eqn]
-            individual.fitness.value = (result._MSE,)
-        except:
-            pass
-    return individual
 
 def display_population(population):
     for ind in population:
@@ -317,7 +313,6 @@ def eaSimple(population, toolbox, cxpb, mutpb, ngen, verbose=__debug__):
         ######################################################################## 
         offspring = filter_population(offspring, toolbox)
         # Evaluate the individuals with an invalid fitness
-        offspring = list(toolbox.map(check_against_db, offspring))
         invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
         fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
         for ind, fit in zip(invalid_ind, fitnesses):
