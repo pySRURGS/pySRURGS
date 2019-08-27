@@ -1144,12 +1144,12 @@ class Enumerator(object):
         return s
     @memoize
     def get_l_i(self, i):
-        i = int(i)
         ''' 
             from `f` functions of arity one, pick `l_i `
             `l_i` is the number of non-leaf nodes of arity one 
             in the tree corresponding to `i` 
         ''' 
+        i = int(i)
         if i == 0:
             l_i = 0 
         elif i == 1:
