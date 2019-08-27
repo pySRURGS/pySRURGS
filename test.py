@@ -118,14 +118,18 @@ def test_python_code():
     else:
         test_f_funcs = test_f_funcs.split(',')
         test_f_funcs = pySRURGS.check_validity_suggested_functions(test_f_funcs, 1)
-    SRconfig_test_n_funcs = pySRURGS.SymbolicRegressionConfig(n_funcs, test_f_funcs, 5, max_permitted_trees)
+    SRconfig_test_f_funcs = pySRURGS.SymbolicRegressionConfig(n_funcs, test_f_funcs, 5, max_permitted_trees)
     for i in tqdm.tqdm(range(0,max_attempts)):
-        pySRURGS.uniform_random_global_search_once(path_to_db, path_to_csv, SRconfig)
+        pySRURGS.uniform_random_global_search_once(path_to_db, path_to_csv, SRconfig_test_f_funcs)
     # test max_permitted_trees = 10
     test_max_permitted_trees = 10
-    SRconfig_test_n_funcs = pySRURGS.SymbolicRegressionConfig(n_funcs, test_f_funcs, 5, test_max_permitted_trees)
+    SRconfig_test_permitted_trees = pySRURGS.SymbolicRegressionConfig(n_funcs, f_funcs, 5, test_max_permitted_trees)
     for i in tqdm.tqdm(range(0,max_attempts)):
-        pySRURGS.uniform_random_global_search_once(path_to_db, path_to_csv, SRconfig)
+        pySRURGS.uniform_random_global_search_once(path_to_db, path_to_csv, SRconfig_test_permitted_trees)
+    # plot results 
+    pySRURGS.plot_results(path_to_db, path_to_csv, SRconfig)
+    # generate benchmarks
+    pySRURGS.generate_benchmarks()
     print('Finished run_python_tests')
 
 if __name__ == '__main__':
