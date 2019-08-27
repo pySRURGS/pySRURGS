@@ -141,6 +141,9 @@ Running in multi processor mode
 
 ![Example performance](image/plot.svg)
 
+## API
+[Documentation](https://pysrurgs.github.io/pySRURGS/)
+
 ## Author
 
 **Sohrab Towfighi**
