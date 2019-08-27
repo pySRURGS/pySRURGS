@@ -551,36 +551,6 @@ def get_element_of_cartesian_product(*args, repeat=1, index=0):
         ith_item.append(pools[index][index_list[index]])
     return ith_item
 
-def fix_order_of_fitting_parameters(funcstring):
-    # NOT DEPLOYED YET
-    # sometimes equations come out like p1 * x2 - p0
-    # would prefer p0 * x2 - p1 because they are equivalent and reduces 
-    # redundancy 
-    # TODO - if a parameter is not in the equation, reduce the integer value 
-    # corresponding with the parameters in the equation, if their integer is 
-    # larger than that of the missing parameter
-    param_pattern = fitting_param_prefix + '(.+?)' + fitting_param_suffix
-    all_params = re.findall(param_pattern, funcstring)
-    params_indexing = list()
-    if len(all_params) > 0:
-        for i in range(0,len(all_params)):
-            current_param = all_params[i]
-            if current_param not in params_indexing:
-                params_indexing.append(current_param)
-        for j in range(0,len(params_indexing)):
-            old_name = make_parameter_name(params_indexing[j])
-            temp_name = make_parameter_name('p'+str(j))
-            funcstring = funcstring.replace(old_name, temp_name)
-        for j in range(0,len(params_indexing)):
-            temp_name = make_parameter_name('p'+str(j))
-            new_name = make_parameter_name(str(j))
-            funcstring = funcstring.replace(temp_name, new_name)
-    replacements = {'[' : '(', 
-                    ']' : ')'}                   
-    for key,value in replacements.items():
-        funcstring = funcstring.replace(key, value)
-    return funcstring
-
 def simplify_equation_string(eqn_str, dataset):
     """
     Simplify a pySRURGS equation string into a more human readable format
@@ -2138,39 +2108,6 @@ def compile_results(path_to_db, path_to_csv, SRconfig):
     result_list.sort()
     result_list.print(dataset._y_data)
     return result_list
-
-def count_parameters_in_equation_string(equation_string):
-    '''
-    Reads the equation string and determines the number of fitting parameters.
-    Assumes that fitting parameter names are in the form 'p' + str(myint)
-    and that myint starts with 0 indexing.
-    
-    Parameters
-    ----------
-    equation_string: string 
-        A pySRURGS generated equation string. Should have fitting parameter 
-        prefix/suffix still in place.
-        
-    Returns
-    -------
-    num_params: int
-        The minimum number of fitting parameters needed to recreate the search 
-        space used to generate this equation string.
-    
-    ''' 
-    pattern = re.escape(fitting_param_prefix) + '(.+?)' + re.escape(fitting_param_suffix)
-    regex = re.compile(pattern)
-    matches = regex.findall(equation_string)
-    if matches == []:
-        return 0
-    matches = list(set(matches))
-    max_value = 0
-    for match in matches:
-        int_value = int(match[1:])
-        if int_value > max_value:
-            max_value = int_value
-    num_params = max_value + 1
-    return num_params
 
 def plot_results(path_to_db, path_to_csv, SRconfig):
     '''
