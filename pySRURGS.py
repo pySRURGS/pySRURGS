@@ -318,7 +318,7 @@ def create_parameter_list(m):
         my_pars.append(make_parameter_name('p'+str(i)))
     return my_pars
 
-@memoize
+
 def get_bits(x):
     ''' Gets the odd and even bits of a binary number in string format. Used by 
     `get_left_right_bits`.
@@ -329,7 +329,7 @@ def get_bits(x):
     odd_bits = x[1::2]
     return odd_bits, even_bits
 
-@memoize
+
 def get_left_right_bits(my_int):
     """
     Converts an integer to binary and returns two integers, representing the odd
@@ -488,7 +488,7 @@ def div(x, y):
 def pow(x, y):
     return np.power(x,y)
 
-@memoize
+
 def mempower(a,b):
     """
     Same as pow, but able to handle extremely large values, and memoized.
@@ -1019,7 +1019,7 @@ class Enumerator(object):
     >>> en.get_M(1000, 5, 5, 5)
     """
     
-    @memoize
+    
     def get_M(self, N, f, n, m):
         """
         Calculate the total number of equations for this symbolic regression 
@@ -1056,7 +1056,7 @@ class Enumerator(object):
             return count
         M = mpmath.nsum(get_count, [0, N-1])
         return M    
-    @memoize
+    
     def get_G(self, f, i):
         """
         Calculate the total number of configurations of the functions of arity 
@@ -1081,7 +1081,7 @@ class Enumerator(object):
         G = mempower(f,l)
         G = int(G)
         return G
-    @memoize
+    
     def get_A(self, n, i):
         """
         Calculate the total number of configurations of the functions of arity 
@@ -1106,7 +1106,7 @@ class Enumerator(object):
         A = mempower(n,k)
         A = int(A)
         return A
-    @memoize
+    
     def get_B(self, m, i):
         """
         Calculate the total number of configurations of the terminals for the 
@@ -1146,7 +1146,7 @@ class Enumerator(object):
         B = self.get_B(m, i)
         s = random.randint(0, B-1)
         return s
-    @memoize
+    
     def get_l_i(self, i):
         ''' 
             from `f` functions of arity one, pick `l_i `
@@ -1166,7 +1166,7 @@ class Enumerator(object):
             right_l_i = self.get_l_i(right_int)
             l_i = left_l_i + right_l_i + 1
         return l_i
-    @memoize
+    
     def get_k_i(self, i):
         ''' 
             from `n` functions of arity two, pick `k_i`
@@ -1186,7 +1186,7 @@ class Enumerator(object):
             right_k_i = self.get_k_i(right_int)
             k_i = left_k_i + right_k_i + 1
         return k_i
-    @memoize
+    
     def get_j_i(self, i):
         ''' 
             from `m` terminals, pick `j_i`
@@ -1226,7 +1226,7 @@ class Enumerator2(object):
     >>> en.get_M(1000, 5, 5)
     """
     
-    @memoize
+    
     def get_M(self, N, n, m):
         """
         Calculate the total number of equations for this symbolic regression 
@@ -1258,7 +1258,7 @@ class Enumerator2(object):
             return count
         M = mpmath.nsum(get_count, [0, N-1])
         return M    
-    @memoize
+    
     def get_A(self, n, i):
         """
         Calculate the total number of configurations of the functions of arity 
@@ -1283,7 +1283,7 @@ class Enumerator2(object):
         A = mempower(n,k)
         A = int(A)
         return A
-    @memoize
+    
     def get_B(self, m, i):
         """
         Calculate the total number of configurations of the terminals for the 
@@ -1318,7 +1318,7 @@ class Enumerator2(object):
         B = self.get_B(m, i)
         s = random.randint(0, B-1)
         return s
-    @memoize
+    
     def get_k_i(self, i):
         ''' 
             from `n` functions of arity two, pick `k_i` 
@@ -1336,7 +1336,7 @@ class Enumerator2(object):
             right_k_i = self.get_k_i(right_int)
             k_i = left_k_i + right_k_i + 1
         return k_i
-    @memoize
+    
     def get_j_i(self, i):
         ''' 
             from `m` terminals, pick `j_i`
@@ -1544,7 +1544,7 @@ def check_goodness_of_fit(individual, params, my_data):
              residual)
     return result
 
-@memoize
+
 def ith_full_binary_tree(i):
     """
     Generates the `i`th binary tree. Use ith_full_binary_tree2 when no functions
@@ -1574,7 +1574,7 @@ def ith_full_binary_tree(i):
         tree = '[' + left +', ' +right + ']'
     return tree
 
-@memoize
+
 def ith_full_binary_tree2(i):
     """
     Generates the `i`th binary tree. Use ith_full_binary_tree when functions
@@ -1602,7 +1602,7 @@ def ith_full_binary_tree2(i):
         tree = '[' + left +', ' +right + ']'
     return tree
 
-@memoize    
+    
 def get_cum_weights(N, f, n, m, enumerator):
     """
     Generates the relative probabilities of selecting the `i`th binary tree.
@@ -1643,7 +1643,7 @@ def get_cum_weights(N, f, n, m, enumerator):
     cum_weights = np.array(weights)/np.sum(weights)
     return cum_weights
 
-@memoize
+
 def get_cum_weights2(N, n, m, enumerator):
     """
     Generates the relative probabilities of selecting the `i`th binary tree.
@@ -2140,11 +2140,44 @@ def compile_results(path_to_db, path_to_csv, SRconfig):
     result_list.print(dataset._y_data)
     return result_list
 
+def count_parameters_in_equation_string(equation_string):
+    '''
+    Reads the equation string and determines the number of fitting parameters.
+    Assumes that fitting parameter names are in the form 'p' + str(myint)
+    and that myint starts with 0 indexing.
+    
+    Parameters
+    ----------
+    equation_string: string 
+        A pySRURGS generated equation string. Should have fitting parameter 
+        prefix/suffix still in place.
+        
+    Returns
+    -------
+    num_params: int
+        The minimum number of fitting parameters needed to recreate the search 
+        space used to generate this equation string.
+    
+    ''' 
+    pattern = re.escape(fitting_param_prefix) + '(.+?)' + re.escape(fitting_param_suffix)
+    regex = re.compile(pattern)
+    matches = regex.findall(equation_string)
+    if matches == []:
+        return 0
+    matches = list(set(matches))
+    max_value = 0
+    for match in matches:
+        int_value = int(match[1:])
+        if int_value > max_value:
+            max_value = int_value
+    num_params = max_value + 1
+    return num_params
+
 def plot_results(path_to_db, path_to_csv, SRconfig):
     '''
     Reads the generated SqliteDict file to determine the best model, 
     then plots it against the raw data. saves the figure to './image/plot.png'
-    and './image/plot.svg'
+    and './image/plot.svg'. Only works for univariate data.
     
     Parameters
     ----------
@@ -2156,10 +2189,16 @@ def plot_results(path_to_db, path_to_csv, SRconfig):
         
     SRconfig: pySRUGS.SymbolicRegressionConfig
         The symbolic regression problem's configuration object
-            
+    
     Returns
     -------
-    None   
+    None  
+
+    
+    Raises
+    ------
+    Exception, if data is not univariate.
+    
     ''' 
     result_list, dataset = get_resultlist(path_to_db, path_to_csv, SRconfig)
     if len(dataset._x_labels) != 1:
@@ -2167,9 +2206,10 @@ def plot_results(path_to_db, path_to_csv, SRconfig):
     result_list.sort()
     best_model = result_list._results[0]
     param_values = best_model._params
-    params_obj = create_fitting_parameters(SRconfig._max_num_fit_params, 
+    equation_string = best_model._equation
+    num_params = len(param_values)
+    params_obj = create_fitting_parameters(num_params, 
                                            param_values=param_values)
-    equation_string = best_model._equation    
     evaluatable_equation_string = equation_string
     eval_eqn_string = clean_funcstring(equation_string)        
     data_dict = dict()
