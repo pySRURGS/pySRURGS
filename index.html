@@ -146,19 +146,94 @@ Example<br>
 &gt;&gt;&gt;&nbsp;en.<a href="#Enumerator-get_M">get_M</a>(1000,&nbsp;5,&nbsp;5,&nbsp;5)<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
-<dl><dt><a name="Enumerator-get_A"><strong>get_A</strong></a> = memoized_func(*args)</dt></dl>
+<dl><dt><a name="Enumerator-get_A"><strong>get_A</strong></a>(self, n, i)</dt><dd><tt>Calculate&nbsp;the&nbsp;total&nbsp;number&nbsp;of&nbsp;configurations&nbsp;of&nbsp;the&nbsp;functions&nbsp;of&nbsp;arity&nbsp;<br>
+two&nbsp;for&nbsp;the&nbsp;binary&nbsp;tree&nbsp;mapped&nbsp;from&nbsp;the&nbsp;integer&nbsp;`i`.&nbsp;&nbsp;Use&nbsp;get_A&nbsp;from&nbsp;<br>
+`<a href="#Enumerator2">Enumerator2</a>`&nbsp;instead&nbsp;if&nbsp;the&nbsp;number&nbsp;of&nbsp;functions&nbsp;of&nbsp;arity&nbsp;one&nbsp;permitted&nbsp;<br>
+is&nbsp;zero.<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+n:&nbsp;int&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;number&nbsp;of&nbsp;functions&nbsp;of&nbsp;arity&nbsp;two&nbsp;permitted<br>
+&nbsp;<br>
+i:&nbsp;int&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;`i`^th&nbsp;binary&nbsp;tree&nbsp;in&nbsp;the&nbsp;integer&nbsp;to&nbsp;tree&nbsp;mapping&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+Returns<br>
+-------<br>
+A:&nbsp;mpmath&nbsp;integer<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;number&nbsp;of&nbsp;possible&nbsp;configurations&nbsp;of&nbsp;functions&nbsp;of&nbsp;arity&nbsp;two</tt></dd></dl>
 
-<dl><dt><a name="Enumerator-get_B"><strong>get_B</strong></a> = memoized_func(*args)</dt></dl>
+<dl><dt><a name="Enumerator-get_B"><strong>get_B</strong></a>(self, m, i)</dt><dd><tt>Calculate&nbsp;the&nbsp;total&nbsp;number&nbsp;of&nbsp;configurations&nbsp;of&nbsp;the&nbsp;terminals&nbsp;for&nbsp;the&nbsp;<br>
+binary&nbsp;tree&nbsp;mapped&nbsp;from&nbsp;the&nbsp;integer&nbsp;`i`.&nbsp;&nbsp;Use&nbsp;get_B&nbsp;from&nbsp;<br>
+`<a href="#Enumerator2">Enumerator2</a>`&nbsp;instead&nbsp;if&nbsp;the&nbsp;number&nbsp;of&nbsp;functions&nbsp;of&nbsp;arity&nbsp;one&nbsp;permitted&nbsp;<br>
+is&nbsp;zero.<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+m:&nbsp;int&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;number&nbsp;of&nbsp;terminals&nbsp;including&nbsp;variables&nbsp;and&nbsp;fitting&nbsp;parameters<br>
+&nbsp;<br>
+i:&nbsp;int&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;`i`^th&nbsp;binary&nbsp;tree&nbsp;in&nbsp;the&nbsp;integer&nbsp;to&nbsp;tree&nbsp;mapping&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+Returns<br>
+-------<br>
+B:&nbsp;mpmath&nbsp;integer<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;number&nbsp;of&nbsp;possible&nbsp;configurations&nbsp;of&nbsp;terminals</tt></dd></dl>
 
-<dl><dt><a name="Enumerator-get_G"><strong>get_G</strong></a> = memoized_func(*args)</dt></dl>
+<dl><dt><a name="Enumerator-get_G"><strong>get_G</strong></a>(self, f, i)</dt><dd><tt>Calculate&nbsp;the&nbsp;total&nbsp;number&nbsp;of&nbsp;configurations&nbsp;of&nbsp;the&nbsp;functions&nbsp;of&nbsp;arity&nbsp;<br>
+one&nbsp;for&nbsp;the&nbsp;binary&nbsp;tree&nbsp;mapped&nbsp;from&nbsp;the&nbsp;integer&nbsp;`i`.&nbsp;&nbsp;Use&nbsp;get_G&nbsp;from&nbsp;<br>
+`<a href="#Enumerator2">Enumerator2</a>`&nbsp;instead&nbsp;if&nbsp;the&nbsp;number&nbsp;of&nbsp;functions&nbsp;of&nbsp;arity&nbsp;one&nbsp;permitted&nbsp;<br>
+is&nbsp;zero.<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+f:&nbsp;int&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;number&nbsp;of&nbsp;functions&nbsp;of&nbsp;arity&nbsp;one&nbsp;permitted<br>
+&nbsp;<br>
+i:&nbsp;int&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;`i`^th&nbsp;binary&nbsp;tree&nbsp;in&nbsp;the&nbsp;integer&nbsp;to&nbsp;tree&nbsp;mapping&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+Returns<br>
+-------<br>
+G:&nbsp;mpmath&nbsp;integer<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;number&nbsp;of&nbsp;possible&nbsp;configurations&nbsp;of&nbsp;functions&nbsp;of&nbsp;arity&nbsp;one</tt></dd></dl>
 
-<dl><dt><a name="Enumerator-get_M"><strong>get_M</strong></a> = memoized_func(*args)</dt></dl>
+<dl><dt><a name="Enumerator-get_M"><strong>get_M</strong></a>(self, N, f, n, m)</dt><dd><tt>Calculate&nbsp;the&nbsp;total&nbsp;number&nbsp;of&nbsp;equations&nbsp;for&nbsp;this&nbsp;symbolic&nbsp;regression&nbsp;<br>
+problem.&nbsp;Use&nbsp;get_M&nbsp;from&nbsp;`<a href="#Enumerator2">Enumerator2</a>`&nbsp;instead&nbsp;if&nbsp;the&nbsp;number&nbsp;of&nbsp;functions&nbsp;<br>
+of&nbsp;arity&nbsp;one&nbsp;permitted&nbsp;is&nbsp;zero.<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+N:&nbsp;int&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Specifies&nbsp;the&nbsp;number&nbsp;of&nbsp;unique&nbsp;binary&nbsp;trees&nbsp;permitted&nbsp;in&nbsp;our&nbsp;search.&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;We&nbsp;consider&nbsp;trees&nbsp;mapping&nbsp;from&nbsp;the&nbsp;integer&nbsp;domain&nbsp;[0&nbsp;...&nbsp;`N`-1].<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;<br>
+f:&nbsp;int&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;number&nbsp;of&nbsp;functions&nbsp;of&nbsp;arity&nbsp;one&nbsp;permitted<br>
+&nbsp;<br>
+n:&nbsp;int&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;number&nbsp;of&nbsp;functions&nbsp;of&nbsp;arity&nbsp;two&nbsp;permitted<br>
+&nbsp;<br>
+m:&nbsp;int&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;number&nbsp;of&nbsp;terminals&nbsp;in&nbsp;the&nbsp;problem&nbsp;(includes&nbsp;variables&nbsp;and&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;fitting&nbsp;parameters)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+Returns<br>
+-------<br>
+M:&nbsp;mpmath&nbsp;integer<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;number&nbsp;of&nbsp;possible&nbsp;equations&nbsp;in&nbsp;this&nbsp;symbolic&nbsp;regression&nbsp;problem</tt></dd></dl>
 
-<dl><dt><a name="Enumerator-get_j_i"><strong>get_j_i</strong></a> = memoized_func(*args)</dt></dl>
+<dl><dt><a name="Enumerator-get_j_i"><strong>get_j_i</strong></a>(self, i)</dt><dd><tt>from&nbsp;`m`&nbsp;terminals,&nbsp;pick&nbsp;`j_i`<br>
+`j_i`&nbsp;is&nbsp;the&nbsp;number&nbsp;of&nbsp;leafs&nbsp;in&nbsp;the&nbsp;tree&nbsp;corresponding&nbsp;to&nbsp;`i`</tt></dd></dl>
 
-<dl><dt><a name="Enumerator-get_k_i"><strong>get_k_i</strong></a> = memoized_func(*args)</dt></dl>
+<dl><dt><a name="Enumerator-get_k_i"><strong>get_k_i</strong></a>(self, i)</dt><dd><tt>from&nbsp;`n`&nbsp;functions&nbsp;of&nbsp;arity&nbsp;two,&nbsp;pick&nbsp;`k_i`<br>
+`k_i`&nbsp;is&nbsp;the&nbsp;number&nbsp;of&nbsp;non-leaf&nbsp;nodes&nbsp;<br>
+in&nbsp;the&nbsp;tree&nbsp;corresponding&nbsp;to&nbsp;`i`</tt></dd></dl>
 
-<dl><dt><a name="Enumerator-get_l_i"><strong>get_l_i</strong></a> = memoized_func(*args)</dt></dl>
+<dl><dt><a name="Enumerator-get_l_i"><strong>get_l_i</strong></a>(self, i)</dt></dl>
 
 <dl><dt><a name="Enumerator-get_q"><strong>get_q</strong></a>(self, f, i)</dt><dd><tt>Generates&nbsp;a&nbsp;random&nbsp;integer&nbsp;between&nbsp;0&nbsp;and&nbsp;`G`&nbsp;-&nbsp;1,&nbsp;inclusive</tt></dd></dl>
 
@@ -198,15 +273,70 @@ Example<br>
 &gt;&gt;&gt;&nbsp;en.<a href="#Enumerator2-get_M">get_M</a>(1000,&nbsp;5,&nbsp;5)<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
-<dl><dt><a name="Enumerator2-get_A"><strong>get_A</strong></a> = memoized_func(*args)</dt></dl>
+<dl><dt><a name="Enumerator2-get_A"><strong>get_A</strong></a>(self, n, i)</dt><dd><tt>Calculate&nbsp;the&nbsp;total&nbsp;number&nbsp;of&nbsp;configurations&nbsp;of&nbsp;the&nbsp;functions&nbsp;of&nbsp;arity&nbsp;<br>
+two&nbsp;for&nbsp;the&nbsp;binary&nbsp;tree&nbsp;mapped&nbsp;from&nbsp;the&nbsp;integer&nbsp;`i`.&nbsp;&nbsp;Use&nbsp;get_A&nbsp;from&nbsp;<br>
+`<a href="#Enumerator">Enumerator</a>`&nbsp;instead&nbsp;if&nbsp;the&nbsp;number&nbsp;of&nbsp;functions&nbsp;of&nbsp;arity&nbsp;one&nbsp;permitted&nbsp;<br>
+is&nbsp;not&nbsp;zero.<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+n:&nbsp;int<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;number&nbsp;of&nbsp;functions&nbsp;of&nbsp;arity&nbsp;two&nbsp;permitted<br>
+&nbsp;<br>
+i:&nbsp;int&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;`i`^th&nbsp;binary&nbsp;tree&nbsp;in&nbsp;the&nbsp;integer&nbsp;to&nbsp;tree&nbsp;mapping&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+Returns<br>
+-------<br>
+A:&nbsp;mpmath&nbsp;integer<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;number&nbsp;of&nbsp;possible&nbsp;configurations&nbsp;of&nbsp;functions&nbsp;of&nbsp;arity&nbsp;two</tt></dd></dl>
 
-<dl><dt><a name="Enumerator2-get_B"><strong>get_B</strong></a> = memoized_func(*args)</dt></dl>
+<dl><dt><a name="Enumerator2-get_B"><strong>get_B</strong></a>(self, m, i)</dt><dd><tt>Calculate&nbsp;the&nbsp;total&nbsp;number&nbsp;of&nbsp;configurations&nbsp;of&nbsp;the&nbsp;terminals&nbsp;for&nbsp;the&nbsp;<br>
+binary&nbsp;tree&nbsp;mapped&nbsp;from&nbsp;the&nbsp;integer&nbsp;`i`.&nbsp;&nbsp;Use&nbsp;get_B&nbsp;from&nbsp;<br>
+`<a href="#Enumerator">Enumerator</a>`&nbsp;instead&nbsp;if&nbsp;the&nbsp;number&nbsp;of&nbsp;functions&nbsp;of&nbsp;arity&nbsp;one&nbsp;permitted&nbsp;<br>
+is&nbsp;not&nbsp;zero.<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+m:&nbsp;int&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;number&nbsp;of&nbsp;terminals&nbsp;including&nbsp;variables&nbsp;and&nbsp;fitting&nbsp;parameters<br>
+&nbsp;<br>
+i:&nbsp;int&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;`i`^th&nbsp;binary&nbsp;tree&nbsp;in&nbsp;the&nbsp;integer&nbsp;to&nbsp;tree&nbsp;mapping&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+Returns<br>
+-------<br>
+B:&nbsp;mpmath&nbsp;integer<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;number&nbsp;of&nbsp;possible&nbsp;configurations&nbsp;of&nbsp;terminals</tt></dd></dl>
 
-<dl><dt><a name="Enumerator2-get_M"><strong>get_M</strong></a> = memoized_func(*args)</dt></dl>
+<dl><dt><a name="Enumerator2-get_M"><strong>get_M</strong></a>(self, N, n, m)</dt><dd><tt>Calculate&nbsp;the&nbsp;total&nbsp;number&nbsp;of&nbsp;equations&nbsp;for&nbsp;this&nbsp;symbolic&nbsp;regression&nbsp;<br>
+problem.&nbsp;Use&nbsp;get_M&nbsp;from&nbsp;`<a href="#Enumerator">Enumerator</a>`&nbsp;instead&nbsp;if&nbsp;any&nbsp;functions&nbsp;<br>
+of&nbsp;arity&nbsp;one&nbsp;are&nbsp;permitted.<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+N:&nbsp;int&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Specifies&nbsp;the&nbsp;number&nbsp;of&nbsp;unique&nbsp;binary&nbsp;trees&nbsp;permitted&nbsp;in&nbsp;our&nbsp;search.&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;We&nbsp;consider&nbsp;trees&nbsp;mapping&nbsp;from&nbsp;the&nbsp;integer&nbsp;domain&nbsp;[0&nbsp;...&nbsp;`N`-1].<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+n:&nbsp;int&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;number&nbsp;of&nbsp;functions&nbsp;of&nbsp;arity&nbsp;two&nbsp;permitted<br>
+&nbsp;<br>
+m:&nbsp;int&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;number&nbsp;of&nbsp;terminals&nbsp;in&nbsp;the&nbsp;problem&nbsp;(includes&nbsp;variables&nbsp;and&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;fitting&nbsp;parameters)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+Returns<br>
+-------<br>
+M:&nbsp;mpmath&nbsp;integer<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;number&nbsp;of&nbsp;possible&nbsp;equations&nbsp;in&nbsp;this&nbsp;symbolic&nbsp;regression&nbsp;problem</tt></dd></dl>
 
-<dl><dt><a name="Enumerator2-get_j_i"><strong>get_j_i</strong></a> = memoized_func(*args)</dt></dl>
+<dl><dt><a name="Enumerator2-get_j_i"><strong>get_j_i</strong></a>(self, i)</dt><dd><tt>from&nbsp;`m`&nbsp;terminals,&nbsp;pick&nbsp;`j_i`<br>
+`j_i`&nbsp;is&nbsp;the&nbsp;number&nbsp;of&nbsp;leafs&nbsp;in&nbsp;the&nbsp;tree&nbsp;corresponding&nbsp;to&nbsp;`i`</tt></dd></dl>
 
-<dl><dt><a name="Enumerator2-get_k_i"><strong>get_k_i</strong></a> = memoized_func(*args)</dt></dl>
+<dl><dt><a name="Enumerator2-get_k_i"><strong>get_k_i</strong></a>(self, i)</dt><dd><tt>from&nbsp;`n`&nbsp;functions&nbsp;of&nbsp;arity&nbsp;two,&nbsp;pick&nbsp;`k_i`&nbsp;<br>
+`k_i`&nbsp;is&nbsp;the&nbsp;number&nbsp;of&nbsp;non-leaf&nbsp;nodes&nbsp;<br>
+in&nbsp;the&nbsp;tree&nbsp;corresponding&nbsp;to&nbsp;`i`</tt></dd></dl>
 
 <dl><dt><a name="Enumerator2-get_r"><strong>get_r</strong></a>(self, n, i)</dt><dd><tt>Generates&nbsp;a&nbsp;random&nbsp;integer&nbsp;between&nbsp;0&nbsp;and&nbsp;`A`&nbsp;-&nbsp;1,&nbsp;inclusive</tt></dd></dl>
 
@@ -737,9 +867,66 @@ SR_config2:&nbsp;pySRURGS.<a href="#SymbolicRegressionConfig">SymbolicRegression
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;f_functions=['sin','sinh','exp'],<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;max_num_fit_params=5,<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;max_permitted_trees=200)</tt></dd></dl>
- <dl><dt><a name="-get_bits"><strong>get_bits</strong></a> = memoized_func(*args)</dt></dl>
- <dl><dt><a name="-get_cum_weights"><strong>get_cum_weights</strong></a> = memoized_func(*args)</dt></dl>
- <dl><dt><a name="-get_cum_weights2"><strong>get_cum_weights2</strong></a> = memoized_func(*args)</dt></dl>
+ <dl><dt><a name="-get_bits"><strong>get_bits</strong></a>(x)</dt></dl>
+ <dl><dt><a name="-get_cum_weights"><strong>get_cum_weights</strong></a>(N, f, n, m, enumerator)</dt><dd><tt>Generates&nbsp;the&nbsp;relative&nbsp;probabilities&nbsp;of&nbsp;selecting&nbsp;the&nbsp;`i`th&nbsp;binary&nbsp;tree.<br>
+Sums&nbsp;to&nbsp;1.&nbsp;Ensures&nbsp;that&nbsp;each&nbsp;equation&nbsp;has&nbsp;equal&nbsp;probability&nbsp;of&nbsp;selection.<br>
+Gives&nbsp;increasing&nbsp;probability&nbsp;with&nbsp;increasing&nbsp;`i`,&nbsp;because&nbsp;larger&nbsp;values&nbsp;<br>
+of&nbsp;`i`&nbsp;correspond&nbsp;to&nbsp;more&nbsp;complex&nbsp;trees&nbsp;which&nbsp;permit&nbsp;more&nbsp;equations.<br>
+Use&nbsp;`get_cum_weights2`&nbsp;when&nbsp;functions&nbsp;of&nbsp;arity&nbsp;one&nbsp;are&nbsp;not&nbsp;permitted.<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+N:&nbsp;int&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Specifies&nbsp;the&nbsp;number&nbsp;of&nbsp;unique&nbsp;binary&nbsp;trees&nbsp;permitted&nbsp;in&nbsp;our&nbsp;search.&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;We&nbsp;consider&nbsp;trees&nbsp;mapping&nbsp;from&nbsp;the&nbsp;integer&nbsp;domain&nbsp;[0&nbsp;...&nbsp;`N`-1].<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+f:&nbsp;int&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;number&nbsp;of&nbsp;functions&nbsp;of&nbsp;arity&nbsp;one&nbsp;permitted<br>
+&nbsp;<br>
+n:&nbsp;int&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;number&nbsp;of&nbsp;functions&nbsp;of&nbsp;arity&nbsp;two&nbsp;permitted<br>
+&nbsp;<br>
+m:&nbsp;int&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;number&nbsp;of&nbsp;terminals&nbsp;in&nbsp;the&nbsp;problem&nbsp;(includes&nbsp;variables&nbsp;and&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;fitting&nbsp;parameters)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+enumerator:&nbsp;pySRURGS.<a href="#Enumerator">Enumerator</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;enumerator&nbsp;of&nbsp;the&nbsp;symbolic&nbsp;regression&nbsp;problem&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+Returns<br>
+-------<br>
+cum_weights:&nbsp;numpy.array&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;relative&nbsp;probability&nbsp;of&nbsp;selecting&nbsp;`i`&nbsp;in&nbsp;the&nbsp;range(0,N)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;to&nbsp;ensure&nbsp;that&nbsp;the&nbsp;equations&nbsp;from&nbsp;the&nbsp;corresponding&nbsp;binary&nbsp;trees&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;have&nbsp;equal&nbsp;probability&nbsp;of&nbsp;selection</tt></dd></dl>
+ <dl><dt><a name="-get_cum_weights2"><strong>get_cum_weights2</strong></a>(N, n, m, enumerator)</dt><dd><tt>Generates&nbsp;the&nbsp;relative&nbsp;probabilities&nbsp;of&nbsp;selecting&nbsp;the&nbsp;`i`th&nbsp;binary&nbsp;tree.<br>
+Sums&nbsp;to&nbsp;1.&nbsp;Ensures&nbsp;that&nbsp;each&nbsp;equation&nbsp;has&nbsp;equal&nbsp;probability&nbsp;of&nbsp;selection.<br>
+Gives&nbsp;increasing&nbsp;probability&nbsp;with&nbsp;increasing&nbsp;`i`,&nbsp;because&nbsp;larger&nbsp;values&nbsp;<br>
+of&nbsp;`i`&nbsp;correspond&nbsp;to&nbsp;more&nbsp;complex&nbsp;trees&nbsp;which&nbsp;permit&nbsp;more&nbsp;equations.<br>
+Use&nbsp;`get_cum_weights`&nbsp;when&nbsp;functions&nbsp;of&nbsp;arity&nbsp;one&nbsp;are&nbsp;permitted.<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+N:&nbsp;int&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Specifies&nbsp;the&nbsp;number&nbsp;of&nbsp;unique&nbsp;binary&nbsp;trees&nbsp;permitted&nbsp;in&nbsp;our&nbsp;search.&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;We&nbsp;consider&nbsp;trees&nbsp;mapping&nbsp;from&nbsp;the&nbsp;integer&nbsp;domain&nbsp;[0&nbsp;...&nbsp;`N`-1].<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+n:&nbsp;int&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;number&nbsp;of&nbsp;functions&nbsp;of&nbsp;arity&nbsp;two&nbsp;permitted<br>
+&nbsp;<br>
+m:&nbsp;int&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;number&nbsp;of&nbsp;terminals&nbsp;in&nbsp;the&nbsp;problem&nbsp;(includes&nbsp;variables&nbsp;and&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;fitting&nbsp;parameters)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+enumerator:&nbsp;pySRURGS.<a href="#Enumerator2">Enumerator2</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;enumerator&nbsp;of&nbsp;the&nbsp;symbolic&nbsp;regression&nbsp;problem&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+Returns<br>
+-------<br>
+cum_weights:&nbsp;numpy.array&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;relative&nbsp;probability&nbsp;of&nbsp;selecting&nbsp;`i`&nbsp;in&nbsp;the&nbsp;range(0,N)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;to&nbsp;ensure&nbsp;that&nbsp;the&nbsp;equations&nbsp;from&nbsp;the&nbsp;corresponding&nbsp;binary&nbsp;trees&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;have&nbsp;equal&nbsp;probability&nbsp;of&nbsp;selection</tt></dd></dl>
  <dl><dt><a name="-get_element_of_cartesian_product"><strong>get_element_of_cartesian_product</strong></a>(*args, repeat=1, index=0)</dt><dd><tt>Access&nbsp;a&nbsp;specific&nbsp;element&nbsp;of&nbsp;a&nbsp;cartesian&nbsp;product,&nbsp;without&nbsp;needing&nbsp;to&nbsp;iterate<br>
 through&nbsp;the&nbsp;entire&nbsp;product.<br>
 &nbsp;<br>
@@ -758,7 +945,22 @@ index:&nbsp;int<br>
 Returns<br>
 -------<br>
 ith_item:&nbsp;the&nbsp;`index`th&nbsp;element&nbsp;of&nbsp;the&nbsp;cartesian&nbsp;product</tt></dd></dl>
- <dl><dt><a name="-get_left_right_bits"><strong>get_left_right_bits</strong></a> = memoized_func(*args)</dt></dl>
+ <dl><dt><a name="-get_left_right_bits"><strong>get_left_right_bits</strong></a>(my_int)</dt><dd><tt>Converts&nbsp;an&nbsp;integer&nbsp;to&nbsp;binary&nbsp;and&nbsp;returns&nbsp;two&nbsp;integers,&nbsp;representing&nbsp;the&nbsp;odd<br>
+and&nbsp;even&nbsp;bits&nbsp;of&nbsp;its&nbsp;binary&nbsp;value.&nbsp;<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+my_int&nbsp;:&nbsp;integer<br>
+&nbsp;<br>
+Returns<br>
+-------<br>
+left_int:&nbsp;int<br>
+&nbsp;&nbsp;&nbsp;&nbsp;An&nbsp;integer&nbsp;corresponding&nbsp;to&nbsp;the&nbsp;decimal&nbsp;representation&nbsp;of&nbsp;the&nbsp;odd&nbsp;bits&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;of&nbsp;`my_int`'s&nbsp;binary&nbsp;representation<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+right_int:&nbsp;int<br>
+&nbsp;&nbsp;&nbsp;&nbsp;An&nbsp;integer&nbsp;corresponding&nbsp;to&nbsp;the&nbsp;decimal&nbsp;representation&nbsp;of&nbsp;the&nbsp;even&nbsp;bits&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;of&nbsp;`my_int`'s&nbsp;binary&nbsp;representation</tt></dd></dl>
  <dl><dt><a name="-get_properties"><strong>get_properties</strong></a>(dataframe, label)</dt><dd><tt>Returns&nbsp;a&nbsp;dictionary&nbsp;of&nbsp;statistical&nbsp;data&nbsp;around&nbsp;the&nbsp;data&nbsp;found&nbsp;in&nbsp;<br>
 `dataframe[label]`<br>
 &nbsp;<br>
@@ -807,8 +1009,32 @@ Returns<br>
  <dl><dt><a name="-has_nans"><strong>has_nans</strong></a>(X)</dt></dl>
  <dl><dt><a name="-initialize_db"><strong>initialize_db</strong></a>(path_to_db)</dt><dd><tt>Initializes&nbsp;the&nbsp;SqliteDict&nbsp;database&nbsp;file&nbsp;with&nbsp;an&nbsp;initial&nbsp;null&nbsp;value&nbsp;<br>
 for&nbsp;the&nbsp;'best_result'&nbsp;key</tt></dd></dl>
- <dl><dt><a name="-ith_full_binary_tree"><strong>ith_full_binary_tree</strong></a> = memoized_func(*args)</dt></dl>
- <dl><dt><a name="-ith_full_binary_tree2"><strong>ith_full_binary_tree2</strong></a> = memoized_func(*args)</dt></dl>
+ <dl><dt><a name="-ith_full_binary_tree"><strong>ith_full_binary_tree</strong></a>(i)</dt><dd><tt>Generates&nbsp;the&nbsp;`i`th&nbsp;binary&nbsp;tree.&nbsp;Use&nbsp;ith_full_binary_tree2&nbsp;when&nbsp;no&nbsp;functions<br>
+of&nbsp;arity&nbsp;one&nbsp;are&nbsp;permitted.<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+i:&nbsp;int<br>
+&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;non-negative&nbsp;integer&nbsp;which&nbsp;will&nbsp;be&nbsp;used&nbsp;to&nbsp;map&nbsp;to&nbsp;a&nbsp;unique&nbsp;binary&nbsp;tree<br>
+&nbsp;<br>
+Returns<br>
+-------<br>
+tree:&nbsp;string&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;binary&nbsp;tree&nbsp;represented&nbsp;using&nbsp;[.,.]&nbsp;to&nbsp;represent&nbsp;a&nbsp;full&nbsp;binary&nbsp;tree,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;|.|&nbsp;to&nbsp;represent&nbsp;functions&nbsp;of&nbsp;arity&nbsp;one,&nbsp;and&nbsp;'.'&nbsp;to&nbsp;represent&nbsp;terminals.</tt></dd></dl>
+ <dl><dt><a name="-ith_full_binary_tree2"><strong>ith_full_binary_tree2</strong></a>(i)</dt><dd><tt>Generates&nbsp;the&nbsp;`i`th&nbsp;binary&nbsp;tree.&nbsp;Use&nbsp;ith_full_binary_tree&nbsp;when&nbsp;functions<br>
+of&nbsp;arity&nbsp;one&nbsp;are&nbsp;permitted.<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+i:&nbsp;int<br>
+&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;non-negative&nbsp;integer&nbsp;which&nbsp;will&nbsp;be&nbsp;used&nbsp;to&nbsp;map&nbsp;to&nbsp;a&nbsp;unique&nbsp;binary&nbsp;tree<br>
+&nbsp;<br>
+Returns<br>
+-------<br>
+tree:&nbsp;string&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;binary&nbsp;tree&nbsp;represented&nbsp;using&nbsp;[.,.]&nbsp;to&nbsp;represent&nbsp;a&nbsp;full&nbsp;binary&nbsp;tree,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;'.'&nbsp;to&nbsp;represent&nbsp;terminals.</tt></dd></dl>
  <dl><dt><a name="-log"><strong>log</strong></a>(x)</dt></dl>
  <dl><dt><a name="-make_parameter_name"><strong>make_parameter_name</strong></a>(par)</dt><dd><tt>Converts&nbsp;a&nbsp;fitting&nbsp;parameter&nbsp;name&nbsp;to&nbsp;pySRURGS&nbsp;safe&nbsp;parameter&nbsp;name.&nbsp;Prevents&nbsp;<br>
 string&nbsp;manipulations&nbsp;on&nbsp;parameter&nbsp;names&nbsp;from&nbsp;affecting&nbsp;function&nbsp;names.<br>
@@ -846,7 +1072,17 @@ Returns<br>
 -------<br>
 memoized_func:&nbsp;function<br>
 &nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;memoized&nbsp;wrapper&nbsp;around&nbsp;`func`</tt></dd></dl>
- <dl><dt><a name="-mempower"><strong>mempower</strong></a> = memoized_func(*args)</dt></dl>
+ <dl><dt><a name="-mempower"><strong>mempower</strong></a>(a, b)</dt><dd><tt>Same&nbsp;as&nbsp;pow,&nbsp;but&nbsp;able&nbsp;to&nbsp;handle&nbsp;extremely&nbsp;large&nbsp;values,&nbsp;and&nbsp;memoized.<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+a:&nbsp;int&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+b:&nbsp;int&nbsp;<br>
+&nbsp;<br>
+Returns<br>
+-------<br>
+result:&nbsp;mpmath&nbsp;integer<br>
+&nbsp;&nbsp;&nbsp;&nbsp;`a&nbsp;**&nbsp;b`</tt></dd></dl>
  <dl><dt><a name="-mul"><strong>mul</strong></a>(x, y)</dt></dl>
  <dl><dt><a name="-plot_results"><strong>plot_results</strong></a>(path_to_db, path_to_csv, SRconfig)</dt><dd><tt>Reads&nbsp;the&nbsp;generated&nbsp;SqliteDict&nbsp;file&nbsp;to&nbsp;determine&nbsp;the&nbsp;best&nbsp;model,&nbsp;<br>
 then&nbsp;plots&nbsp;it&nbsp;against&nbsp;the&nbsp;raw&nbsp;data.&nbsp;saves&nbsp;the&nbsp;figure&nbsp;to&nbsp;'./image/plot.png'<br>
