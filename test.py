@@ -28,7 +28,7 @@ x1sqrd_csv = './csvs/x1_squared_minus_five_x3.csv'
 x1sqrd_db = './db/x1_squared_minus_five_x3.db'
 benchmarks_dir = './csvs/benchmarks'
 
-def run_command_line_tests():
+def test_command_line_code():
     print('Started run_command_line_tests')
     # Command line interface
     sh.python('pySRURGS.py', qrtic_polynml_csv, 10)
@@ -48,7 +48,7 @@ def run_command_line_tests():
     sh.python('pySRURGS.py', '-max_permitted_trees', 10, '-max_num_fit_params', 5, qrtic_polynml_csv, 10)
     print('Finished run_command_line_tests')
 
-def run_python_tests():
+def test_python_code():
     print('Started run_python_tests')
     # Python level code
     # load the default command line values
@@ -129,6 +129,6 @@ def run_python_tests():
     print('Finished run_python_tests')
 
 if __name__ == '__main__':
-    run_command_line_tests()
-    run_python_tests()
+    test_command_line_code()
+    test_python_code()
 
