@@ -125,7 +125,6 @@ Do not use special characters or spaces in variable names and start variable nam
 A sample problem is provided. The filename denotes the true equation.
 
 ```
-
 $ winpty python pySRURGS.py -max_num_fit_params 3 -max_permitted_trees 1000 -plotting ./csvs/quartic_polynomial.csv 2000
 Running in multi processor mode
 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 2000/2000 [05:22<00:00,  8.22it/s]
@@ -137,7 +136,6 @@ Making sure we meet the iters value
                     0.000154517  0.999996  x*(p2/p0)**x*(-p0 + p2)**p2 - (x**p1)**p1 + 1                           4.72E-01,1.17E+00,1.69E+00
                     0.0001829    0.999995  -(p0 + x)*(p1*p2*(p2 - x) - (p2 - x)**x)/(p0**2*p1*p2)                  -2.11E+01,-9.23E-03,1.24E+01
                     0.00021193   0.999995  ((p1**x)**p1 + (x**(-p0 + p2))**p2)*((p1 + x**p2)**x)**(-p0*(p0 - p1))  4.09E-01,1.61E+00,1.75E+00
-
 ```
 
 ![Example performance](image/plot.svg)
