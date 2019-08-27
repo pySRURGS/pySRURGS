@@ -823,8 +823,7 @@ def random_equation(N, cum_weights, dataset, enumerator, SRconfig,
     if details == False:
         return equation_string
     else:   
-        result = [original_equation_string, equation_string, 
-        N, n, f, m, i, q, r, s]    
+        result = [equation_string, N, n, f, m, i, q, r, s]    
         return result
     
 def random_equation2(N, cum_weights, dataset, enumerator, SRconfig, 
