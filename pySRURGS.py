@@ -33,24 +33,8 @@ import matplotlib.style
 matplotlib.style.use('seaborn-colorblind')
 import matplotlib.pyplot as plt
 
-class SymbolicRegressionConfig(object):
-    ''' 
-        Defines the nature of the search space in a symbolic regression problem
-    '''
-    def __init__(self, n_functions=['add','sub','mul','div', 'pow'],
-                       f_functions=['log', 'sinh', 'sin'],
-                       max_num_fit_params=3,
-                       max_permitted_trees=100):
-        self._n_functions = n_functions
-        self._f_functions = f_functions
-        self._max_num_fit_params = max_num_fit_params
-        self._max_permitted_trees = max_permitted_trees
-
-#### GLOBALS 
-# a very big number!
+''' GLOBALS '''
 BIG_NUM = 1.79769313e+300
-# prefix and suffix variables and parameters thinking I would do string 
-# manipulations, but this may end up being needless.
 fitting_param_prefix = 'begin_fitting_param_'
 fitting_param_suffix = '_end_fitting_param'
 variable_prefix = 'begin_variable_'
@@ -66,9 +50,80 @@ defaults_dict = {'funcs_arity_one': None,
                  'max_num_fit_params': 3,
                  'max_permitted_trees':1000,
                  'path_to_db': None}
-##### END GLOBALS
+''' END GLOBALS '''
+
+class SymbolicRegressionConfig(object):
+    """
+    An object used to store the configuration of this symbolic regression 
+    problem. Notably, does not contain information regarding the dataset.
+
+    Parameters
+    ----------
+    
+    n_functions: list
+       A list with elements from the set ['add','sub','mul','div','pow'].
+       Defines the functions of arity two that are permitted in this symbolic 
+       regression run. Default: ['add','sub','mul','div', 'pow']
+    
+    f_functions: list 
+        A list with elements from the set ['cos','sin','tan','cosh','sinh', 
+        'tanh','exp','log']. Defines the functions of arity one that are 
+        permitted in this symbolic regression run. 
+        Default: []
+    
+    max_num_fit_params: int 
+        This specifies the length of the fitting parameters vector. Randomly 
+        generated equations can have up to `max_num_fit_params` independent 
+        fitting parameters. Default: 3
+            
+    max_permitted_trees: int 
+        This specifies the number of permitted unique binary trees, which 
+        determine the structure of random equations. pySRURGS will consider 
+        equations from [0 ... max_permitted_trees] during its search. Increasing 
+        this value increases the size of the search space. Default: 100
+    
+    Returns
+    -------
+    SymbolicRegressionConfig
+        A symbolic regression problem configuration object, with attributes 
+        self._n_functions, self._f_functions, self._max_num_fit_params, 
+        self._max_permitted_trees.
+    
+    Example
+    --------
+
+    >>> import pySRURGS
+    >>> n_funcs = ['add','sub','mul','div']
+    >>> f_funcs = []
+    >>> n_par = 5
+    >>> n_tree = 1000
+    >>> SR_config = pySRURGS.SymbolicRegressionConfig(n_funcs, f_funcs, n_par, n_tree]
+    """
+
+    def __init__(self, n_functions=['add','sub','mul','div', 'pow'],
+                       f_functions=['log', 'sinh', 'sin'],
+                       max_num_fit_params=3,
+                       max_permitted_trees=100):
+        self._n_functions = n_functions
+        self._f_functions = f_functions
+        self._max_num_fit_params = max_num_fit_params
+        self._max_permitted_trees = max_permitted_trees
 
 def memoize(func):
+    """
+    A memoize function that wraps other functions. Improves CPU performance at 
+    the cost of increased memory requirements.
+
+    Parameters
+    ----------
+    func : function
+        Will memoize the `func` provided `func` is deterministic in its outputs.
+    
+    Returns
+    -------
+    memoized_func: function
+        A memoized wrapper around `func`
+    """
     cache = dict()
     def memoized_func(*args):
         if args in cache and memoize_funcs == True:
@@ -77,9 +132,6 @@ def memoize(func):
         cache[args] = result
         return result
     return memoized_func
-
-def make_timestamp():
-    return '{:%Y-%b-%d.%H.%M.%S}'.format(datetime.datetime.now())
 
 def has_nans(X):
     if np.any(np.isnan(X)) == True:
@@ -92,7 +144,7 @@ def check_for_nans(X):
         raise Exception("Has NaNs")
 
 def binary(num, pre='', length=16, spacer=0):
-    # formats a number into binary 
+    ''' formats a number into binary - https://stackoverflow.com/a/16926270/3549879 '''
     return '{0}{{:{1}>{2}}}'.format(pre, spacer, length).format(bin(num)[2:])      
         
 def check_file_exists(path_to_file):
@@ -107,29 +159,116 @@ def check_dir_perms(path_to_file):
         raise Exception("Output dir has bad permissions: " + path_to_file)
     return path_to_file
 
-def make_variable_name(label):    
-    return variable_prefix + str(label) + variable_suffix
+def make_variable_name(var):
+    """
+    Converts a variable name to pySRURGS safe variable names. Prevents string 
+    manipulations on variable names from affecting function names.
+
+    Parameters
+    ----------
+    var : string
+        A variable name.
     
-def make_parameter_name(label):
-    return fitting_param_prefix + str(label) + fitting_param_suffix
+    Returns
+    -------
+    var_name: string
+        `var` wrapped in the pySRURGS variable prefix and suffix.
+    """
+    var_name = variable_prefix + str(var) + variable_suffix
+    return var_name
+    
+def make_parameter_name(par):
+    """
+    Converts a fitting parameter name to pySRURGS safe parameter name. Prevents 
+    string manipulations on parameter names from affecting function names.
+
+    Parameters
+    ----------
+    par : string
+        A variable name.
+    
+    Returns
+    -------
+    par_name: string
+        `par` wrapped in the pySRURGS parameter prefix and suffix.
+    """
+    par_name = fitting_param_prefix + str(par) + fitting_param_suffix
+    return par_name
     
 def remove_variable_tags(equation_string):
+    """
+    Removes the pySRURGS variable prefix/suffix from an equation string.
+
+    Parameters
+    ----------
+    equation_string : string
+        A pySRURGS generated equation string
+    
+    Returns
+    -------
+    equation_string: string
+        `equation_string` with the variable prefix and suffix removed.
+    """
     equation_string = equation_string.replace(variable_prefix, '')
     equation_string = equation_string.replace(variable_suffix, '')
     return equation_string
     
 def remove_parameter_tags(equation_string):
+    """
+    Removes the pySRURGS fitting parameter prefix/suffix from an equation string.
+
+    Parameters
+    ----------
+    equation_string : string
+        A pySRURGS generated equation string
+    
+    Returns
+    -------
+    equation_string: string
+        `equation_string` with the fitting parameter prefix and suffix removed.
+    """
     equation_string = equation_string.replace(fitting_param_prefix, '')
     equation_string = equation_string.replace(fitting_param_suffix, '')
     return equation_string
     
 def remove_tags(equation_string):
-    # removes the fitting_param_prefix and fitting_var_prefix with nothing 
+    """
+    Removes the pySRURGS variable and fitting parameter prefix/suffix from an 
+    equation string.
+
+    Parameters
+    ----------
+    equation_string : string
+        A pySRURGS generated equation string
+    
+    Returns
+    -------
+    equation_string: string
+        `equation_string` with the variable and fitting parameter prefixes and 
+        suffixes removed.
+    """
     equation_string = remove_parameter_tags(equation_string)
     equation_string = remove_variable_tags(equation_string)
     return equation_string
 
 def remove_dict_tags(equation_string):
+    """
+    Prior to numerically evaluating an equation string, we replace the variable 
+    and fitting parameter suffix/prefix with code to access values housed in 
+    dictionaries. This function removes that dictionary code from the equation 
+    string.
+
+    Parameters
+    ----------
+    equation_string : string
+        A pySRURGS generated equation string just prior to being numerically 
+        evaluated. 
+    
+    Returns
+    -------
+    equation_string: string
+        `equation_string` without dictionary access formatting.
+    """
     equation_string = equation_string.replace('df["', '')
     equation_string = equation_string.replace('params["', '')
     equation_string = equation_string.replace('"].value', '')
@@ -137,6 +276,20 @@ def remove_dict_tags(equation_string):
     return equation_string
     
 def create_variable_list(m):
+    """
+    Creates a list of all the variable names. 
+
+    Parameters
+    ----------
+    m : string (1) or int (2)
+        (1) Absolute or relative path to a CSV file with a header
+        (2) The number of independent variables in the dataset               
+    
+    Returns
+    -------
+    my_vars: list
+        A list with dataset variable names as elements.
+    """
     if type(m) == str:
         my_vars = pandas.read_csv(m).keys()[:-1].tolist()
         my_vars = [make_variable_name(x) for x in my_vars]
@@ -144,27 +297,26 @@ def create_variable_list(m):
         my_vars = []
         for i in range(0,m):
             my_vars.append(make_variable_name('x'+str(i)))
-    return my_vars   
+    return my_vars
 
 def create_parameter_list(m):
+    """
+    Creates a list of all the fitting parameter names. 
+
+    Parameters
+    ----------
+    m : int
+        The number of fitting parameters in the symbolic regression problem               
+    
+    Returns
+    -------
+    my_pars: list
+        A list with fitting parameter names as elements.
+    """
     my_pars = []
     for i in range(0,m):
         my_pars.append(make_parameter_name('p'+str(i)))
-    return my_pars   
-
-def get_opers_dict():
-     ''' 
-         The order of this dictionary affects the way we simplify expressions
-         eg add(pow(x,mul(y,z)),x) ----> x**(y*z)+x         
-     '''
-     opers_dict = {"mul":"*", 
-                   "div":"/", 
-                   "add":"+",
-                   "sub":"-",
-                   "pow":"**"} 
-     opers_dict = collections.OrderedDict(opers_dict)
-     opers_dict.move_to_end("mul") 
-     return opers_dict
+    return my_pars
 
 @memoize
 def get_bits(x):
@@ -175,15 +327,49 @@ def get_bits(x):
     return odd_bits, even_bits
 
 @memoize
-def get_left_right_bits(integer):
+def get_left_right_bits(my_int):
+    """
+    Converts an integer to binary and returns two integers, representing the odd
+    and even bits of its binary value. 
+
+    Parameters
+    ----------
+    my_int : integer
+    
+    Returns
+    -------
+    left_int: int
+        An integer corresponding to the decimal representation of the odd bits 
+        of `my_int`'s binary representation
+        
+    right_int: int
+        An integer corresponding to the decimal representation of the even bits 
+        of `my_int`'s binary representation
+    """
     # splits an integer into its odd and even bits - AKA left and right bits 
-    int_as_bin = binary(integer)
+    int_as_bin = binary(my_int)
     left_bin, right_bin = get_bits(int_as_bin)   
     left_int =  int(left_bin, 2)
     right_int =  int(right_bin, 2)
     return left_int, right_int
 
 def get_properties(dataframe, label):
+    """
+    Returns a dictionary of statistical data around the data found in 
+    `dataframe[label]`
+
+    Parameters
+    ----------
+    dataframe : pandas.DataFrame object
+    
+    label: a column name within `dataframe`
+    
+    Returns
+    -------
+    properties: dictionary
+        A dictionary containing the mean, standard deviation, min, and max of 
+        the column.
+    """
     properties = dict()
     properties[label + '_mean'] = dataframe.mean()
     properties[label + '_std'] = dataframe.std()
@@ -192,6 +378,19 @@ def get_properties(dataframe, label):
     return properties
 
 def get_scale_type(dataframe, header_labels):
+    """
+    A helper function used to specify the type of data scaling. pySRURGS does 
+    not use scaling by default.
+
+    Parameters
+    ----------
+    dataframe : pandas.DataFrame object
+    header_labels: A list of the independent variables names
+    
+    Returns
+    -------
+    'subtract_by_mean_divide_by_std' or 'divide_by_mean'
+    """
     for label in header_labels:
         row = dataframe[label]
         if has_negatives(row) == True:
@@ -199,7 +398,21 @@ def get_scale_type(dataframe, header_labels):
     return 'divide_by_mean'
 
 def scale_dataframe(df, scale_type):
-    # does scaling by column mean    
+    """
+    A helper function that scales the dataframe depending on its shape and 
+    data's values.
+
+    Parameters
+    ----------
+    df: pandas.DataFrame object
+    scale_type: string specifying the type of scaling
+    
+    Returns
+    -------
+    df: pandas.DataFrame object
+        The same `df` but with its independent variables scaled according to 
+        `scale_type` which is specified by `get_scale_type` function
+    """ 
     msg  = "This kind of scaling does not make sense when"
     msg += " your data contains negatives"
     if df.min() < 0 and scale_type == 'divide_by_mean':
@@ -273,15 +486,43 @@ def pow(x, y):
 
 @memoize
 def mempower(a,b):
+    """
+    Same as pow, but able to handle extremely large values, and memoized.
+
+    Parameters
+    ----------
+    a: int        
+    b: int 
+    
+    Returns
+    -------
+    result: mpmath integer
+        `a ** b`
+    """ 
     result = mpmath.power(a,b)    
     return result
 
 def get_element_of_cartesian_product(*args, repeat=1, index=0):
-    '''
-        You want the i^th index of the cartesian product of two large arrays?
-        This function retrieves that element without needing to iterate through 
-        the entire product 
-    '''
+    """
+    Access a specific element of a cartesian product, without needing to iterate
+    through the entire product.
+
+    Parameters
+    ----------
+    args: iterable 
+        A set of iterables whose cartesian product is being accessed
+        
+    repeat: int
+        If `args` is only one object, `repeat` specifies the number of times 
+        to take the cartesian product with itself.
+        
+    index: int
+        The index of the cartesian product which we want to access 
+    
+    Returns
+    -------
+    ith_item: the `index`th element of the cartesian product
+    """ 
     pools = [tuple(pool) for pool in args] * repeat 
     if len(pools) == 0:
         return []
@@ -305,8 +546,6 @@ def get_element_of_cartesian_product(*args, repeat=1, index=0):
     for index in range(0, len_pools):
         ith_item.append(pools[index][index_list[index]])
     return ith_item
-
-opers_dict = get_opers_dict()
 
 def fix_order_of_fitting_parameters(funcstring):
     # NOT DEPLOYED YET
@@ -339,10 +578,27 @@ def fix_order_of_fitting_parameters(funcstring):
     return funcstring
 
 def simplify_equation_string(eqn_str, dataset):
-    '''
-        This replaces add(a,b) with a + b 
-        Also uses sympy for algebraic simplification 
-    '''
+    """
+    Simplify a pySRURGS equation string into a more human readable format
+
+    Parameters
+    ----------
+    eqn_str: string 
+        pySRURGS equation string
+        
+    dataset: pySRURGS.Dataset
+        The dataset object used to generate the `eqn_str`
+    
+    Returns
+    -------
+    eqn_str: string
+        A simpler, more human readable version of `eqn_str`
+        
+    Notes 
+    -------
+    Uses sympy to perform simplification. The dataset object specifies the sympy
+    namespace.
+    """ 
     s = sympy.sympify(eqn_str, locals = dataset._sympy_namespace)
     try:
         eqn_str = str(sympy.simplify(s))
@@ -354,17 +610,50 @@ def simplify_equation_string(eqn_str, dataset):
     eqn_str = remove_parameter_tags(eqn_str)
     return eqn_str
 
-def equation_generator(i, q, r, s, dataset, enumerator, SRconfig, simpler=True):
-    '''
-        Generates the random equation 
-        i is in the domain [0, N-1], and specifies which binary tree to use 
-        q is in the domain [0, G-1], and specifies which configuration of  
-            arity 1 functions
-        r is in the domain [0, A-1], and specifies which configuration of 
-            arity 2 functions
-        s is in the domain [0, B-1], and specifies which configuration of 
-            terminals
-    '''
+def equation_generator(i, q, r, s, dataset, enumerator, SRconfig):
+    """
+    Generates an equation string given the integers that specify an equation 
+    string in pySRURGS. Use `equation_generator2` instead when there are no 
+    functions of arity one permitted.
+
+    Parameters
+    ----------
+    i: int
+        Specifies the integer representation of the unique binary tree. Must be 
+        greater than 0.
+        
+    q: int 
+        Specifies the integer representation of the configuration of the 
+        functions of arity one. Must be greater than 0 and less than the number 
+        of possible configurations of functions of arity one, `G`: see 
+        `Enumerator.get_G` for details.
+        
+    r: int
+        Specifies the integer representation of the configuration of the 
+        functions of arity two. Must be greater than 0 and less than the number 
+        of possible configurations of functions of arity two, `A`: see 
+        `Enumerator.get_A` for details.
+        
+    s: int
+        Specifies the integer representation of the configuration of the 
+        terminals. Must be greater than 0 and less than the number 
+        of possible configurations of functions of arity two, `B`: see 
+        `Enumerator.get_B` for details.
+        
+    dataset: pySRURGS.Dataset
+        The `Dataset` object for the symbolic regression problem
+        
+    enumerator: pySRURGS.Enumerator
+        The `Enumerator` object for the symbolic regression problem
+        
+    SRconfig: pySRURGS.SymbolicRegressionConfig
+        The `SymbolicRegressionConfig` for the symbolic regression problem 
+    
+    Returns
+    -------
+    tree: string
+        The equation string, without any simplifications      
+    """
     en = enumerator
     f = len(SRconfig._f_functions)
     n = len(SRconfig._n_functions)
@@ -413,8 +702,44 @@ def equation_generator(i, q, r, s, dataset, enumerator, SRconfig, simpler=True):
         tree = tree.replace('.', term, 1)
     return tree
 
-def equation_generator2(i, r, s, dataset, enumerator, SRconfig, simpler=True):
-    # for the case where there are zero functions of arity one 
+def equation_generator2(i, r, s, dataset, enumerator, SRconfig):
+    """
+    Generates an equation string given the integers that specify an equation 
+    string in pySRURGS. Use `equation_generator` instead when there are 
+    functions of arity one permitted.
+
+    Parameters
+    ----------
+    i: int
+        Specifies the integer representation of the unique binary tree. Must be 
+        greater than 0.
+        
+    r: int
+        Specifies the integer representation of the configuration of the 
+        functions of arity two. Must be greater than 0 and less than the number 
+        of possible configurations of functions of arity two, `A`: see 
+        `Enumerator.get_A` for details.
+        
+    s: int
+        Specifies the integer representation of the configuration of the 
+        terminals. Must be greater than 0 and less than the number 
+        of possible configurations of functions of arity two, `B`: see 
+        `Enumerator.get_B` for details.
+        
+    dataset: pySRURGS.Dataset
+        The `Dataset` object for the symbolic regression problem
+        
+    enumerator: pySRURGS.Enumerator2
+        The `Enumerator2` object for the symbolic regression problem
+        
+    SRconfig: pySRURGS.SymbolicRegressionConfig
+        The `SymbolicRegressionConfig` for the symbolic regression problem 
+    
+    Returns
+    -------
+    tree: string
+        The equation string, without any simplifications      
+    """
     en = enumerator
     n = len(SRconfig._n_functions)
     m = dataset._m_terminals
@@ -445,17 +770,44 @@ def equation_generator2(i, r, s, dataset, enumerator, SRconfig, simpler=True):
     
 def random_equation(N, cum_weights, dataset, enumerator, SRconfig, 
                     details=False):
-    '''
-        Generates a random equation given the number of permitted unique trees 
-        (N), the probability of selection for each of those trees (cum_weights), 
-        a Dataset object, and an Enumerator object 
+    """
+    Generates a random equation string. Generating the random numbers which 
+    specify the equation, then passes those as arguments to equation_generator. 
+    Use `random_equation2` instead when there are no functions of arity one 
+    permitted.
+
+    Parameters
+    ----------
+    N: int
+        Specifies the number of unique binary trees permitted in our search. The 
+        search considers trees mapping from the integer domain [0 ... `N`-1].
         
-        It works by generating the random numbers which specify the equation, 
-        then passing those as arguments to equation_generator
+    cum_weights: array like
+        Specifies the probability that an integer in [0 ... `N`-1] will be 
+        randomly selected. Should add to 1. pySRURGS gives preference to larger 
+        values of `N` because they result in more possible equations and we want 
+        to give each equation uniform probability of selection.
         
-        The details argument is used when generating benchmark problems,
-        for most uses, it should be left as false.
-    '''
+    dataset: pySRURGS.Dataset
+        The `Dataset` object for the symbolic regression problem
+        
+    enumerator: pySRURGS.Enumerator
+        The `Enumerator2` object for the symbolic regression problem
+        
+    SRconfig: pySRURGS.SymbolicRegressionConfig
+        The `SymbolicRegressionConfig` for the symbolic regression problem 
+        
+    details: Boolean 
+        Determines the output type 
+        
+    Returns
+    -------
+    if `details` == False:
+        equation_string: string
+            A randomly generated pySRURGS equation string 
+    if `details` == True:
+        [equation_string, N, n, f, m, i, q, r, s]
+    """
     n = len(SRconfig._n_functions)
     f = len(SRconfig._f_functions)
     m = dataset._m_terminals
@@ -463,39 +815,106 @@ def random_equation(N, cum_weights, dataset, enumerator, SRconfig,
     q = enumerator.get_q(f, i)
     r = enumerator.get_r(n, i)
     s = enumerator.get_s(m, i)   
-    equation_string = equation_generator(i, q, r, s, dataset, enumerator, 
-                                         SRconfig, simpler=True)
+    equation_string = equation_generator(i, q, r, s, dataset, enumerator, SRconfig)
     if details == False:
         return equation_string
     else:   
         original_equation_string = equation_generator(i, q, r, s, dataset, 
-                                                      enumerator, SRconfig, 
-                                                      simpler=False)        
+                                                      enumerator, SRconfig)
     result = [original_equation_string, equation_string, N, n, f, m, i, q, r, s]
     return 
     
 def random_equation2(N, cum_weights, dataset, enumerator, SRconfig, 
                      details=False):
-    # for the case where there are zero functions of arity one 
+    """
+    Generates a random equation string. Generating the random numbers which 
+    specify the equation, then passes those as arguments to equation_generator. 
+    Use `random_equation` instead when there are functions of arity one 
+    permitted.
+
+    Parameters
+    ----------
+    N: int
+        Specifies the number of unique binary trees permitted in our search. The 
+        search considers trees mapping from the integer domain [0 ... `N`-1].
+        
+    cum_weights: array like
+        Specifies the probability that an integer in [0 ... `N`-1] will be 
+        randomly selected. Should add to 1. pySRURGS gives preference to larger 
+        values of `N` because they result in more possible equations and we want 
+        to give each equation uniform probability of selection.
+        
+    dataset: pySRURGS.Dataset
+        The `Dataset` object for the symbolic regression problem
+        
+    enumerator: pySRURGS.Enumerator2
+        The `Enumerator2` object for the symbolic regression problem
+        
+    SRconfig: pySRURGS.SymbolicRegressionConfig
+        The `SymbolicRegressionConfig` for the symbolic regression problem 
+        
+    details: Boolean 
+        Determines the output type 
+        
+    Returns
+    -------
+    if `details` == False:
+        equation_string: string
+            A randomly generated pySRURGS equation string 
+    if `details` == True:
+        [equation_string, N, n, f, m, i, q, r, s]
+    """
     n = len(SRconfig._n_functions)
     m = dataset._m_terminals
     i = random.choices(range(0, N), cum_weights=cum_weights, k=1)[0]
     r = enumerator.get_r(n, i)
     s = enumerator.get_s(m, i)   
     equation_string = equation_generator2(i, r, s, dataset, enumerator, 
-                                          SRconfig, simpler=True)
+                                          SRconfig)
     if details == False:
         return equation_string
     else:   
         original_equation_string = equation_generator2(i, r, s, dataset, 
-                                                       enumerator, SRconfig, 
-                                                       simpler=False)
+                                                       enumerator, SRconfig)
         return [original_equation_string, equation_string, N, n, m, i, r, s]
 
 class Dataset(object):
-    '''
-        This class houses all the numerical data for the problem 
-    '''
+    """
+    An object used to store the dataset of this symbolic regression 
+    problem.
+
+    Parameters
+    ----------
+    path_to_csv_file: string
+       Absolute or relative path to the CSV file for the numerical data. The 
+       rightmost column of the CSV file should be the dependent variable. 
+       The CSV file should have a header of column names and should NOT 
+       have a leftmost index column.
+    
+    int_max_params: int
+        The maximum number of fitting parameters specified in the symbolic 
+        regression problem. Same as `max_num_fit_params`.
+    
+    scaled: Boolean
+        Specifies whether the independent variables should be scaled prior to 
+        analysis. Default: False.
+         
+    Returns
+    -------
+    Dataset
+        A pySRURGS dataset object, which houses a variety of attributes including
+        the numerical data, the sympy namespace, the data dict used in evaluating 
+        the equation string, etc.
+    
+    Example
+    --------
+
+    >>> import pySRURGS
+    >>> path_to_csv_file = './csvs/quartic_polynomial.csv'
+    >>> int_max_params = 5
+    >>> dataset = pySRURGS.Dataset(path_to_csv_file, int_max_params)
+    """
+
     def __init__(self, path_to_csv_file, int_max_params, scaled=False):
         # the independent variables will be scaled if self._scaled == True.
         self._scaled = scaled
@@ -512,6 +931,8 @@ class Dataset(object):
         self._y_label = y_label
         if np.std(self._y_data) == 0:
             raise Exception("The data is invalid. All y values are the same.")
+        self._param_names = [make_parameter_name(x) for x in 
+                                                  range(0,self._int_max_params)]
         self._data_properties = dict()
         self._data_properties.update(x_properties)
         self._data_properties.update(y_properties)
@@ -525,9 +946,7 @@ class Dataset(object):
         sympy_namespace = {}
         for variable_name in self._x_labels:
             sympy_namespace[variable_name] = sympy.Symbol(variable_name)
-        param_names = [make_parameter_name(x) for x in 
-                                                  range(0,self._int_max_params)]
-        for param_name in param_names:
+        for param_name in self._param_names:
             sympy_namespace[param_name] = sympy.Symbol(param_name)
         sympy_namespace['add'] = sympy.Add
         sympy_namespace['sub'] = lambda a,b: sympy.Add(a, -b)
@@ -578,15 +997,53 @@ class Dataset(object):
 
 
 class Enumerator(object):
-    '''
-        This class is used to count all the possible equations for the case 
-        where functions of arity 1 and 2 are permitted.
-    '''
+    """
+    An object housing methods for enumeration of the symbolic regression 
+    problem. Use `Enumerator2` instead when no functions of arity one permitted.
+         
+    Returns
+    -------
+    Enumerator
+        A pySRURGS Enumerator object which houses various methods for the 
+        enumeration.
+    
+    Example
+    --------
+
+    >>> import pySRURGS
+    >>> en = pySRURGS.Enumerator()
+    >>> en.get_M(1000, 5, 5, 5)
+    """
+    
     @memoize
     def get_M(self, N, f, n, m):
-        # M is the total number of equations possible for [0, 1, 2, ..., i, ..., N]
-        # unique binary trees, f functions of arity one, n functions of arity two, 
-        # and m terminals 
+        """
+        Calculate the total number of equations for this symbolic regression 
+        problem. Use get_M from `Enumerator2` instead if the number of functions 
+        of arity one permitted is zero.
+
+        Parameters
+        ----------
+        N: int  
+            Specifies the number of unique binary trees permitted in our search. 
+            We consider trees mapping from the integer domain [0 ... `N`-1].
+            
+        
+        f: int  
+            The number of functions of arity one permitted
+        
+        n: int 
+            The number of functions of arity two permitted
+        
+        m: int 
+            The number of terminals in the problem (includes variables and 
+            fitting parameters)
+             
+        Returns
+        -------
+        M: mpmath integer
+            The number of possible equations in this symbolic regression problem         
+        """
         def get_count(i):
             l_i = self.get_l_i(i)
             k_i = self.get_k_i(i)
@@ -597,44 +1054,102 @@ class Enumerator(object):
         return M    
     @memoize
     def get_G(self, f, i):
-        # G is the number of ways to pick l_i functions of arity 
-        # one from f possible functions of arity one
+        """
+        Calculate the total number of configurations of the functions of arity 
+        one for the binary tree mapped from the integer `i`.  Use get_G from 
+        `Enumerator2` instead if the number of functions of arity one permitted 
+        is zero.
+
+        Parameters
+        ----------
+        f: int  
+            The number of functions of arity one permitted
+        
+        i: int 
+            The `i`^th binary tree in the integer to tree mapping        
+             
+        Returns
+        -------
+        G: mpmath integer
+            The number of possible configurations of functions of arity one
+        """
         l = self.get_l_i(i)
         G = mempower(f,l)
         G = int(G)
         return G
     @memoize
     def get_A(self, n, i):
-        # A is the number of ways to pick k_i functions of arity 
-        # two from n possible functions of arity two
+        """
+        Calculate the total number of configurations of the functions of arity 
+        two for the binary tree mapped from the integer `i`.  Use get_A from 
+        `Enumerator2` instead if the number of functions of arity one permitted 
+        is zero.
+
+        Parameters
+        ----------
+        n: int  
+            The number of functions of arity two permitted
+        
+        i: int 
+            The `i`^th binary tree in the integer to tree mapping        
+             
+        Returns
+        -------
+        A: mpmath integer
+            The number of possible configurations of functions of arity two
+        """
         k = self.get_k_i(i)
         A = mempower(n,k)
         A = int(A)
         return A
     @memoize
     def get_B(self, m, i):
-        # B is the number of ways to pick j_i terminals from m terminals  
+        """
+        Calculate the total number of configurations of the terminals for the 
+        binary tree mapped from the integer `i`.  Use get_B from 
+        `Enumerator2` instead if the number of functions of arity one permitted 
+        is zero.
+
+        Parameters
+        ----------
+        m: int  
+            The number of terminals including variables and fitting parameters
+        
+        i: int 
+            The `i`^th binary tree in the integer to tree mapping        
+             
+        Returns
+        -------
+        B: mpmath integer
+            The number of possible configurations of terminals 
+        """
         j = self.get_j_i(i)
         B = mempower(m,j)
         B = int(B)
         return B        
     def get_q(self, f, i):
+        ''' Generates a random integer between 0 and `G` - 1, inclusive '''
         G = self.get_G(f, i)
         q = random.randint(0, G-1)
         return q
     def get_r(self, n, i):
+        ''' Generates a random integer between 0 and `A` - 1, inclusive '''
         A = self.get_A(n, i)
         r = random.randint(0, A-1)
         return r
     def get_s(self, m, i):
+        ''' Generates a random integer between 0 and `B` - 1, inclusive '''
         B = self.get_B(m, i)
         s = random.randint(0, B-1)
         return s
     @memoize
     def get_l_i(self, i):
         i = int(i)
-        # from n functions of arity two, pick k_i 
-        # k_i is the number of non-leaf nodes in the tree corresponding to i
+        ''' 
+            from `f` functions of arity one, pick `l_i `
+            `l_i` is the number of non-leaf nodes of arity one 
+            in the tree corresponding to `i` 
+        ''' 
         if i == 0:
             l_i = 0 
         elif i == 1:
@@ -649,9 +1164,12 @@ class Enumerator(object):
         return l_i
     @memoize
     def get_k_i(self, i):
+        ''' 
+            from `n` functions of arity two, pick `k_i`
+            `k_i` is the number of non-leaf nodes 
+            in the tree corresponding to `i`            
+        ''' 
         i = int(i)
-        # from n functions of arity two, pick k_i 
-        # k_i is the number of non-leaf nodes in the tree corresponding to i
         if i == 0:
             k_i = 0 
         elif i == 1:
@@ -666,9 +1184,11 @@ class Enumerator(object):
         return k_i
     @memoize
     def get_j_i(self, i):
+        ''' 
+            from `m` terminals, pick `j_i`
+            `j_i` is the number of leafs in the tree corresponding to `i`
+        '''
         i = int(i)
-        # from m m_terminals, pick j_i 
-        # j_i is the number of leafs in the tree corresponding to i
         if i == 0:
             j_i = 1
         elif i == 1:
@@ -683,9 +1203,49 @@ class Enumerator(object):
         return j_i
 
 class Enumerator2(object):
-    # for the case where the are zero functions of arity one
+    """
+    An object housing methods for enumeration of the symbolic regression 
+    problem. Use `Enumerator` instead when functions of arity one are permitted.
+         
+    Returns
+    -------
+    Enumerator
+        A pySRURGS Enumerator object which houses various methods for the 
+        enumeration.
+    
+    Example
+    --------
+
+    >>> import pySRURGS
+    >>> en = pySRURGS.Enumerator2()
+    >>> en.get_M(1000, 5, 5)
+    """
+    
     @memoize
     def get_M(self, N, n, m):
+        """
+        Calculate the total number of equations for this symbolic regression 
+        problem. Use get_M from `Enumerator` instead if any functions 
+        of arity one are permitted.
+
+        Parameters
+        ----------
+        N: int  
+            Specifies the number of unique binary trees permitted in our search. 
+            We consider trees mapping from the integer domain [0 ... `N`-1].
+                   
+        n: int 
+            The number of functions of arity two permitted
+        
+        m: int 
+            The number of terminals in the problem (includes variables and 
+            fitting parameters)
+             
+        Returns
+        -------
+        M: mpmath integer
+            The number of possible equations in this symbolic regression problem         
+        """
         def get_count(i):
             k_i = self.get_k_i(i)
             j_i = self.get_j_i(i)
@@ -695,32 +1255,72 @@ class Enumerator2(object):
         return M    
     @memoize
     def get_A(self, n, i):
-        # A is the number of ways to pick k_i functions of arity 
-        # two from n possible functions of arity two
+        """
+        Calculate the total number of configurations of the functions of arity 
+        two for the binary tree mapped from the integer `i`.  Use get_A from 
+        `Enumerator` instead if the number of functions of arity one permitted 
+        is not zero.
+
+        Parameters
+        ----------
+        n: int
+            The number of functions of arity two permitted
+        
+        i: int 
+            The `i`^th binary tree in the integer to tree mapping        
+             
+        Returns
+        -------
+        A: mpmath integer
+            The number of possible configurations of functions of arity two
+        """
         k = self.get_k_i(i)
         A = mempower(n,k)
         A = int(A)
         return A
     @memoize
     def get_B(self, m, i):
-        # B is the number of ways to pick j_i terminals from m terminals  
+        """
+        Calculate the total number of configurations of the terminals for the 
+        binary tree mapped from the integer `i`.  Use get_B from 
+        `Enumerator` instead if the number of functions of arity one permitted 
+        is not zero.
+
+        Parameters
+        ----------
+        m: int  
+            The number of terminals including variables and fitting parameters
+        
+        i: int 
+            The `i`^th binary tree in the integer to tree mapping        
+             
+        Returns
+        -------
+        B: mpmath integer
+            The number of possible configurations of terminals 
+        """
         j = self.get_j_i(i)
         B = mempower(m,j)
         B = int(B)
         return B        
     def get_r(self, n, i):
+        ''' Generates a random integer between 0 and `A` - 1, inclusive '''
         A = self.get_A(n, i)
         r = random.randint(0, A-1)
         return r
     def get_s(self, m, i):
+        ''' Generates a random integer between 0 and `B` - 1, inclusive '''
         B = self.get_B(m, i)
         s = random.randint(0, B-1)
         return s
     @memoize
     def get_k_i(self, i):
+        ''' 
+            from `n` functions of arity two, pick `k_i` 
+            `k_i` is the number of non-leaf nodes 
+            in the tree corresponding to `i`            
+        ''' 
         i = int(i)
-        # from n functions of arity two, pick k_i 
-        # k_i is the number of non-leaf nodes in the tree corresponding to i
         if i == 0:
             k_i = 0 
         elif i == 1:
@@ -733,9 +1333,11 @@ class Enumerator2(object):
         return k_i
     @memoize
     def get_j_i(self, i):
+        ''' 
+            from `m` terminals, pick `j_i`
+            `j_i` is the number of leafs in the tree corresponding to `i`
+        '''
         i = int(i)
-        # from m m_terminals, pick j_i 
-        # j_i is the number of leafs in the tree corresponding to i
         if i == 0:
             j_i = 1
         elif i == 1:
@@ -748,7 +1350,25 @@ class Enumerator2(object):
         return j_i
 
 def create_fitting_parameters(max_params, param_values=None):
-    # param_values must be None or a np.array of length max_params
+    """
+    Creates the lmfit.Parameters object based on the number of fitting parameters 
+    permitted in this symbolic regression problem.
+
+    Parameters
+    ----------
+    max_params: int 
+        The maximum number of fitting parameters. Same as `max_num_fit_params`.
+        
+    param_values: None OR (numpy.array of length max_params)
+        Specifies the values of the fitting parameters. If none, will default 
+        to an array of ones, which are to be optimized later.
+          
+    Returns
+    -------
+    params: lmfit.Parameters
+        Fitting parameter names specified as ['p' + str(integer) for integer 
+        in range(0, max_params)]
+    """    
     params = lmfit.Parameters()
     for int_param in range(0, max_params):
         param_name = 'p'+str(int_param)
@@ -761,6 +1381,30 @@ def create_fitting_parameters(max_params, param_values=None):
     return params
 
 def eval_equation(params, function_string, my_data, mode='residual'):
+    """
+    Evaluates the equation numerically.
+
+    Parameters
+    ----------
+    params: lmfit.Parameters
+        The lmfit.parameters object used to optimize fitting parameters
+        
+    function_string: string
+        The equation string in dictionary code tags in place. 
+        Use `clean_funcstring` to put in place the dictionary code tags.
+    
+    my_data: pySRURGS.Dataset
+        The dataset object for this symbolic regression problem.
+    
+    mode: string
+        'residual' or 'y_calc'.
+    
+    Returns
+    -------
+    output: array like 
+        An array of residuals or predicted dependent variable values, depending 
+        on the value of `mode`.
+    """    
     len_data = len(my_data._y_data)
     df = my_data._data_dict
     pd = params.valuesdict()
@@ -785,26 +1429,88 @@ def eval_equation(params, function_string, my_data, mode='residual'):
     return output
 
 def clean_funcstring_params(funcstring):
+    """
+    Replaces the pySRURGS fitting parameter prefix/suffix from an equation 
+    string with the dictionary codes needed to numerically evaluate the equation 
+    string.
+
+    Parameters
+    ----------
+    funcstring : string
+        A pySRURGS generated equation string
+    
+    Returns
+    -------
+    funcstring: string
+        `funcstring` with the fitting parameters' prefix and suffix replaced 
+        with the dictionary tags.
+    """
     funcstring = funcstring.replace(fitting_param_prefix, 'params["')
     funcstring = funcstring.replace(fitting_param_suffix, '"].value')
     return funcstring 
     
 def clean_funcstring_vars(funcstring):
+    """
+    Replaces the pySRURGS variable prefix/suffix from an equation 
+    string with the dictionary codes needed to numerically evaluate the equation 
+    string.
+
+    Parameters
+    ----------
+    funcstring : string
+        A pySRURGS generated equation string
+    
+    Returns
+    -------
+    funcstring: string
+        `funcstring` with the variables' prefix and suffix replaced with 
+        the dictionary tags.
+    """
     funcstring = funcstring.replace(variable_prefix, 'df["')
     funcstring = funcstring.replace(variable_suffix, '"]')
     return funcstring 
 
 def clean_funcstring(funcstring):
+    """
+    Replaces the pySRURGS variables' and fitting parameters' prefix/suffix from 
+    an equation string with the dictionary codes needed to numerically evaluate 
+    the equation string.
+
+    Parameters
+    ----------
+    funcstring : string
+        A pySRURGS generated equation string
+    
+    Returns
+    -------
+    funcstring: string
+        `funcstring` with the variables' and fitting parameters' prefix and 
+        suffix replaced with the dictionary tags.
+    """
     funcstring = clean_funcstring_vars(funcstring)
     funcstring = clean_funcstring_params(funcstring)
     return funcstring
 
 def check_goodness_of_fit(individual, params, my_data):
-    '''
-        Given the individual, the lmfit params object, and the datastructure,
-        the function outputs sum_of_squared_residuals, sum_of_squared_totals, 
-        params_dict_to_store         
-    '''
+    """
+    Calculates metrics to assess the goodness of fit. Does so by first 
+    optimizing the fitting parameters.
+
+    Parameters
+    ----------
+    individual : string (or, alternatively, a DEAP individual object)
+        A pySRURGS generated equation string
+    
+    params: lmfit.Parameters
+    
+    my_data: pySRURGS.Dataset     
+    
+    Returns
+    -------
+    result: tuple
+        (sum_of_squared_residuals, sum_of_squared_totals, R2, 
+         params_dict_to_store, residual)
+    """
     # If funcstring is a tree, transform to string
     funcstring = str(individual)
     funcstring = clean_funcstring(funcstring)
@@ -825,14 +1531,30 @@ def check_goodness_of_fit(individual, params, my_data):
     sum_of_squared_residuals = sum(pow(residual,2))
     sum_of_squared_totals = sum(pow(y_calc - avg_y_data,2))     
     R2 = 1 - sum_of_squared_residuals/sum_of_squared_totals
-    return (sum_of_squared_residuals, 
-            sum_of_squared_totals, 
-            R2,
-            params_dict_to_store, 
-            residual)
+    result = (sum_of_squared_residuals, 
+             sum_of_squared_totals, 
+             R2,
+             params_dict_to_store, 
+             residual)
+    return result
 
 @memoize
-def ith_full_binary_tree(i):    
+def ith_full_binary_tree(i):
+    """
+    Generates the `i`th binary tree. Use ith_full_binary_tree2 when no functions
+    of arity one are permitted.
+
+    Parameters
+    ----------
+    i: int
+        A non-negative integer which will be used to map to a unique binary tree
+    
+    Returns
+    -------
+    tree: string 
+        The binary tree represented using [.,.] to represent a full binary tree,
+        |.| to represent functions of arity one, and '.' to represent terminals.
+    """
     if i == 0:
         tree = '.'
     elif i == 1:
@@ -848,7 +1570,21 @@ def ith_full_binary_tree(i):
 
 @memoize
 def ith_full_binary_tree2(i):
-    # for the cases where there are zero functions of arity two
+    """
+    Generates the `i`th binary tree. Use ith_full_binary_tree when functions
+    of arity one are permitted.
+
+    Parameters
+    ----------
+    i: int
+        A non-negative integer which will be used to map to a unique binary tree
+    
+    Returns
+    -------
+    tree: string 
+        The binary tree represented using [.,.] to represent a full binary tree,
+        and '.' to represent terminals.
+    """
     if i == 0:
         tree = '.'
     elif i == 1:
@@ -862,11 +1598,39 @@ def ith_full_binary_tree2(i):
 
 @memoize    
 def get_cum_weights(N, f, n, m, enumerator):
-    ''' Since we want uniform random global search, we need to assign different 
-        probabilities of selection for each binary tree. Different binary trees 
-        have different number of configurations, and we want each configuration 
-        to have the same likelihood of selection.        
-    '''
+    """
+    Generates the relative probabilities of selecting the `i`th binary tree.
+    Sums to 1. Ensures that each equation has equal probability of selection.
+    Gives increasing probability with increasing `i`, because larger values 
+    of `i` correspond to more complex trees which permit more equations.
+    Use `get_cum_weights2` when functions of arity one are not permitted.
+
+    Parameters
+    ----------
+    N: int  
+        Specifies the number of unique binary trees permitted in our search. 
+        We consider trees mapping from the integer domain [0 ... `N`-1].
+            
+    f: int  
+        The number of functions of arity one permitted
+    
+    n: int 
+        The number of functions of arity two permitted
+    
+    m: int 
+        The number of terminals in the problem (includes variables and 
+        fitting parameters)
+        
+    enumerator: pySRURGS.Enumerator
+        The enumerator of the symbolic regression problem 
+         
+    Returns
+    -------
+    cum_weights: numpy.array 
+        The relative probability of selecting `i` in the range(0,N)
+        to ensure that the equations from the corresponding binary trees 
+        have equal probability of selection
+    """
     en = enumerator
     weights = [en.get_G(f, i)*en.get_A(n, i)*en.get_B(m, i) for i in range(0,N)]
     weights = np.array(weights)
@@ -875,7 +1639,36 @@ def get_cum_weights(N, f, n, m, enumerator):
 
 @memoize
 def get_cum_weights2(N, n, m, enumerator):
-    # for the case where there are zero functions of arity one
+    """
+    Generates the relative probabilities of selecting the `i`th binary tree.
+    Sums to 1. Ensures that each equation has equal probability of selection.
+    Gives increasing probability with increasing `i`, because larger values 
+    of `i` correspond to more complex trees which permit more equations.
+    Use `get_cum_weights` when functions of arity one are permitted.
+
+    Parameters
+    ----------
+    N: int  
+        Specifies the number of unique binary trees permitted in our search. 
+        We consider trees mapping from the integer domain [0 ... `N`-1].
+            
+    n: int 
+        The number of functions of arity two permitted
+    
+    m: int 
+        The number of terminals in the problem (includes variables and 
+        fitting parameters)
+        
+    enumerator: pySRURGS.Enumerator2
+        The enumerator of the symbolic regression problem 
+         
+    Returns
+    -------
+    cum_weights: numpy.array 
+        The relative probability of selecting `i` in the range(0,N)
+        to ensure that the equations from the corresponding binary trees 
+        have equal probability of selection
+    """
     en = enumerator
     weights = [en.get_A(n, i)*en.get_B(m, i) for i in range(0, N)]
     weights = np.array(weights)
@@ -883,15 +1676,50 @@ def get_cum_weights2(N, n, m, enumerator):
     return cum_weights
 
 class ResultList(object):
-    '''
-        Class to store multiple results from SRURGS
-        Permits easy printing 
-    '''
+    """
+    Stores multiple results from a pySRURGS run. Typically, is loaded from the 
+    SqliteDict database file. `self._results` needs to be generated by appending
+    `Result` objects to it.
+
+    Returns
+    -------
+    self: ResultList
+    """
+    
     def __init__(self):
         self._results = []
     def sort(self):
+        """
+        Sorts the results in the result list by decreasing value of mean squared 
+        error.
+        """
         self._results = sorted(self._results, key=lambda x: x._MSE)
     def print(self, y_data, top=5, mode='succinct'):
+        """
+        Prints the Normalized Mean Squared Error, R^2, Equation (simplified), 
+        and Parameters values for the top results_dict. Run `self._sort` prior 
+        to executing `self.print`.
+        
+        Parameters
+        ----------
+        y_data: array like
+            The dependent variable's data from the pySRURGS.Dataset object
+                
+        top: int 
+            The number of results to display. Will be the best models if 
+            `self.sort` has been run prior to printing.
+        
+        mode: string
+            'succinct' or 'detailed' depending on whether you want to see 
+            the difficult to read original equation string
+                        
+        Returns
+        -------
+        table_string: string
+            A table housing the Normalized Mean Squared Error, R^2, 
+            Equation (simplified), and Parameters values in the 
+            tabulate package format.
+        """
         table = []
         header = ["Normalized Mean Squared Error", "R^2", 
                   "Equation, simplified", "Parameters"]
@@ -903,10 +1731,32 @@ class ResultList(object):
         print(table_string)
 
 class Result(object):
-    '''
-        Class to save a single result of SRURGS
-        Permits easy printing
-    '''
+    """
+    Stores the result of a single run of pySRURGS
+
+    Parameters
+    ----------
+    simple_equation: string
+        The simplified equation string for this run of pySRURGS
+            
+    equation: string
+        The pySRURGS equation string 
+    
+    MSE: float like
+        The mean squared error of this proposed model
+
+    R2: float like 
+        The coefficient of determination of this proposed model
+        
+    params: lmfit.Parameters 
+        The fitting parameters of this model. Will be saved as a numpy.array 
+        and not lmfit.Parameters
+
+    Returns
+    -------
+    self: Result
+    """
+    
     def __init__(self, simple_equation, equation, MSE, R2, params):
         self._simple_equation = simple_equation
         self._equation = equation
@@ -927,6 +1777,20 @@ class Result(object):
         summary.append(parameters_str)
         return summary
     def predict(self, dataset):
+        """
+        Calculates the predicted value of the dependent variable given a new 
+        pySRURGS.Dataset object. Can be used to test models against a test or 
+        validation dataset.
+        
+        Parameters
+        ----------
+        dataset: pySRURGS.Dataset
+                
+        Returns
+        -------
+        y_calc: array like 
+            The predicted values of the dependent variable 
+        """
         n_params = dataset._int_max_params
         parameters = create_fitting_parameters(n_params, self._params)
         eqn_original_cleaned = clean_funcstring(self._equation)
@@ -935,7 +1799,10 @@ class Result(object):
         return y_calc
 
 def initialize_db(path_to_db):
-    # initialize the SQLiteDict 
+    ''' 
+        Initializes the SqliteDict database file with an initial null value 
+        for the 'best_result' key 
+    '''
     with SqliteDict(path_to_db, autocommit=True) as results_dict:
         try:
             results_dict['best_result']
@@ -944,6 +1811,10 @@ def initialize_db(path_to_db):
     return 
 
 def assign_n_evals(path_to_db):
+    '''
+        Checks the number of equations in a SqliteDict file, and assigns a 
+        value to the 'n_evals' key of the dictionary
+    '''
     with SqliteDict(path_to_db, autocommit=True) as results_dict: 
         keys = list(results_dict.keys())
         n_evals = len(keys)        
@@ -955,7 +1826,39 @@ def assign_n_evals(path_to_db):
     return n_evals
                 
 def uniform_random_global_search_once(path_to_db, path_to_csv, SRconfig):
-    # Run SRURGS once
+    """
+    Runs pySRURGS once against the CSV file 
+    
+    Parameters
+    ----------
+    path_to_db: string 
+        An absolute or relative path to where the code can save an output 
+        database file. Usually, this file ends in a '.db' extension.
+    
+    path_to_csv: string 
+        An absolute or relative path to the dataset CSV file. Usually, this 
+        file ends in a '.csv' extension.
+    
+    SRconfig: pySRURGS.SymbolicRegressionConfig
+        The symbolic regression configuration file for this problem
+            
+    Returns
+    -------
+    y_calc: array like 
+        The predicted values of the dependent variable 
+    
+    Example
+    -------
+    >>> import pySRURGS
+    >>> n_funcs = ['add','sub','mul','div']
+    >>> f_funcs = []
+    >>> n_par = 5
+    >>> n_tree = 1000
+    >>> SR_config = pySRURGS.SymbolicRegressionConfig(n_funcs, f_funcs, n_par, n_tree]
+    >>> path_to_db = './db/quartic_polynomial.db'
+    >>> path_to_csv = './csvs/quartic_polynomial.csv'
+    >>> pySRURGS.uniform_random_global_search_once(path_to_db, path_to_csv, SR_config)
+    """
     (f, n, m, cum_weights, N, dataset, enumerator, _, _) = setup(path_to_csv, 
                                                                  SRconfig)
     valid = False
@@ -995,7 +1898,31 @@ def uniform_random_global_search_once(path_to_db, path_to_csv, SRconfig):
     return result
 
 def generate_benchmark(benchmark_name, SRconfig):
-    # x_domain is [lower_bound, upper_bound]
+    """
+    Generate a random symbolic regression benchmark problem.
+    
+    Parameters
+    ----------
+    benchmark_name: string 
+        A string that denotes the name of the problem. Typically, an integer 
+        set as a string will do.
+    
+    SRconfig: pySRURGS.SymbolicRegressionConfig
+        The symbolic regression configuration file for this problem
+            
+    Returns
+    -------
+    None
+    
+    
+    Notes
+    -----    
+    Saves a CSV file to - `benchmarks_dir + '/' + benchmark_name + '_train.csv'`
+    Saves a CSV file to - `benchmarks_dir + '/' + benchmark_name + '_test.csv'`
+    Saves a human readable text file to - `benchmarks_dir + '/' + benchmark_name + '_params.txt'`
+    
+    `benchmarks_dir` is a global variable typically set to './benchmarks'    
+    """
     (f, n, m, cum_weights, N, dataset, 
      enumerator, n_functions, f_functions) = setup(path_to_toy_csv, SRconfig)
     valid = False
@@ -1012,7 +1939,7 @@ def generate_benchmark(benchmark_name, SRconfig):
                                               details=True)
             eqn_original = eqn_details[0]
             eqn_simple = simplify_equation_string(eqn_original, dataset)
-            eqn_specifiers = eqn_details[2:]
+            eqn_specifiers = eqn_details[1:]
             # create the fitting parameters values
             fitting_parameters = (np.random.sample((5))-0.5)*20
             fit_param_list = create_fitting_parameters(5)
@@ -1060,6 +1987,51 @@ def generate_benchmark(benchmark_name, SRconfig):
             
     
 def setup(path_to_csv, SR_config):
+    """
+    Reads the CSV file and the SymbolicRegressionConfig and generates the 
+    integers that define the problem.
+    
+    Parameters
+    ----------
+    path_to_csv: string 
+        An absolute or relative path to the CSV for the problem.
+    
+    SR_config: pySRURGS.SymbolicRegressionConfig
+        The symbolic regression configuration file for this problem
+            
+    Returns
+    -------
+    result: tuple
+        (f, n, m, cum_weights, N, dataset, enumerator, n_funcs, f_funcs)
+    
+    
+    Notes
+    -----    
+    f : int 
+        The number of functions of arity one in the problem
+    
+    n: int 
+        The number of functions of arity two in the problem 
+        
+    cum_weights: array like 
+        The relative weight of selecting the binary trees from 0 to N-1, calculated 
+        to ensure equal probabilty of selecting each equation.
+    
+    N: int 
+        The number of unique binary trees permitted in the search. Same as 
+        `max_permitted_trees`.
+    
+    dataset: pySRURGS.Dataset
+        The dataset object for the problem.
+        
+    enumerator: pySRURGS.Enumerator OR pySRURGS.Enumerator2 (if `f_funcs` == 0)
+
+    n_funcs: list
+        A list of strings of the functions of arity two permitted in this search
+        
+    f_funcs: list 
+        A list of strings of the functions of arity one permitted in this search
+    """
     # reads the configuration, the csv file, and creates needed objects
     N = SR_config._max_permitted_trees    
     n = len(SR_config._n_functions) # the number of functions of arity 2 
@@ -1077,7 +2049,24 @@ def setup(path_to_csv, SR_config):
         cum_weights = get_cum_weights(N, f, n, m, enumerator)    
     return (f, n, m, cum_weights, N, dataset, enumerator, n_funcs, f_funcs)
 
-def create_db(path_to_csv, additional_name=None):
+def create_db_name(path_to_csv, additional_name=None):
+    '''
+    Generates a name of a SqliteDict file based on the CSV filename
+    
+    Parameters
+    ----------
+    path_to_csv: string 
+        An absolute or relative path to the CSV for the problem.
+    
+    additional_name: string
+        An additional specifier used in generating the database file name
+            
+    Returns
+    -------
+    db_name: string
+        A filepath starting with './db/' and matching with the CSV file name 
+        with an optional `additional_name` within the file name. Ends in '.db'.    
+    '''
     csv_basename = os.path.basename(path_to_csv)
     csv_name = csv_basename[:-4]    
     if additional_name is not None:
@@ -1087,6 +2076,28 @@ def create_db(path_to_csv, additional_name=None):
     return db_name
 
 def get_resultlist(path_to_db, path_to_csv, SRconfig):
+    '''
+    Loads the ResultList of a previous run of pySRURGS
+    
+    Parameters
+    ----------
+    path_to_db: string 
+        An absolute or relative path to the SqliteDict database file.
+    
+    path_to_csv: string
+        An absolute or relative path to the problem's data CSV file.
+        
+    SRconfig: pySRUGS.SymbolicRegressionConfig
+        The symbolic regression problem's configuration object
+            
+    Returns
+    -------
+    result_list: pySRURGS.ResultList
+        An unsorted ResultList object for the previously run problem
+        
+    dataset: pySRURGS.Dataset 
+        The dataset for the problem        
+    '''
     (_, _, _, _, _, dataset, _, _, _) = setup(path_to_csv, SRconfig)
     result_list = ResultList()
     with SqliteDict(path_to_db, autocommit=True) as results_dict:
@@ -1099,16 +2110,51 @@ def get_resultlist(path_to_db, path_to_csv, SRconfig):
     return result_list, dataset
     
 def compile_results(path_to_db, path_to_csv, SRconfig):
-    # reads the generated .sqlite file to determine the best models, then 
-    # prints them to screen!
+    '''
+    Reads the generated SqliteDict file to determine the best models, then 
+    prints them to screen
+    
+    Parameters
+    ----------
+    path_to_db: string 
+        An absolute or relative path to the SqliteDict database file.
+    
+    path_to_csv: string
+        An absolute or relative path to the problem's data CSV file.
+        
+    SRconfig: pySRUGS.SymbolicRegressionConfig
+        The symbolic regression problem's configuration object
+            
+    Returns
+    -------
+    None   
+    '''
     result_list, dataset = get_resultlist(path_to_db, path_to_csv, SRconfig)
     result_list.sort()
     result_list.print(dataset._y_data)
     return result_list
 
 def plot_results(path_to_db, path_to_csv, SRconfig):
-    # reads the generated .sqlite file to determine the best model, 
-    # then plots it against the raw data. saves the figure to plot.png    
+    '''
+    Reads the generated SqliteDict file to determine the best model, 
+    then plots it against the raw data. saves the figure to './image/plot.png'
+    and './image/plot.svg'
+    
+    Parameters
+    ----------
+    path_to_db: string 
+        An absolute or relative path to the SqliteDict database file.
+    
+    path_to_csv: string
+        An absolute or relative path to the problem's data CSV file.
+        
+    SRconfig: pySRUGS.SymbolicRegressionConfig
+        The symbolic regression problem's configuration object
+            
+    Returns
+    -------
+    None   
+    ''' 
     result_list, dataset = get_resultlist(path_to_db, path_to_csv, SRconfig)
     if len(dataset._x_labels) != 1:
         raise Exception("We only plot univariate data")
@@ -1131,10 +2177,36 @@ def plot_results(path_to_db, path_to_csv, SRconfig):
              label=dataset._y_label+' original data')
     plt.xlabel(dataset._x_labels[0])
     plt.ylabel(dataset._y_label)
-    plt.savefig('image/plot.svg')
-    plt.savefig('image/plot.png')
+    plt.savefig('./image/plot.svg')
+    plt.savefig('./image/plot.png')
        
 def generate_benchmarks_SRconfigs():
+    '''
+    Generates two SymbolicRegressionConfig objects for the generation of 100 
+    randomly generated symbolic regression problems. 
+    First SRconfig is simpler than the second in that the second permits 
+    functions of arity one.
+    
+    Parameters
+    ----------
+    None
+    
+    Returns
+    -------
+    SR_config1, SR_config2    
+    
+    Notes
+    ------
+    SR_config1: pySRURGS.SymbolicRegressionConfig(n_functions=['add','sub','mul','div'],
+                                                  f_functions=[],
+                                                  max_num_fit_params=5,
+                                                  max_permitted_trees=200)
+
+    SR_config2: pySRURGS.SymbolicRegressionConfig(n_functions=['add','sub','mul','div','pow'],
+                                                  f_functions=['sin','sinh','exp'],
+                                                  max_num_fit_params=5,
+                                                  max_permitted_trees=200)
+    ''' 
     SR_config1 = SymbolicRegressionConfig(n_functions=['add','sub','mul','div'],
                                           f_functions=[],
                                           max_num_fit_params=5,
@@ -1146,6 +2218,24 @@ def generate_benchmarks_SRconfigs():
     return SR_config1, SR_config2
 
 def generate_benchmarks():
+    '''
+    Generates 100 randomly generated symbolic regression problems. The first 
+    twentry problems are simpler than the latter 80, in that the latter 80
+    permit functions of arity one in the search space.
+    
+    Parameters
+    ----------
+    None
+    
+    Returns
+    -------
+    None
+    
+    Notes
+    ------
+    Benchmark problems are saved in the `benchmarks_dir` filepath
+    `benchmarks_dir` is a global variable.
+    ''' 
     SR_config1, SR_config2 = generate_benchmarks_SRconfigs()
     # first set is from 0 - 19 inclusive
     for z in range(0, 20):
@@ -1158,6 +2248,22 @@ def generate_benchmarks():
     read_benchmarks()
 
 def read_benchmarks():
+    '''
+    Reads the benchmark problems and generates a summary tab separated value file.
+    
+    Parameters
+    ----------
+    None
+    
+    Returns
+    -------
+    None
+    
+    Notes
+    ------
+    Benchmark problems' summary is saved in `benchmarks_summary_tsv` filepath
+    `benchmarks_summary_tsv` is a global variable.
+    ''' 
     with open(benchmarks_summary_tsv, 'w') as benchmarks_file:
         wrtr = csv.writer(benchmarks_file, delimiter='\t', lineterminator='\n')
         for i in range(0,100):
@@ -1176,6 +2282,25 @@ def read_benchmarks():
                 wrtr.writerow(row)
 
 def check_validity_suggested_functions(suggested_funcs, arity):
+    '''
+    Takes a list of suggested functions to use in the search space and checks 
+    that they are valid.
+    
+    Parameters
+    ----------
+    suggested_funcs: list
+        A list of strings. 
+        In case of `arity==1`, permitted values are ['sin','cos','tan','exp','log','tanh','sinh','cosh',None]
+        In case of `arity==2`, permitted values are ['add','sub','mul','div','pow']
+    
+    Returns
+    -------
+    suggested_funcs: list
+    
+    Raises
+    ------
+    Exception, if any of the suggested funcs is not in the permitted list 
+    ''' 
     valid_funcs_arity_1 = ['sin','cos','tan','exp','log','tanh','sinh','cosh',None]
     valid_funcs_arity_2 = ['add','sub','mul','div','pow']
     if arity == 1:
@@ -1198,6 +2323,22 @@ def check_validity_suggested_functions(suggested_funcs, arity):
     return suggested_funcs
 
 def count_number_equations(path_to_csv, SRconfig):
+    '''
+    Counts the number of possible equations in this problem. A wrapper function 
+    around Enumerator.get_M / Enumerator2.get_M.
+    
+    Parameters
+    ----------
+    path_to_csv: string
+        An absolute or relative path to the dataset CSV file 
+        
+    SRconfig: pySRURGS.SymbolicRegressionConfig
+        The symbolic regression problem configuration object
+    
+    Returns
+    -------
+    number_possible_equations: mpmath int
+    ''' 
     (f, n, m, cum_weights, N, dataset, enumerator, _, _) = setup(path_to_csv, SRconfig)
     if f == 0:
         number_possible_equations = enumerator.get_M(N,n,m)
@@ -1260,7 +2401,7 @@ if __name__ == '__main__':
     
     run_ID = arguments.run_ID
     if path_to_db is None:
-        path_to_db = create_db(path_to_csv, run_ID)    
+        path_to_db = create_db_name(path_to_csv, run_ID)    
     os.makedirs('./db', exist_ok=True) 
     if single_processing_mode == False:
         print("Running in multi processor mode")
