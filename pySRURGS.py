@@ -84,8 +84,8 @@ class SymbolicRegressionConfig(object):
     
     Returns
     -------
-    SymbolicRegressionConfig
-        A symbolic regression problem configuration object, with attributes 
+    self
+        A pySRURGS.SymbolicRegressionConfig object, with attributes 
         self._n_functions, self._f_functions, self._max_num_fit_params, 
         self._max_permitted_trees.
     
@@ -320,6 +320,9 @@ def create_parameter_list(m):
 
 @memoize
 def get_bits(x):
+    ''' Gets the odd and even bits of a binary number in string format. Used by 
+    `get_left_right_bits`.
+    '''
     # Get all even bits of x 
     even_bits = x[::2]
     # Get all odd bits of x 
@@ -455,6 +458,7 @@ def exp(x):
     return np.exp(x)
 
 def log(x):
+    ''' Note, this is actually log(abs(x)) '''
     return np.log(np.abs(x))
 
 def sinh(x):
@@ -851,7 +855,7 @@ def random_equation2(N, cum_weights, dataset, enumerator, SRconfig,
         The `Enumerator2` object for the symbolic regression problem
         
     SRconfig: pySRURGS.SymbolicRegressionConfig
-        The `SymbolicRegressionConfig` for the symbolic regression problem 
+        The `SymbolicRegressionConfig` object for the symbolic regression problem 
         
     details: Boolean 
         Determines the output type 
@@ -901,8 +905,8 @@ class Dataset(object):
          
     Returns
     -------
-    Dataset
-        A pySRURGS dataset object, which houses a variety of attributes including
+    self
+        A pySRURGS.Dataset object, which houses a variety of attributes including
         the numerical data, the sympy namespace, the data dict used in evaluating 
         the equation string, etc.
     
@@ -1003,9 +1007,9 @@ class Enumerator(object):
          
     Returns
     -------
-    Enumerator
-        A pySRURGS Enumerator object which houses various methods for the 
-        enumeration.
+    self
+        A pySRURGS.Enumerator object which houses various methods for the 
+        enumeration of the problem space.
     
     Example
     --------
@@ -1210,8 +1214,9 @@ class Enumerator2(object):
     Returns
     -------
     Enumerator
-        A pySRURGS Enumerator object which houses various methods for the 
-        enumeration.
+        A pySRURGS.Enumerator2 object which houses various methods for the 
+        enumeration of the problem space for case where only functions of arity
+        two are permitted.
     
     Example
     --------
@@ -1335,7 +1340,8 @@ class Enumerator2(object):
     def get_j_i(self, i):
         ''' 
             from `m` terminals, pick `j_i`
-            `j_i` is the number of leafs in the tree corresponding to `i`
+            `j_i` is the number of leafs 
+            in the tree corresponding to `i`
         '''
         i = int(i)
         if i == 0:
@@ -1989,7 +1995,7 @@ def generate_benchmark(benchmark_name, SRconfig):
 def setup(path_to_csv, SR_config):
     """
     Reads the CSV file and the SymbolicRegressionConfig and generates the 
-    integers that define the problem.
+    integers and pySRURGS objects that define the problem.
     
     Parameters
     ----------
@@ -2193,7 +2199,8 @@ def generate_benchmarks_SRconfigs():
     
     Returns
     -------
-    SR_config1, SR_config2    
+    result: tuple
+      (SR_config1, SR_config2)   
     
     Notes
     ------
@@ -2215,7 +2222,8 @@ def generate_benchmarks_SRconfigs():
                                           f_functions=['sin','sinh','exp'],
                                           max_num_fit_params=5,
                                           max_permitted_trees=200)
-    return SR_config1, SR_config2
+    result = (SR_config1, SR_config2)
+    return result
 
 def generate_benchmarks():
     '''
