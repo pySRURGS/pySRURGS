@@ -75,6 +75,16 @@ def test_python_code():
     # the the -count functionality
     num_equations = pySRURGS.count_number_equations(path_to_csv, SRconfig)
     max_attempts = 15
+    # the the -count functionality
+    test_f_funcs = 'tan,exp'
+    if test_f_funcs is None or test_f_funcs == '':
+        test_f_funcs = []
+    else:
+        test_f_funcs = test_f_funcs.split(',')
+        test_f_funcs = pySRURGS.check_validity_suggested_functions(test_f_funcs, 1)
+    SRconfigtest = pySRURGS.SymbolicRegressionConfig(n_funcs, f_funcs, max_num_fit_params, max_permitted_trees)
+    num_equations = pySRURGS.count_number_equations(path_to_csv, SRconfigtest)
+    max_attempts = 15
     # test the basic functionality
     for i in range(0,max_attempts):
         pySRURGS.uniform_random_global_search_once(path_to_db, path_to_csv, SRconfig)
@@ -82,6 +92,9 @@ def test_python_code():
     print(num_equations)
     # get the MSE of the first run 
     result_list = pySRURGS.compile_results(path_to_db, path_to_csv, SRconfig)
+    (_, _, _, _, _, dataset, _, _, _) = setup(path_to_csv, SRconfig)
+    MSE_calc = (result_list._results[0].predict(dataset) - dataset._y_data)**2/len(dataset._y_data)
+    print(MSE_calc, MSE_1st_run)
     MSE_1st_run = result_list._results[0]._MSE
     # test the multiprocessing functionality and that MSE decreases with 1000 runs
     max_attempts = 100
@@ -112,12 +125,6 @@ def test_python_code():
     for i in tqdm.tqdm(range(0,max_attempts)):
         pySRURGS.uniform_random_global_search_once(path_to_db, path_to_csv, SRconfig)
     # test funcs_arity_one = 'tan,exp'
-    test_f_funcs = 'tan,exp'
-    if test_f_funcs is None or test_f_funcs == '':
-        test_f_funcs = []
-    else:
-        test_f_funcs = test_f_funcs.split(',')
-        test_f_funcs = pySRURGS.check_validity_suggested_functions(test_f_funcs, 1)
     SRconfig_test_f_funcs = pySRURGS.SymbolicRegressionConfig(n_funcs, test_f_funcs, 5, max_permitted_trees)
     for i in tqdm.tqdm(range(0,max_attempts)):
         pySRURGS.uniform_random_global_search_once(path_to_db, path_to_csv, SRconfig_test_f_funcs)
