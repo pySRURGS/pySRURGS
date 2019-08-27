@@ -1933,6 +1933,7 @@ def generate_benchmark(benchmark_name, SRconfig):
      enumerator, n_functions, f_functions) = setup(path_to_toy_csv, SRconfig)
     valid = False
     while valid == False:
+        print("Iterating...")
         try:
             # specify the equation
             if f == 0:
