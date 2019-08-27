@@ -500,7 +500,7 @@ def mempower(a,b):
     
     Returns
     -------
-    result: mpmath integer
+    result: mpmath.ctx_mp_python.mpf (int)
         `a ** b`
     """ 
     result = mpmath.power(a,b)    
@@ -1045,7 +1045,7 @@ class Enumerator(object):
              
         Returns
         -------
-        M: mpmath integer
+        M: mpmath.ctx_mp_python.mpf (int)
             The number of possible equations in this symbolic regression problem         
         """
         def get_count(i):
@@ -1074,7 +1074,7 @@ class Enumerator(object):
              
         Returns
         -------
-        G: mpmath integer
+        G: mpmath.ctx_mp_python.mpf (int)
             The number of possible configurations of functions of arity one
         """
         l = self.get_l_i(i)
@@ -1099,7 +1099,7 @@ class Enumerator(object):
              
         Returns
         -------
-        A: mpmath integer
+        A: mpmath.ctx_mp_python.mpf (int)
             The number of possible configurations of functions of arity two
         """
         k = self.get_k_i(i)
@@ -1124,7 +1124,7 @@ class Enumerator(object):
              
         Returns
         -------
-        B: mpmath integer
+        B: mpmath.ctx_mp_python.mpf (int)
             The number of possible configurations of terminals 
         """
         j = self.get_j_i(i)
@@ -1248,7 +1248,7 @@ class Enumerator2(object):
              
         Returns
         -------
-        M: mpmath integer
+        M: mpmath.ctx_mp_python.mpf (int)
             The number of possible equations in this symbolic regression problem         
         """
         def get_count(i):
@@ -1276,7 +1276,7 @@ class Enumerator2(object):
              
         Returns
         -------
-        A: mpmath integer
+        A: mpmath.ctx_mp_python.mpf (int)
             The number of possible configurations of functions of arity two
         """
         k = self.get_k_i(i)
@@ -1301,7 +1301,7 @@ class Enumerator2(object):
              
         Returns
         -------
-        B: mpmath integer
+        B: mpmath.ctx_mp_python.mpf (int)
             The number of possible configurations of terminals 
         """
         j = self.get_j_i(i)
@@ -2385,7 +2385,7 @@ def count_number_equations(path_to_csv, SRconfig):
     
     Returns
     -------
-    number_possible_equations: mpmath int
+    number_possible_equations: mpmath.ctx_mp_python.mpf (int)
     ''' 
     (f, n, m, cum_weights, N, dataset, enumerator, _, _) = setup(path_to_csv, SRconfig)
     if f == 0:
