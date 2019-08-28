@@ -15,6 +15,8 @@ from sqlitedict import SqliteDict
 import dropbox
 import multiprocessing as mp
 import glob
+import time 
+import random
 
 try:
     import sh
@@ -191,6 +193,8 @@ class TransferData:
 def run_all_SRGP_jobs(placeholder):
     i = 0
     dropbox_trnsfer = TransferData(DROPBOX_KEY)
+    random_sleep = random.randint(1, 20)
+    time.sleep(random_sleep)
     for finished in range(0,2):
         print("Looking for a job to run")
         job_ID, job_arguments = get_SRGP_job(finished)        
