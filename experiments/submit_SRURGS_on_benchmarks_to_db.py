@@ -57,7 +57,7 @@ def generate_list_of_experiments(SR_config1, SR_config_2):
         else:
             SR_config = SR_config2
         # assign the SRURGS parameter values
-        train = '$PYSRURGSDIR/csvs/benchmarks/'+str(exp_num)+'_train.csv'
+        train = '$PYSRURGSDIR/csv/benchmarks/'+str(exp_num)+'_train.csv'
         # INSERT with IGNORE so just insert all the finished SRGP jobs 
         run_ID = job_ID.split('.')[1]
         path_to_db = give_db_path(train, run_ID)
