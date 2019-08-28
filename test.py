@@ -47,6 +47,7 @@ def test_command_line_code():
     sh.python('pySRURGS.py', '-funcs_arity_one', 'tan,exp', '-max_num_fit_params', 5, qrtic_polynml_csv, 10)
     print('Finished tan,exp funcs arity one run')
     sh.python('pySRURGS.py', '-max_permitted_trees', 10, '-max_num_fit_params', 5, qrtic_polynml_csv, 10)
+    sh.python('pySRURGS.py', '-plotting', '-max_permitted_trees', 10, '-max_num_fit_params', 5, qrtic_polynml_csv, 10)
     print('Finished run_command_line_tests')
 
 def test_python_code():
@@ -77,7 +78,7 @@ def test_python_code():
     num_equations = pySRURGS.count_number_equations(path_to_csv, SRconfig)
     max_attempts = 15
     # the the -count functionality
-    test_f_funcs = 'tan,exp'
+    test_f_funcs = 'tan,exp,cos,sin,log,sinh,cosh,tanh'
     if test_f_funcs is None or test_f_funcs == '':
         test_f_funcs = []
     else:
