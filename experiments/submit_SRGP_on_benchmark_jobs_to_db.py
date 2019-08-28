@@ -39,7 +39,7 @@ def generate_list_of_experiments(SR_config, start_index, count_experiments, n_ru
     max_num_fit_params = SR_config._max_num_fit_params
     max_size_trees = SR_config._max_permitted_trees
     popsize = 100
-    goal_total_evals = 5000
+    goal_total_evals = 1000
     # first twenty problems
     for z in range(start_index,start_index+count_experiments):
         train = '$PYSRURGSDIR/csv/benchmarks/'+str(z)+'_train.csv'        
