@@ -1,7 +1,7 @@
 
 ![pySRURGS_logo](image/pySRURGS.svg)
 
-# Symbolic Regression by Uniform Random Global Search (in python)
+# Symbolic Regression by Uniform Random Global Search
 [![Build Status](https://travis-ci.com/pySRURGS/pySRURGS.svg?branch=master)](https://travis-ci.com/pySRURGS/pySRURGS)
 [![Coverage Status](https://coveralls.io/repos/github/pySRURGS/pySRURGS/badge.svg)](https://coveralls.io/github/pySRURGS/pySRURGS)
 [![License: GPL v3](image/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
