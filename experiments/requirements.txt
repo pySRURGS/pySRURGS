@@ -2,3 +2,5 @@ dropbox
 sshtunnel
 pymysql
 scoop
+sh
+deap
