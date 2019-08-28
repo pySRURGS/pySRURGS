@@ -1,7 +1,8 @@
-# Adapting https://github.com/usnistgov/pysr
-# to the pySRURGS code style and datastructure
-# Some improvements to performance through checking previously considered equations
-
+'''
+    This script is only tested on Linux. Windows is problematic with the 
+    multiprocessing module.
+    
+'''
 import warnings
 warnings.simplefilter('ignore')
 import scipy
@@ -18,11 +19,19 @@ import pdb
 import pickle
 import os
 import sys
-import multiprocessing as mp
+import pathos.multiprocessing as mp
 import argparse
 import pandas as pd
-from scoop.futures import map
 sys.path.append('./..')
+import pySRURGS
+import random
+import numpy
+from deap import algorithms
+from deap import base
+from deap import creator
+from deap import tools
+from deap import gp
+from deap.algorithms import *
 
 # making the codes analogous 
 from pySRURGS import (add, mul, sub, div, pow, sin, cos, tan,
@@ -31,326 +40,213 @@ from pySRURGS import (add, mul, sub, div, pow, sin, cos, tan,
                       simplify_equation_string, create_fitting_parameters,
                       create_parameter_list, create_variable_list,
                       initialize_db, check_goodness_of_fit, Result,
-                      clean_funcstring, remove_dict_tags)
+                      clean_funcstring, remove_dict_tags, assign_n_evals,
+                      BIG_NUM)
 
-# load the arguments
-parser = argparse.ArgumentParser(prog='pySR.py', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument("csv_path", help="absolute path to the csv")
-parser.add_argument("path_to_db", help='path to the pickle file we will be generating')
-parser.add_argument("numgens", help='number of generations for evolution', type=int)
-parser.add_argument("popsize", help='number of individuals in the population', type=int)
-parser.add_argument("int_max_params", help='the maximum number of fitting parameters in the model', type=int)
-parser.add_argument("n_functions", help='comma delimited list of functions of arity 2 to be used eg: add,pow,sub,mul,div')
-parser.add_argument("-f_functions", help='comma delimited list of functions of arity 1 to be used eg: sin,cos,tan,exp,log')
-arguments = parser.parse_args()
-if len(sys.argv) < 2:
-    parser.print_usage()
-    sys.exit(1)
-# assign arugments to the namespace
-csv_path = arguments.csv_path
-path_to_db = arguments.path_to_db
-initialize_db(path_to_db)    
-        
-numgens = arguments.numgens
-popsize = arguments.popsize
-n_functions = arguments.n_functions
-n_functions = n_functions.split(',')
-f_functions = arguments.f_functions
-if f_functions is None:
-    f_functions = []
-else:    
-    f_functions = f_functions.split(',')
-int_max_params = arguments.int_max_params
-
-#Let's read some data
-dataset = Dataset(csv_path, int_max_params)
-SR_config = SymbolicRegressionConfig(n_functions, f_functions, int_max_params, None)
-params = create_fitting_parameters(int_max_params)
-np.seterr(all='raise') # need to implement the error handling
-
-#Define the tree elements the EA chooses from
-pset = gp.PrimitiveSet('MATH', len(dataset._x_labels)+int_max_params)
-if 'add' in n_functions:
-    pset.addPrimitive(add, 2, name='add')
-if 'sub' in n_functions:
-    pset.addPrimitive(sub, 2, name='sub')
-if 'mul' in n_functions:
-    pset.addPrimitive(mul, 2, name='mul')
-if 'div' in n_functions:
-    pset.addPrimitive(div, 2, name='div')
-if 'pow' in n_functions:
-    pset.addPrimitive(pow, 2, name='pow')
-if 'sin' in f_functions:
-    pset.addPrimitive(sin, 1, name='sin')
-if 'cos' in f_functions:
-    pset.addPrimitive(cos, 1, name='cos')
-if 'tan' in f_functions:
-    pset.addPrimitive(tan, 1, name='tan')
-if 'exp' in f_functions:
-    pset.addPrimitive(exp, 1, name='exp')
-if 'log' in f_functions:
-    pset.addPrimitive(log, 1, name='log')
-if 'sinh' in f_functions:
-    pset.addPrimitive(sinh, 1, name='sinh')
-if 'cosh' in f_functions:
-    pset.addPrimitive(cosh, 1, name='cosh')
-if 'tanh' in f_functions:
-    pset.addPrimitive(tanh, 1, name='tanh')
-
-# dynamically create DEAP variables based on the var names and parameter names 
-var_names = create_variable_list(csv_path)
-for i in range(0,len(var_names)):     
-    var_label = var_names[i]
-    deap_var_name = "ARG" + str(i)
-    var_assignment_command = 'pset.renameArguments(' 
-    var_assignment_command += deap_var_name + '="' + var_label + '")'
-    eval(var_assignment_command)
-
-param_names = create_parameter_list(int_max_params)
-for i in range(0, int_max_params):
-    deap_var_name = "ARG" + str(len(var_names) + i)
-    var_assignment_command = 'pset.renameArguments(' 
-    var_assignment_command += deap_var_name + '="' + param_names[i] + '")'
-    eval(var_assignment_command)
-
-class InfanticideException(Exception):
-    def __init__(self):
-        pass
-
-#Define our 'Individual' class
-creator.create('FitnessMin', base.Fitness, weights=(-1.0,))
-creator.create('Individual',
-               gp.PrimitiveTree,
-               pset=pset,
-               fitness=creator.FitnessMin,
-               params=create_fitting_parameters(int_max_params))               
-
-def strip_dictionary_tags(dataset, equation_string):
-    terminals_list = dataset._terminals_list
-    for terminal in terminals_list:
-        equation_string = equation_string.replace("df['"+terminal+"']", terminal)
-        equation_string = equation_string.replace("pd['"+terminal+"']", terminal)
-    return equation_string
-
-
-#Construct our toolbox
-toolbox = base.Toolbox()
-toolbox.register('expr', gp.genGrow, pset=pset, min_=1, max_=10)
-toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.expr)
-toolbox.register("population", tools.initRepeat, list, toolbox.individual)
-toolbox.register("lambdify", gp.compile, pset=pset)
-toolbox.register("select", tools.selTournament, tournsize=4)
-toolbox.register("mate", gp.cxOnePoint)
-toolbox.register("expr_mut", gp.genGrow, min_=0, max_=4)
-toolbox.register("mutate", gp.mutUniform, expr=toolbox.expr_mut, pset=pset)
-toolbox.register("map",  map)    
-
-#Define our evaluation function
-def evaluate(individual):
-    # replace invalid equations with a random new equation
-    if type(individual) == list:
-        individual = individual[0]
-    valid = False
-    while valid == False:  
-        funcstring = str(individual)
-        funcstring_dict_form = clean_funcstring(funcstring)
-        funcstring_readable_form = remove_dict_tags(funcstring_dict_form)        
-        try:
-            simple_eqn = simplify_equation_string(funcstring_readable_form, dataset)
-            with SqliteDict(path_to_db, autocommit=True) as results_dict:
-                try: # if we have already attempted this equation, do not run again
-                    result = results_dict[simple_eqn]
-                    raise InfanticideException("Don't run the same equation twice")
-                except:
-                    pass
-            (sum_of_squared_residuals, 
-            sum_of_squared_totals, 
-            R2, fitted_params, 
-            residual) = check_goodness_of_fit(funcstring_dict_form, 
-                                              individual.params, dataset)    
-            MSE = sum_of_squared_residuals/len(dataset._y_data)
-            valid = True
-        except (FloatingPointError, InfanticideException):
-            individual = toolbox.population(n=1)[0]      
-    result = Result(simple_eqn, funcstring, MSE, R2, fitted_params)
-    individual.params = fitted_params
-    with SqliteDict(path_to_db, autocommit=True) as results_dict:
-        results_dict[simple_eqn] = result    
-    return (MSE,)
-  
-toolbox.register("evaluate", evaluate)
-
-def filter_population(population, toolbox):    
-    for i in range(0, len(population)):
-        individual = population[i]
-        try:
-            evaluate(individual)
-        except:
-            run_bool = True
-            iter = 0
-            while run_bool:
-                new_indiv = toolbox.population(n=1)[0]
-                iter = iter + 1
-                if iter == 100:
-                    raise Exception("Too many iterations to generate a valid individual")
-                try:
-                    evaluate(new_indiv)
-                    population[i] = new_indiv
-                    run_bool = False
-                except (FloatingPointError, InfanticideException):
-                    pass
-    return population    
-
-def display_population(population):
-    for ind in population:
-        #print(remove_tags(str(ind), dataset))
-        pass
-
-def varCross_EnsureValid(pair_individuals, toolbox, cxpb):
-    offspring = pair_individuals
-    i = 1
-    if random.random() < cxpb:
-        are_offspring_valid = False
-        valid_offspring = []
-        max_iter = 0
-        while are_offspring_valid == False:
-            max_iter = max_iter + 1
-            try:
-                offspring[i - 1], offspring[i] = toolbox.mate(offspring[i - 1],
-                                                          offspring[i])
-            except IndexError as e:
-                return offspring
-            try:
-                toolbox.evaluate(offspring[i - 1])
-                valid_offspring.append(offspring[i - 1])
-            except FloatingPointError:
-                pass
-            if len(valid_offspring) == 2:
-                are_offspring_valid = True
-                break
-            try:
-                toolbox.evaluate(offspring[i])
-                valid_offspring.append(offspring[i])
-            except FloatingPointError:
-                pass
-            if len(valid_offspring) == 2:
-                are_offspring_valid = True
-                break
-            if max_iter == 10:
-                [offspring[i - 1], offspring[i]] = filter_population([offspring[i - 1], 
-                                                                      offspring[i]], toolbox)
-        offspring[i - 1], offspring[i] = valid_offspring[0], valid_offspring[1]
-        del offspring[i - 1].fitness.values, offspring[i].fitness.values
-    return offspring
-
-def varMut_EnsureValid(individual, toolbox, mutpb):
-    """custom varand which ensures that produced children do not evaluate 
-    to a floatingpointerror
+def eaSimple(population, toolbox, cxpb, mutpb, goal_total_evals, stats=None,
+             halloffame=None, verbose=__debug__):
+    """Custom version with number of evaluations checked.
     """
-    i=0
-    if random.random() < mutpb:
-        is_offspring_valid = False
-        valid_offspring = []
-        max_iter = 0
-        while is_offspring_valid == False:
-            max_iter = max_iter + 1
-            try:
-                [individual] = toolbox.mutate(individual)
-            except IndexError as e:
-                return individual
-            try:
-                toolbox.evaluate(individual)
-                valid_offspring.append(individual)
-            except FloatingPointError:
-                pass
-            if len(valid_offspring) == 1:
-                is_offspring_valid = True
-                break
-            if max_iter == 10:
-                [individual] = filter_population([individual], toolbox)
-        individual = valid_offspring[0]
-        del individual.fitness.values
-    return individual
-
-def eaSimple(population, toolbox, cxpb, mutpb, ngen, verbose=__debug__):
-    population = filter_population(population, toolbox)
     logbook = tools.Logbook()
-    logbook.header = ['gen', 'nevals']
+    logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
+
     # Evaluate the individuals with an invalid fitness
     invalid_ind = [ind for ind in population if not ind.fitness.valid]
     fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
     for ind, fit in zip(invalid_ind, fitnesses):
         ind.fitness.values = fit
-    logbook.record(gen=0, nevals=len(invalid_ind))
-    best_ever = None
+
+    if halloffame is not None:
+        halloffame.update(population)
+
+    record = stats.compile(population) if stats else {}
+    logbook.record(gen=0, nevals=len(invalid_ind), **record)
+    if verbose:
+        print(logbook.stream)
+
     # Begin the generational process
-    for gen in range(1, ngen + 1):
+    gen = 0
+    total_evals = pySRURGS.assign_n_evals(path_to_db)
+    print(total_evals, goal_total_evals)
+    while total_evals < goal_total_evals:        
+        gen = gen + 1
         # Select the next generation individuals
         offspring = toolbox.select(population, len(population))
+
         # Vary the pool of individuals
-        ########################################################################
-        #CUSTOM IMPLEMENTATION, MULTIPROCESSING varAnd with validness ensured
-        ########################################################################
-        pairs = []
-        for i in range(1, len(offspring), 2):
-            pairs.append([offspring[i-1], offspring[i]])
-        first_child = offspring[0]
-        if len(offspring) % 2 == 0:
-            last_child = offspring[-1]
-        else:
-            last_child = []
-        npairs = len(pairs)
-        crossed_offspring = list(toolbox.map(varCross_EnsureValid, pairs, 
-                                             [toolbox]*npairs, [cxpb]*npairs))
-        temp_offspring = []
-        for i in range(0,len(crossed_offspring)):
-            temp_offspring.append(crossed_offspring[i][0])
-            temp_offspring.append(crossed_offspring[i][1])        
-        offspring = temp_offspring
-        nchild = len(offspring)
-        offspring = list(toolbox.map(varMut_EnsureValid, offspring, 
-                                     [toolbox]*nchild, [mutpb]*nchild))
-        ######################################################################## 
-        offspring = filter_population(offspring, toolbox)
+        offspring = varAnd(offspring, toolbox, cxpb, mutpb)
+
         # Evaluate the individuals with an invalid fitness
         invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
         fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
         for ind, fit in zip(invalid_ind, fitnesses):
             ind.fitness.values = fit
-        # Replace the current population by the offspring
-        population = toolbox.select(population + offspring, len(population))
-        # Append the current generation statistics to the logbook
-        nevals = len(invalid_ind)
-        logbook.record(gen=gen, nevals=nevals)
-        try:
-            if best_ever is None:
-                best_ever = min(population, key=lambda ind: ind.fitness.values[0])
-            else:
-                best = min(population, key=lambda ind: ind.fitness.values[0])
-                if best.fitness.values[0] < best_ever.fitness.values[0]:
-                    best_ever = best
-        except:
-            pdb.set_trace()
-        MSE = best_ever.fitness.values[0]
-        NMSE = np.nan_to_num(MSE / np.std(dataset._y_data))
-    return population, logbook, best_ever
 
-def calc_total_evals(logbook):
-    nevals = 0
-    for entry in logbook:
-        nevals += entry['nevals']
-    return nevals
+        # Update the hall of fame with the generated individuals
+        if halloffame is not None:
+            halloffame.update(offspring)
+
+        # Replace the current population by the offspring
+        population[:] = offspring
+
+        # Append the current generation statistics to the logbook
+        record = stats.compile(population) if stats else {}
+        logbook.record(gen=gen, nevals=len(invalid_ind), **record)
+        if verbose:
+            print(logbook.stream)
+        total_evals = pySRURGS.assign_n_evals(path_to_db)
+        print(total_evals, goal_total_evals)
+    return population, logbook
+
+def make_pset(dataset, int_max_params, csv_path, n_functions, f_functions):
+    #Define the tree elements the EA chooses from
+    pset = gp.PrimitiveSet('MATH', len(dataset._x_labels)+int_max_params)
+    if 'add' in n_functions:
+        pset.addPrimitive(add, 2, name='add')
+    if 'sub' in n_functions:
+        pset.addPrimitive(sub, 2, name='sub')
+    if 'mul' in n_functions:
+        pset.addPrimitive(mul, 2, name='mul')
+    if 'div' in n_functions:
+        pset.addPrimitive(div, 2, name='div')
+    if 'pow' in n_functions:
+        pset.addPrimitive(pow, 2, name='pow')
+    if 'sin' in f_functions:
+        pset.addPrimitive(sin, 1, name='sin')
+    if 'cos' in f_functions:
+        pset.addPrimitive(cos, 1, name='cos')
+    if 'tan' in f_functions:
+        pset.addPrimitive(tan, 1, name='tan')
+    if 'exp' in f_functions:
+        pset.addPrimitive(exp, 1, name='exp')
+    if 'log' in f_functions:
+        pset.addPrimitive(log, 1, name='log')
+    if 'sinh' in f_functions:
+        pset.addPrimitive(sinh, 1, name='sinh')
+    if 'cosh' in f_functions:
+        pset.addPrimitive(cosh, 1, name='cosh')
+    if 'tanh' in f_functions:
+        pset.addPrimitive(tanh, 1, name='tanh')
+    # dynamically create DEAP variables based on the var names and parameter names 
+    var_names = create_variable_list(csv_path)
+    for i in range(0,len(var_names)):     
+        var_label = var_names[i]
+        deap_var_name = "ARG" + str(i)
+        var_assignment_command = 'pset.renameArguments(' 
+        var_assignment_command += deap_var_name + '="' + var_label + '")'
+        eval(var_assignment_command)
+    param_names = create_parameter_list(int_max_params)
+    for i in range(0, int_max_params):
+        deap_var_name = "ARG" + str(len(var_names) + i)
+        var_assignment_command = 'pset.renameArguments(' 
+        var_assignment_command += deap_var_name + '="' + param_names[i] + '")'
+        eval(var_assignment_command)
+    return pset
+
+#Define our evaluation function
+def evaluate(individual, dataset):
+    import sys
+    sys.path.append('./../')
+    import pySRURGS
+    # replace invalid equations with a random new equation
+    if type(individual) == list:
+        individual = individual[0]
+    funcstring = str(individual)
+    funcstring_dict_form = pySRURGS.clean_funcstring(funcstring)
+    funcstring_readable_form = pySRURGS.remove_dict_tags(funcstring_dict_form)        
+    try:
+        simple_eqn = pySRURGS.simplify_equation_string(funcstring_readable_form, dataset)
+        with SqliteDict(path_to_db, autocommit=True) as results_dict:
+            try: # if we have already attempted this equation, do not run again
+                result = results_dict[simple_eqn]
+                MSE = result._MSE
+                return (MSE,)
+            except KeyError:                    
+                (sum_of_squared_residuals, 
+                sum_of_squared_totals, 
+                R2, fitted_params, 
+                residual) = pySRURGS.check_goodness_of_fit(funcstring_dict_form, 
+                                                           params, dataset)    
+                MSE = sum_of_squared_residuals/len(dataset._y_data)
+    except (FloatingPointError):
+        MSE = pySRURGS.BIG_NUM
+        return (MSE,) # don't save these results to the db
+    result = pySRURGS.Result(simple_eqn, funcstring, MSE, R2, fitted_params)
+    with SqliteDict(path_to_db, autocommit=True) as results_dict:
+        results_dict[simple_eqn] = result    
+    return (MSE,)
+
+def mean(x):    
+    np.seterr('ignore')
+    return np.nan_to_num(np.mean(x))
+    
+def std(x):
+    np.seterr('ignore')
+    return np.nan_to_num(np.std(x))
 
 def main():
     pop = toolbox.population(n=popsize)
-    pop = filter_population(pop, toolbox)
-    pop, logbook, best = eaSimple(pop,
-                                  toolbox,
-                                  0.7,
-                                  0.3,
-                                  numgens)    
-    with SqliteDict(path_to_db, autocommit=True) as results_dict:
-        results_dict['n_evals'] = calc_total_evals(logbook) 
+    hof = tools.HallOfFame(1)
+    
+    stats_fit = tools.Statistics(lambda ind: ind.fitness.values)
+    stats_size = tools.Statistics(len)
+    mstats = tools.MultiStatistics(fitness=stats_fit, size=stats_size)
+    mstats.register("avg", mean)
+    mstats.register("std", std)
+    mstats.register("min", np.min)
+    mstats.register("max", np.max)
+
+    pop, log = eaSimple(pop, toolbox, 0.7, 0.3, goal_total_evals, stats=mstats,
+                                   halloffame=hof, verbose=True)
+    return pop, log, hof
 
 if __name__ == "__main__":
+    # load the arguments
+    parser = argparse.ArgumentParser(prog='pySR.py', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument("csv_path", help="absolute path to the csv")
+    parser.add_argument("path_to_db", help='path to the pickle file we will be generating')
+    parser.add_argument("goal_total_evals", help='number of individuals evaluated', type=int)
+    parser.add_argument("popsize", help='number of individuals in the population', type=int)
+    parser.add_argument("int_max_params", help='the maximum number of fitting parameters in the model', type=int)
+    parser.add_argument("n_functions", help='comma delimited list of functions of arity 2 to be used eg: add,pow,sub,mul,div')
+    parser.add_argument("-f_functions", help='comma delimited list of functions of arity 1 to be used eg: sin,cos,tan,exp,log')
+    arguments = parser.parse_args()
+    if len(sys.argv) < 2:
+        parser.print_usage()
+        sys.exit(1)
+    # assign arugments to the namespace
+    csv_path = arguments.csv_path
+    path_to_db = arguments.path_to_db
+    initialize_db(path_to_db)
+    goal_total_evals = arguments.goal_total_evals
+    popsize = arguments.popsize
+    n_functions = arguments.n_functions
+    n_functions = n_functions.split(',')
+    f_functions = arguments.f_functions
+    if f_functions is None:
+        f_functions = []
+    else:    
+        f_functions = f_functions.split(',')
+    int_max_params = arguments.int_max_params
+    #Let's read some data
+    dataset = Dataset(csv_path, int_max_params)
+    SR_config = SymbolicRegressionConfig(n_functions, f_functions, int_max_params, None)
+    params = create_fitting_parameters(int_max_params)
+    pset = make_pset(dataset, int_max_params, csv_path, n_functions, f_functions)    
+    creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
+    creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMin)
+    toolbox = base.Toolbox()
+    toolbox.register("expr", gp.genHalfAndHalf, pset=pset, min_=1, max_=5)
+    toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.expr)
+    toolbox.register("population", tools.initRepeat, list, toolbox.individual)
+    toolbox.register("compile", gp.compile, pset=pset)
+    toolbox.register("evaluate", evaluate, dataset=dataset)
+    toolbox.register("select", tools.selTournament, tournsize=3)
+    toolbox.register("mate", gp.cxOnePoint)
+    toolbox.register("expr_mut", gp.genFull, min_=0, max_=3)
+    toolbox.register("mutate", gp.mutUniform, expr=toolbox.expr_mut, pset=pset)
+    #pool = mp.Pool()
+    #toolbox.register("map", pool.map)
+    toolbox.decorate("mate", gp.staticLimit(key=operator.attrgetter("height"), max_value=17))
+    toolbox.decorate("mutate", gp.staticLimit(key=operator.attrgetter("height"), max_value=17))
     main()
