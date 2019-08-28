@@ -219,6 +219,8 @@ def run_all_SRGP_jobs(placeholder):
 def run_all_SRURGS_jobs(placeholder):
     i = 0
     dropbox_trnsfer = TransferData(DROPBOX_KEY)
+    random_sleep = random.randint(1, 20)
+    time.sleep(random_sleep)
     for finished in range(0,2):
         job_ID, job_arguments = get_SRURGS_job(finished)
         SRGP_db = job_ID.replace("SRURGS", "SRGP")
