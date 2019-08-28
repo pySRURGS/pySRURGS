@@ -1,17 +1,20 @@
 
 ![Binoculars](image/Gnome-system-search.jpg)
 
-# pySRURGS - Symbolic Regression by Uniform Random Global Search (in python)
+# Symbolic Regression by Uniform Random Global Search
 [![Build Status](https://travis-ci.com/pySRURGS/pySRURGS.svg?branch=master)](https://travis-ci.com/pySRURGS/pySRURGS)
+[![Coverage Status](https://coveralls.io/repos/github/pySRURGS/pySRURGS/badge.svg)](https://coveralls.io/github/pySRURGS/pySRURGS)
 [![License: GPL v3](image/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![python versions](image/python-3_6_3_7-blue.svg)](https://www.python.org)
+[![status](https://joss.theoj.org/papers/6c575a3b0604e5c5d4ca31f27d4d182d/status.svg)](https://joss.theoj.org/papers/6c575a3b0604e5c5d4ca31f27d4d182d)
 
 Symbolic regression is a type of data analysis problem where you search for the 
 equation of best fit for a numerical dataset. This package does this task by 
 randomly, with uniform probability of selection, guessing candidate solutions 
 and evaluating them. The No Free Lunch Theorem argues that random search should 
 be equivalent to other approaches like Genetic Programming when assessing algorithm 
-performing over all possible problems.
+performing over all possible problems. This software should be useful for data analysts
+and researchers working on symbolic regression problems.
 
 ## Features 
 
@@ -35,7 +38,7 @@ It's a python3 script. Download it and run it via a terminal.
 
 You can install the prerequisite packages with pip
 
-```mpmath lmfit sympy pandas numpy parmap tqdm sqlitedict tabulate```
+```mpmath lmfit sympy pandas numpy parmap tqdm sqlitedict tabulate matplotlib scipy python-coveralls pytest pytest-cov```
 
 ### Installing
 
@@ -123,21 +126,23 @@ Do not use special characters or spaces in variable names and start variable nam
 A sample problem is provided. The filename denotes the true equation.
 
 ```
-
-$ winpty python pySRURGS.py -max_num_fit_params 3 -max_permitted_trees 2000 ./csvs/quartic_polynomial.csv 1000
+$ winpty python pySRURGS.py -max_num_fit_params 3 -max_permitted_trees 1000 -plotting ./csv/quartic_polynomial.csv 2000
 Running in multi processor mode
-1008it [03:03,  7.78it/s]
-  Normalized Mean Squared Error       R^2  Equation, simplified                                                 Parameters
--------------------------------  --------  -------------------------------------------------------------------  ---------------------------
-                     0.00518398  0.999871  (p2**p2)**p1*(p2**p2)**(p1*x) + ((p0**2 + p1)**x)**(-p2)             6.16E-01,3.41E+00,1.01E+00
-                     0.00623639  0.999845  p0**p2*(p0*x**p2 - p2)**(p1 + 1)*(p1**x)**p1                         3.11E+00,6.34E-01,1.43E+00
-                     0.0851371   0.997893  (p0**(p0 + 1) + p1*(p2 + x)**x)**(-p2*x*(p0 - 1)*(p1 + p2 - x))      1.36E+00,1.60E+00,2.85E-01
-                     0.108024    0.997381  (p0 + p1*(-p2 + p2**p1 - x + x**(2*p2)) - 1)/p1                      4.89E-01,1.10E+00,7.58E-01
-                     0.286993    0.99297   -p2*x**2*(p0 + 1)/(p0*(p2*(p0*x - p0 - p1 + x) + x)*(p0 + p1 + p2))  2.59E+00,6.91E+00,-2.73E-02
-
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 2000/2000 [05:22<00:00,  8.22it/s]
+Making sure we meet the iters value
+  Normalized Mean Squared Error       R^2  Equation, simplified                                                    Parameters
+-------------------------------  --------  ----------------------------------------------------------------------  ----------------------------
+                    4.24058e-05  0.999999  ((p0 + p1)/(p0*x))**(-p0 + p1 + x) + (p0*x + p0 + p2)**(p2*x/p1)        4.47E+00,3.47E-01,2.25E-01
+                    0.000141492  0.999996  (-2*p2*x*(p0*(p1 - x) + x) + (p0*p1*(p1 + x))**x*(p1 - x))/(p1 - x)     1.80E+00,1.34E+00,7.04E-02
+                    0.000154517  0.999996  x*(p2/p0)**x*(-p0 + p2)**p2 - (x**p1)**p1 + 1                           4.72E-01,1.17E+00,1.69E+00
+                    0.0001829    0.999995  -(p0 + x)*(p1*p2*(p2 - x) - (p2 - x)**x)/(p0**2*p1*p2)                  -2.11E+01,-9.23E-03,1.24E+01
+                    0.00021193   0.999995  ((p1**x)**p1 + (x**(-p0 + p2))**p2)*((p1 + x**p2)**x)**(-p0*(p0 - p1))  4.09E-01,1.61E+00,1.75E+00
 ```
 
 ![Example performance](image/plot.svg)
+
+## API
+[Documentation](https://pysrurgs.github.io/pySRURGS/)
 
 ## Author
 

@@ -16,15 +16,15 @@ except ImportError:
 
 SR_config1, SR_config2 = generate_benchmarks_SRconfigs()
 
-def run_SRGP(csv_path, path_to_db, numgens, popsize, int_max_params, 
+def run_SRGP(csv_path, path_to_db, goal_total_evals, popsize, int_max_params, 
              n_functions, f_functions=None):
     if f_functions is None or f_functions == '':
         arguments = ' '.join(['$PYSRURGSDIR/experiments/SRGP.py', 
-                              csv_path, path_to_db, str(numgens), str(popsize), 
+                              csv_path, path_to_db, str(goal_total_evals), str(popsize), 
                               str(int_max_params), n_functions])
     else:
         arguments = ' '.join(['$PYSRURGSDIR/experiments/SRGP.py', 
-                              csv_path, path_to_db, str(numgens), str(popsize), 
+                              csv_path, path_to_db, str(goal_total_evals), str(popsize), 
                               str(int_max_params), n_functions, '-f_functions', 
                               f_functions])
     return arguments 
@@ -38,16 +38,16 @@ def generate_list_of_experiments(SR_config, start_index, count_experiments, n_ru
     funcs_arity_one = ','.join(SR_config._f_functions)
     max_num_fit_params = SR_config._max_num_fit_params
     max_size_trees = SR_config._max_permitted_trees
-    popsize = 500
-    numgens = 40
+    popsize = 100
+    goal_total_evals = 5000
     # first twenty problems
     for z in range(start_index,start_index+count_experiments):
-        train = '$PYSRURGSDIR/csvs/benchmarks/'+str(z)+'_train.csv'        
+        train = '$PYSRURGSDIR/csv/benchmarks/'+str(z)+'_train.csv'        
         for j in range(0,n_runs):
             run_ID = str(j)
             path_to_db = give_db_path(train, run_ID)             
             algorithm = 'SRGP'
-            arguments = run_SRGP(train, path_to_db, numgens, popsize, max_num_fit_params, 
+            arguments = run_SRGP(train, path_to_db, goal_total_evals, popsize, max_num_fit_params, 
                                  funcs_arity_two, funcs_arity_one)
             list_of_jobs.append([algorithm, arguments])
     return list_of_jobs
