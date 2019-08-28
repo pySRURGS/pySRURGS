@@ -50,7 +50,8 @@ def eaSimple(population, toolbox, cxpb, mutpb, goal_total_evals, stats=None,
     logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
     total_evals = pySRURGS.assign_n_evals(path_to_db)
     if total_evals > goal_total_evals:
-        raise Exception("Already exceeded goal_total_evals")
+        print("Already exceeded goal_total_evals")
+        return
     # Evaluate the individuals with an invalid fitness
     invalid_ind = [ind for ind in population if not ind.fitness.valid]
     fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
