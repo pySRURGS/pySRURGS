@@ -229,7 +229,8 @@ if __name__ == "__main__":
     int_max_params = arguments.int_max_params
     #Let's read some data
     dataset = Dataset(csv_path, int_max_params)
-    SR_config = SymbolicRegressionConfig(n_functions, f_functions, int_max_params, None)
+    # max_permitted_trees assigned a placeholder value
+    SR_config = SymbolicRegressionConfig(n_functions, f_functions, int_max_params, 1)
     params = create_fitting_parameters(int_max_params)
     pset = make_pset(dataset, int_max_params, csv_path, n_functions, f_functions)    
     creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
