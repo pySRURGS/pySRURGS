@@ -19,6 +19,7 @@ import numpy as np
 srurgs_dir = 'C:/Users/sohra/srurgs_data/'
 srgp_dir = 'C:/Users/sohra/Dropbox/Apps/pySRURGS/'
 path_to_stats_db = './stats.db'
+images_dir = 'C:/Users/sohra/Google Drive (fischerproject2018@gmail.com)/pySRURGS/experiments/figures'
 # go to srurgs dir 
 # read file, find matching file in srgp dir 
 # add to dictionary 
@@ -64,7 +65,7 @@ def compare_SRURGS_with_algo(problem_number_given=None,
                 best_algo_R2 = result_algo._R2
                 best_SRURGS_R2 = result_SRURGS._R2
             except KeyError:            
-                path_to_csv = 'C:/Users/sohra/Google Drive (fischerproject2018@gmail.com)/pySRURGS/csvs/benchmarks/' + str(problem_number)+'_train.csv'
+                path_to_csv = 'C:/Users/sohra/Google Drive (fischerproject2018@gmail.com)/pySRURGS/csv/benchmarks/' + str(problem_number)+'_train.csv'
                 if problem_number < 20:
                     SR_config = SR_config1 
                 else:
@@ -73,6 +74,7 @@ def compare_SRURGS_with_algo(problem_number_given=None,
                 SRURGS_result_list.sort()
                 algo_result_list, dataset = pySRURGS.get_resultlist(path_to_algo_db, path_to_csv, SR_config)
                 algo_result_list.sort()
+                pdb.set_trace()
                 best_algo = algo_result_list._results[0]
                 best_SRURGS = SRURGS_result_list._results[0]
                 best_algo_R2 = best_algo._R2
@@ -84,6 +86,10 @@ def compare_SRURGS_with_algo(problem_number_given=None,
             best_SRURGS_R2 = 0
         a.append(best_algo_R2)
         b.append(best_SRURGS_R2)
+    a = np.array(a)
+    b = np.array(b)
+    a = np.nan_to_num(a)
+    b = np.nan_to_num(b)
     if problem_number_given is None:
         stat, p_val = ttest_rel(a, b)
         print(p_val)
@@ -94,17 +100,16 @@ def compare_SRURGS_with_algo(problem_number_given=None,
         print("MEDIAN SRGP R2", np.median(a))
         print("MEDIAN SRURGS R2", np.median(b))
         data = [a,b]
-        plt.figure(figsize=(5,3))        
+        plt.figure(figsize=(3.14, 2))        
         plt.hist(data, bins=(np.arange(12)-0.5)/10, label=[algo_name,'SRURGS'])
         plt.xlabel("R^2")
         plt.legend()
-        plt.tight_layout()
-        plt.show()
+        plt.savefig(images_dir+'/histo_'+algo_name+str(benchmark_start_num)+'_'+str(benchmark_end_num)+'.eps')        
         medianprops = dict(linewidth=4, color='firebrick')
-        plt.figure(figsize=(5,3))
+        plt.figure(figsize=(3.14, 2))
         plt.boxplot(data, labels=[algo_name, 'SRURGS'], medianprops=medianprops)
         plt.ylabel('R^2')
-        plt.show()
+        plt.savefig(images_dir+'/boxplot_'+algo_name+str(benchmark_start_num)+'_'+str(benchmark_end_num)+'.eps')
         
     else:
         return
@@ -113,13 +118,13 @@ if __name__ == '__main__':
     #os.remove(path_to_stats_db)
     #results = parmap.map(compare_SRURGS_with_algo, list(range(0,20)), 
     #                     'SRGP', 0, 20, pm_pbar=True)
-    #compare_SRURGS_with_algo(problem_number_given=None, 
-    #                         algo_name='SRGP', 
-    #                         benchmark_start_num=0, 
-    #                         benchmark_end_num=20)
     compare_SRURGS_with_algo(problem_number_given=None, 
                              algo_name='SRGP', 
-                             benchmark_start_num=20, 
-                             benchmark_end_num=100)
-    results = parmap.map(compare_SRURGS_with_algo, list(range(0,20)), 
-                         'SRGP', 20, 100, pm_pbar=True)
+                             benchmark_start_num=0, 
+                             benchmark_end_num=20)    
+    #results = parmap.map(compare_SRURGS_with_algo, list(range(20,100)), 
+    #                     'SRGP', 20, 100, pm_pbar=True)
+    #compare_SRURGS_with_algo(problem_number_given=None, 
+    #                         algo_name='SRGP', 
+    #                         benchmark_start_num=20, 
+    #                         benchmark_end_num=100)
