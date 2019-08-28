@@ -1,5 +1,5 @@
 
-![Binoculars](image/Gnome-system-search.jpg)
+![pySRURGS_logo](image/pySRURGS.svg)
 
 # pySRURGS - Symbolic Regression by Uniform Random Global Search (in python)
 [![Build Status](https://travis-ci.com/pySRURGS/pySRURGS.svg?branch=master)](https://travis-ci.com/pySRURGS/pySRURGS)
