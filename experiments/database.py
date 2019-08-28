@@ -30,12 +30,12 @@ sshtunnel.SSH_TIMEOUT = 15.0
 sshtunnel.TUNNEL_TIMEOUT = 15.0
 
 # This portion of the script is specific to my home computing setup.
-if platform.system() == 'Windows':
+try:
     pySRURGS_dir = PYSRURGS_DIR 
-elif platform.system() == 'Linux':
+except:
     pySRURGS_dir = '/home/brain/pySRURGS'
-else:
-    raise Exception("Invalid OS")
+    if os.path.isdir(pySRURGS_dir) == False:
+        raise Exception("PYSRURGS_DIR invalid")
 
 def int_finished_meaning(my_int):
     # this integer we use when assigning job completion status to the listing of 
