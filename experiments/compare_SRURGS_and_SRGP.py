@@ -16,8 +16,8 @@ from sqlitedict import SqliteDict
 import pdb
 import numpy as np
 
-srurgs_dir = 'C:/Users/sohra/srurgs_data/'
-srgp_dir = 'C:/Users/sohra/Dropbox/Apps/pySRURGS/'
+srurgs_dir = 'G:/srurgs_data/'
+srgp_dir = 'G:/srurgs_data/'
 path_to_stats_db = './stats.db'
 images_dir = 'C:/Users/sohra/Google Drive (fischerproject2018@gmail.com)/pySRURGS/experiments/figures'
 # go to srurgs dir 
@@ -74,7 +74,6 @@ def compare_SRURGS_with_algo(problem_number_given=None,
                 SRURGS_result_list.sort()
                 algo_result_list, dataset = pySRURGS.get_resultlist(path_to_algo_db, path_to_csv, SR_config)
                 algo_result_list.sort()
-                pdb.set_trace()
                 best_algo = algo_result_list._results[0]
                 best_SRURGS = SRURGS_result_list._results[0]
                 best_algo_R2 = best_algo._R2
@@ -104,12 +103,14 @@ def compare_SRURGS_with_algo(problem_number_given=None,
         plt.hist(data, bins=(np.arange(12)-0.5)/10, label=[algo_name,'SRURGS'])
         plt.xlabel("R^2")
         plt.legend()
-        plt.savefig(images_dir+'/histo_'+algo_name+str(benchmark_start_num)+'_'+str(benchmark_end_num)+'.eps')        
+        plt.savefig(images_dir+'/histo_'+algo_name+str(benchmark_start_num)+'_'+str(benchmark_end_num)+'.eps')
+        plt.savefig(images_dir+'/histo_'+algo_name+str(benchmark_start_num)+'_'+str(benchmark_end_num)+'.png')
         medianprops = dict(linewidth=4, color='firebrick')
         plt.figure(figsize=(3.14, 2))
         plt.boxplot(data, labels=[algo_name, 'SRURGS'], medianprops=medianprops)
         plt.ylabel('R^2')
         plt.savefig(images_dir+'/boxplot_'+algo_name+str(benchmark_start_num)+'_'+str(benchmark_end_num)+'.eps')
+        plt.savefig(images_dir+'/boxplot_'+algo_name+str(benchmark_start_num)+'_'+str(benchmark_end_num)+'.png')
         
     else:
         return
@@ -124,7 +125,7 @@ if __name__ == '__main__':
                              benchmark_end_num=20)    
     #results = parmap.map(compare_SRURGS_with_algo, list(range(20,100)), 
     #                     'SRGP', 20, 100, pm_pbar=True)
-    #compare_SRURGS_with_algo(problem_number_given=None, 
-    #                         algo_name='SRGP', 
-    #                         benchmark_start_num=20, 
-    #                         benchmark_end_num=100)
+    compare_SRURGS_with_algo(problem_number_given=None, 
+                             algo_name='SRGP', 
+                             benchmark_start_num=20, 
+                             benchmark_end_num=100)
