@@ -49,7 +49,9 @@ def eaSimple(population, toolbox, cxpb, mutpb, goal_total_evals, stats=None,
     """
     logbook = tools.Logbook()
     logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
-
+    total_evals = pySRURGS.assign_n_evals(path_to_db)
+    if total_evals > goal_total_evals:
+        raise Exception("Already exceeded goal_total_evals")
     # Evaluate the individuals with an invalid fitness
     invalid_ind = [ind for ind in population if not ind.fitness.valid]
     fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
@@ -145,9 +147,6 @@ def make_pset(dataset, int_max_params, csv_path, n_functions, f_functions):
 
 #Define our evaluation function
 def evaluate(individual, dataset):
-    import sys
-    sys.path.append('./../')
-    import pySRURGS
     # replace invalid equations with a random new equation
     if type(individual) == list:
         individual = individual[0]
@@ -173,7 +172,7 @@ def evaluate(individual, dataset):
         return (MSE,) # don't save these results to the db
     result = pySRURGS.Result(simple_eqn, funcstring, MSE, R2, fitted_params)
     with SqliteDict(path_to_db, autocommit=True) as results_dict:
-        results_dict[simple_eqn] = result    
+        results_dict[simple_eqn] = result 
     return (MSE,)
 
 def mean(x):    
@@ -250,3 +249,4 @@ if __name__ == "__main__":
     toolbox.decorate("mate", gp.staticLimit(key=operator.attrgetter("height"), max_value=17))
     toolbox.decorate("mutate", gp.staticLimit(key=operator.attrgetter("height"), max_value=17))
     main()
+    pySRURGS.compile_results(path_to_db, csv_path, SR_config)
