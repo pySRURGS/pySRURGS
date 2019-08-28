@@ -65,7 +65,7 @@ def compare_SRURGS_with_algo(problem_number_given=None,
                 best_algo_R2 = result_algo._R2
                 best_SRURGS_R2 = result_SRURGS._R2
             except KeyError:            
-                path_to_csv = 'C:/Users/sohra/Google Drive (fischerproject2018@gmail.com)/pySRURGS/csvs/benchmarks/' + str(problem_number)+'_train.csv'
+                path_to_csv = 'C:/Users/sohra/Google Drive (fischerproject2018@gmail.com)/pySRURGS/csv/benchmarks/' + str(problem_number)+'_train.csv'
                 if problem_number < 20:
                     SR_config = SR_config1 
                 else:

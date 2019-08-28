@@ -23,11 +23,11 @@ except ImportError:
     sh = Sh()
 
 dbs_dir = './db'
-qrtic_polynml_csv = './csvs/quartic_polynomial.csv'
+qrtic_polynml_csv = './csv/quartic_polynomial.csv'
 qrtic_polynml_db = './db/quartic_polynomial.db'
-x1sqrd_csv = './csvs/x1_squared_minus_five_x3.csv'
+x1sqrd_csv = './csv/x1_squared_minus_five_x3.csv'
 x1sqrd_db = './db/x1_squared_minus_five_x3.db'
-benchmarks_dir = './csvs/benchmarks'
+benchmarks_dir = './csv/benchmarks'
 
 def test_command_line_code():
     print('Started run_command_line_tests')
