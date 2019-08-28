@@ -39,10 +39,10 @@ fitting_param_prefix = 'begin_fitting_param_'
 fitting_param_suffix = '_end_fitting_param'
 variable_prefix = 'begin_variable_'
 variable_suffix = '_end_variable'
-path_to_toy_csv = './csvs/toy_data_for_benchmark_gen.csv'
+path_to_toy_csv = './csv/toy_data_for_benchmark_gen.csv'
 benchmarks_x_domain = [0, 10]
 benchmarks_fit_param_domain = [-10, 10]
-benchmarks_dir = './csvs/benchmarks'
+benchmarks_dir = './csv/benchmarks'
 benchmarks_summary_tsv = './benchmarks_summary.tsv'
 memoize_funcs = False
 defaults_dict = {'funcs_arity_one': None,
@@ -881,7 +881,7 @@ class Dataset(object):
     --------
 
     >>> import pySRURGS
-    >>> path_to_csv_file = './csvs/quartic_polynomial.csv'
+    >>> path_to_csv_file = './csv/quartic_polynomial.csv'
     >>> int_max_params = 5
     >>> dataset = pySRURGS.Dataset(path_to_csv_file, int_max_params)
     """
@@ -1829,7 +1829,7 @@ def uniform_random_global_search_once(path_to_db, path_to_csv, SRconfig):
     >>> n_tree = 1000
     >>> SR_config = pySRURGS.SymbolicRegressionConfig(n_funcs, f_funcs, n_par, n_tree]
     >>> path_to_db = './db/quartic_polynomial.db'
-    >>> path_to_csv = './csvs/quartic_polynomial.csv'
+    >>> path_to_csv = './csv/quartic_polynomial.csv'
     >>> pySRURGS.uniform_random_global_search_once(path_to_db, path_to_csv, SR_config)
     """
     (f, n, m, cum_weights, N, dataset, enumerator, _, _) = setup(path_to_csv, 
