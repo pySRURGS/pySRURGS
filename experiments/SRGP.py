@@ -19,7 +19,6 @@ import pdb
 import pickle
 import os
 import sys
-import pathos.multiprocessing as mp
 import argparse
 import pandas as pd
 sys.path.append('./..')
