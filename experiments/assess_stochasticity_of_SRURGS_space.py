@@ -22,7 +22,7 @@ def main(max_permitted_trees, max_num_fit_params, i, r0, s0, figpath):
                                         max_num_fit_params=max_num_fit_params,
                                         max_permitted_trees=max_permitted_trees)
     en = pySRURGS.Enumerator2()
-    csv_path = './../csvs/quartic_polynomial.csv'  
+    csv_path = './../csv/quartic_polynomial.csv'  
     dataset = pySRURGS.Dataset(csv_path, SR_config._max_num_fit_params)
     params = pySRURGS.create_fitting_parameters(dataset._int_max_params)
     n = len(SR_config._n_functions)

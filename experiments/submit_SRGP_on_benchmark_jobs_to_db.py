@@ -42,7 +42,7 @@ def generate_list_of_experiments(SR_config, start_index, count_experiments, n_ru
     numgens = 40
     # first twenty problems
     for z in range(start_index,start_index+count_experiments):
-        train = '$PYSRURGSDIR/csvs/benchmarks/'+str(z)+'_train.csv'        
+        train = '$PYSRURGSDIR/csv/benchmarks/'+str(z)+'_train.csv'        
         for j in range(0,n_runs):
             run_ID = str(j)
             path_to_db = give_db_path(train, run_ID)             

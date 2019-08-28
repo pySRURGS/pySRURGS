@@ -126,7 +126,7 @@ Do not use special characters or spaces in variable names and start variable nam
 A sample problem is provided. The filename denotes the true equation.
 
 ```
-$ winpty python pySRURGS.py -max_num_fit_params 3 -max_permitted_trees 1000 -plotting ./csvs/quartic_polynomial.csv 2000
+$ winpty python pySRURGS.py -max_num_fit_params 3 -max_permitted_trees 1000 -plotting ./csv/quartic_polynomial.csv 2000
 Running in multi processor mode
 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 2000/2000 [05:22<00:00,  8.22it/s]
 Making sure we meet the iters value
