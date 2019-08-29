@@ -147,18 +147,6 @@ def binary(num, pre='', length=16, spacer=0):
     ''' formats a number into binary - https://stackoverflow.com/a/16926270/3549879 '''
     return '{0}{{:{1}>{2}}}'.format(pre, spacer, length).format(bin(num)[2:])      
         
-def check_file_exists(path_to_file):
-    if os.path.isfile(path_to_file) == False:
-        raise Exception("Missing file: " + path_to_file)
-    return path_to_file
-
-def check_dir_perms(path_to_file):
-    if os.access(os.path.dirname(path_to_file), os.W_OK): 
-        pass # write privileges ok 
-    else: #can not write there
-        raise Exception("Output dir has bad permissions: " + path_to_file)
-    return path_to_file
-
 def make_variable_name(var):
     """
     Converts a variable name to pySRURGS safe variable names. Prevents string 
