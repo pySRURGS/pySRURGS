@@ -100,6 +100,7 @@ def compare_SRURGS_with_algo(problem_number_given=None,
         print("MEDIAN SRURGS R2", np.median(b))
         data = [a,b]
         plt.figure(figsize=(3.14, 2))        
+        plt.tight_layout()
         plt.hist(data, bins=(np.arange(12)-0.5)/10, label=[algo_name,'SRURGS'])
         plt.xlabel("R^2")
         plt.legend()
@@ -107,6 +108,7 @@ def compare_SRURGS_with_algo(problem_number_given=None,
         plt.savefig(images_dir+'/histo_'+algo_name+str(benchmark_start_num)+'_'+str(benchmark_end_num)+'.png')
         medianprops = dict(linewidth=4, color='firebrick')
         plt.figure(figsize=(3.14, 2))
+        plt.tight_layout()
         plt.boxplot(data, labels=[algo_name, 'SRURGS'], medianprops=medianprops)
         plt.ylabel('R^2')
         plt.savefig(images_dir+'/boxplot_'+algo_name+str(benchmark_start_num)+'_'+str(benchmark_end_num)+'.eps')
