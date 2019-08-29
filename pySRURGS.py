@@ -97,7 +97,7 @@ class SymbolicRegressionConfig(object):
     >>> f_funcs = []
     >>> n_par = 5
     >>> n_tree = 1000
-    >>> SR_config = pySRURGS.SymbolicRegressionConfig(n_funcs, f_funcs, n_par, n_tree]
+    >>> SR_config = pySRURGS.SymbolicRegressionConfig(n_funcs, f_funcs, n_par, n_tree)
     """
 
     def __init__(self, n_functions=['add','sub','mul','div', 'pow'],
@@ -2064,7 +2064,7 @@ def get_resultlist(path_to_db, path_to_csv, SRconfig):
     (_, _, _, _, _, dataset, _, _, _) = setup(path_to_csv, SRconfig)
     result_list = ResultList()
     with SqliteDict(path_to_db, autocommit=True) as results_dict:
-        keys = results_dict.keys()
+        keys = results_dict.keys()        
         for eqn in keys:
             if eqn == 'n_evals':
                 continue
@@ -2368,8 +2368,7 @@ if __name__ == '__main__':
         exit(0)
     if count_M == True:
         count_number_equations(path_to_csv, SRconfig)
-        exit(0)    
-    run_ID = arguments.run_ID
+        exit(0)
     path_to_db = create_db_name(path_to_csv)    
     os.makedirs('./db', exist_ok=True) 
     if single_processing_mode == False:
