@@ -139,7 +139,8 @@ result_list, dataset = pySRURGS.get_resultlist(path_to_db, path_to_csv, SR_confi
 result_list.sort()
 # after running sort, zero^th element is the best result
 best_result = result_list._results[0]
-print("R^2", best_result._R2, "Equation", best_result._equation)
+print("R^2:", best_result._R2, "Equation:", best_result._simple_equation, 
+      "Unsimplified Equation:", best_result._equation)
 result_list.print(dataset._y_data)
 ```
 
