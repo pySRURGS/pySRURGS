@@ -59,9 +59,8 @@ python3 pySRURGS.py -h
 The above command should render the following:
 
 ```
-usage: pySRURGS.py [-h] [-memoize_funcs] [-run_ID RUN_ID] [-single] [-count]
-                   [-benchmarks] [-plotting]
-                   [-funcs_arity_two FUNCS_ARITY_TWO]
+usage: pySRURGS.py [-h] [-memoize_funcs] [-single] [-count] [-benchmarks]
+                   [-plotting] [-funcs_arity_two FUNCS_ARITY_TWO]
                    [-funcs_arity_one FUNCS_ARITY_ONE]
                    [-max_num_fit_params MAX_NUM_FIT_PARAMS]
                    [-max_permitted_trees MAX_PERMITTED_TREES]
@@ -78,8 +77,6 @@ optional arguments:
   -memoize_funcs        memoize the computations. If you are running large
                         `iters` and you do not have massive ram, do not use
                         this option. (default: False)
-  -run_ID RUN_ID        some text that uniquely identifies this run (default:
-                        None)
   -single               run in single processing mode (default: False)
   -count                Instead of doing symbolic regression, just count out
                         how many possible equations for this configuration. No
@@ -111,7 +108,9 @@ optional arguments:
                         (default: 1000)
   -path_to_db PATH_TO_DB
                         the absolute or relative path to the database file
-                        where we will save results (default: None)
+                        where we will save results. If not set, will save
+                        database file to ./db directory with same name as the
+                        csv file. (default: None)
 ```
 
 ### Important details
@@ -128,7 +127,7 @@ A sample problem is provided. The filename denotes the true equation.
 ```
 $ winpty python pySRURGS.py -max_num_fit_params 3 -max_permitted_trees 1000 -plotting ./csv/quartic_polynomial.csv 2000
 Running in multi processor mode
-100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 2000/2000 [05:22<00:00,  8.22it/s]
+100%|██████████████████████████████████████████████████████████████████████████████████████████████████████| 2000/2000 [05:22<00:00,  8.22it/s]
 Making sure we meet the iters value
   Normalized Mean Squared Error       R^2  Equation, simplified                                                    Parameters
 -------------------------------  --------  ----------------------------------------------------------------------  ----------------------------
@@ -140,6 +139,32 @@ Making sure we meet the iters value
 ```
 
 ![Example performance](image/plot.svg)
+
+### Database file
+
+The database file is in Sqlite3 format, and we access it using the SqliteDict
+package. For example. if we have already run some computations against 
+the quartic_polynomial example, then we can run the following to inspect
+the results.
+
+```
+import pySRURGS
+from pySRURGS import Result # Result needs to be in the namespace.
+from sqlitedict import SqliteDict
+SR_config = pySRURGS.SymbolicRegressionConfig()
+path_to_csv = './csv/quartic_polynomial.csv'
+path_to_db = './db/quartic_polynomial.db'
+with SqliteDict(path_to_db, autocommit=True) as results_dict:
+    best_result = results_dict['best_result']
+    number_equations = results_dict['n_evals']
+result_list, dataset = pySRURGS.get_resultlist(path_to_db, path_to_csv, SR_config)
+result_list.sort()
+# after running sort, zero^th element is the best result
+best_result = result_list._results[0]
+print("R^2:", best_result._R2, "Equation:", best_result._simple_equation, 
+      "Unsimplified Equation:", best_result._equation)
+result_list.print(dataset._y_data)
+```
 
 ## API
 [Documentation](https://pysrurgs.github.io/pySRURGS/)
