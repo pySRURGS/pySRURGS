@@ -123,7 +123,9 @@ Do not use special characters or spaces in variable names and start variable nam
 ### Database file
 
 The database file is in Sqlite3 format, and we access it using the SqliteDict
-package. 
+package. For example. if we have already run some computations against 
+the quartic_polynomial example, then we can run the following to inspect
+the results.
 
 ```
 import pySRURGS
