@@ -2369,7 +2369,8 @@ if __name__ == '__main__':
     if count_M == True:
         count_number_equations(path_to_csv, SRconfig)
         exit(0)
-    path_to_db = create_db_name(path_to_csv)    
+    if path_to_db is None:
+        path_to_db = create_db_name(path_to_csv)    
     os.makedirs('./db', exist_ok=True) 
     if single_processing_mode == False:
         print("Running in multi processor mode")
