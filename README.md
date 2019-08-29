@@ -128,7 +128,6 @@ package.
 ```
 import pySRURGS
 from pySRURGS import Result # Result needs to be in the namespace.
-import pdb
 from sqlitedict import SqliteDict
 SR_config = pySRURGS.SymbolicRegressionConfig()
 path_to_csv = './csv/quartic_polynomial.csv'
