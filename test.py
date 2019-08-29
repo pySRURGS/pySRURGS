@@ -75,9 +75,6 @@ def test_python_code():
         pass
     SRconfig = pySRURGS.SymbolicRegressionConfig(n_funcs, f_funcs, max_num_fit_params, max_permitted_trees)
     # the the -count functionality
-    num_equations = pySRURGS.count_number_equations(path_to_csv, SRconfig)
-    max_attempts = 15
-    # the the -count functionality
     test_f_funcs = 'tan,exp,cos,sin,log,sinh,cosh,tanh'
     if test_f_funcs is None or test_f_funcs == '':
         test_f_funcs = []
