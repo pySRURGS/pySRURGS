@@ -120,30 +120,6 @@ Your CSV file should have a header.
 Inside the csv, the dependent variable should be the rightmost column.
 Do not use special characters or spaces in variable names and start variable names with a letter.
 
-### Database file
-
-The database file is in Sqlite3 format, and we access it using the SqliteDict
-package. 
-
-```
-import pySRURGS
-from pySRURGS import Result # Result needs to be in the namespace.
-from sqlitedict import SqliteDict
-SR_config = pySRURGS.SymbolicRegressionConfig()
-path_to_csv = './csv/quartic_polynomial.csv'
-path_to_db = './db/quartic_polynomial.db'
-with SqliteDict(path_to_db, autocommit=True) as results_dict:
-    best_result = results_dict['best_result']
-    number_equations = results_dict['n_evals']
-result_list, dataset = pySRURGS.get_resultlist(path_to_db, path_to_csv, SR_config)
-result_list.sort()
-# after running sort, zero^th element is the best result
-best_result = result_list._results[0]
-print("R^2:", best_result._R2, "Equation:", best_result._simple_equation, 
-      "Unsimplified Equation:", best_result._equation)
-result_list.print(dataset._y_data)
-```
-
 ### An example
 
 A sample problem is provided. The filename denotes the true equation.
@@ -163,6 +139,32 @@ Making sure we meet the iters value
 ```
 
 ![Example performance](image/plot.svg)
+
+### Database file
+
+The database file is in Sqlite3 format, and we access it using the SqliteDict
+package. For example. if we have already run some computations against 
+the quartic_polynomial example, then we can run the following to inspect
+the results.
+
+```
+import pySRURGS
+from pySRURGS import Result # Result needs to be in the namespace.
+from sqlitedict import SqliteDict
+SR_config = pySRURGS.SymbolicRegressionConfig()
+path_to_csv = './csv/quartic_polynomial.csv'
+path_to_db = './db/quartic_polynomial.db'
+with SqliteDict(path_to_db, autocommit=True) as results_dict:
+    best_result = results_dict['best_result']
+    number_equations = results_dict['n_evals']
+result_list, dataset = pySRURGS.get_resultlist(path_to_db, path_to_csv, SR_config)
+result_list.sort()
+# after running sort, zero^th element is the best result
+best_result = result_list._results[0]
+print("R^2:", best_result._R2, "Equation:", best_result._simple_equation, 
+      "Unsimplified Equation:", best_result._equation)
+result_list.print(dataset._y_data)
+```
 
 ## API
 [Documentation](https://pysrurgs.github.io/pySRURGS/)
