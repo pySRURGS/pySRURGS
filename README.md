@@ -120,6 +120,26 @@ Your CSV file should have a header.
 Inside the csv, the dependent variable should be the rightmost column.
 Do not use special characters or spaces in variable names and start variable names with a letter.
 
+### An example
+
+A sample problem is provided. The filename denotes the true equation.
+
+```
+$ winpty python pySRURGS.py -max_num_fit_params 3 -max_permitted_trees 1000 -plotting ./csv/quartic_polynomial.csv 2000
+Running in multi processor mode
+100%|██████████████████████████████████████████████████████████████████████████████████████████████████████| 2000/2000 [05:22<00:00,  8.22it/s]
+Making sure we meet the iters value
+  Normalized Mean Squared Error       R^2  Equation, simplified                                                    Parameters
+-------------------------------  --------  ----------------------------------------------------------------------  ----------------------------
+                    4.24058e-05  0.999999  ((p0 + p1)/(p0*x))**(-p0 + p1 + x) + (p0*x + p0 + p2)**(p2*x/p1)        4.47E+00,3.47E-01,2.25E-01
+                    0.000141492  0.999996  (-2*p2*x*(p0*(p1 - x) + x) + (p0*p1*(p1 + x))**x*(p1 - x))/(p1 - x)     1.80E+00,1.34E+00,7.04E-02
+                    0.000154517  0.999996  x*(p2/p0)**x*(-p0 + p2)**p2 - (x**p1)**p1 + 1                           4.72E-01,1.17E+00,1.69E+00
+                    0.0001829    0.999995  -(p0 + x)*(p1*p2*(p2 - x) - (p2 - x)**x)/(p0**2*p1*p2)                  -2.11E+01,-9.23E-03,1.24E+01
+                    0.00021193   0.999995  ((p1**x)**p1 + (x**(-p0 + p2))**p2)*((p1 + x**p2)**x)**(-p0*(p0 - p1))  4.09E-01,1.61E+00,1.75E+00
+```
+
+![Example performance](image/plot.svg)
+
 ### Database file
 
 The database file is in Sqlite3 format, and we access it using the SqliteDict
@@ -145,26 +165,6 @@ print("R^2:", best_result._R2, "Equation:", best_result._simple_equation,
       "Unsimplified Equation:", best_result._equation)
 result_list.print(dataset._y_data)
 ```
-
-### An example
-
-A sample problem is provided. The filename denotes the true equation.
-
-```
-$ winpty python pySRURGS.py -max_num_fit_params 3 -max_permitted_trees 1000 -plotting ./csv/quartic_polynomial.csv 2000
-Running in multi processor mode
-100%|██████████████████████████████████████████████████████████████████████████████████████████████████████| 2000/2000 [05:22<00:00,  8.22it/s]
-Making sure we meet the iters value
-  Normalized Mean Squared Error       R^2  Equation, simplified                                                    Parameters
--------------------------------  --------  ----------------------------------------------------------------------  ----------------------------
-                    4.24058e-05  0.999999  ((p0 + p1)/(p0*x))**(-p0 + p1 + x) + (p0*x + p0 + p2)**(p2*x/p1)        4.47E+00,3.47E-01,2.25E-01
-                    0.000141492  0.999996  (-2*p2*x*(p0*(p1 - x) + x) + (p0*p1*(p1 + x))**x*(p1 - x))/(p1 - x)     1.80E+00,1.34E+00,7.04E-02
-                    0.000154517  0.999996  x*(p2/p0)**x*(-p0 + p2)**p2 - (x**p1)**p1 + 1                           4.72E-01,1.17E+00,1.69E+00
-                    0.0001829    0.999995  -(p0 + x)*(p1*p2*(p2 - x) - (p2 - x)**x)/(p0**2*p1*p2)                  -2.11E+01,-9.23E-03,1.24E+01
-                    0.00021193   0.999995  ((p1**x)**p1 + (x**(-p0 + p2))**p2)*((p1 + x**p2)**x)**(-p0*(p0 - p1))  4.09E-01,1.61E+00,1.75E+00
-```
-
-![Example performance](image/plot.svg)
 
 ## API
 [Documentation](https://pysrurgs.github.io/pySRURGS/)
