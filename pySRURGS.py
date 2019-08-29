@@ -2327,7 +2327,6 @@ if __name__ == '__main__':
     parser.add_argument("iters", help="the number of equations to be attempted in this run", type=int)
     #TODO parser.add_argument("-test", help="absolute or relative file path to the csv file housing the testing data")
     parser.add_argument("-memoize_funcs", help="memoize the computations. If you are running large `iters` and you do not have massive ram, do not use this option.", action="store_true")
-    parser.add_argument("-run_ID", help="some text that uniquely identifies this run", required=False)
     parser.add_argument("-single", help="run in single processing mode", action="store_true")
     parser.add_argument("-count", help="Instead of doing symbolic regression, just count out how many possible equations for this configuration. No other processing performed.", action="store_true")
     parser.add_argument("-benchmarks", help="Instead of doing symbolic regression, generate the 100 benchmark problems. No other processing performed.", action="store_true")
@@ -2336,7 +2335,7 @@ if __name__ == '__main__':
     parser.add_argument("-funcs_arity_one", help="a comma separated string listing the functions of arity one you want to be considered. Permitted:sin,cos,tan,exp,log,sinh,cosh,tanh")
     parser.add_argument("-max_num_fit_params", help="the maximum number of fitting parameters permitted in the generated models", default=defaults_dict['max_num_fit_params'], type=int)
     parser.add_argument("-max_permitted_trees", help="the number of unique binary trees that are permitted in the generated models - binary trees define the form of the equation, increasing this number tends to increase the complexity of generated equations", default=defaults_dict['max_permitted_trees'], type=int)
-    parser.add_argument("-path_to_db", help="the absolute or relative path to the database file where we will save results", default=defaults_dict['path_to_db'])
+    parser.add_argument("-path_to_db", help="the absolute or relative path to the database file where we will save results. If not set, will save database file to ./db directory with same name as the csv file.", default=defaults_dict['path_to_db'])
     if len(sys.argv) < 2:
         parser.print_usage()
         sys.exit(1)
@@ -2369,11 +2368,9 @@ if __name__ == '__main__':
         exit(0)
     if count_M == True:
         count_number_equations(path_to_csv, SRconfig)
-        exit(0)
-    
+        exit(0)    
     run_ID = arguments.run_ID
-    if path_to_db is None:
-        path_to_db = create_db_name(path_to_csv, run_ID)    
+    path_to_db = create_db_name(path_to_csv)    
     os.makedirs('./db', exist_ok=True) 
     if single_processing_mode == False:
         print("Running in multi processor mode")
