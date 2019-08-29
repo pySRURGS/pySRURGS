@@ -918,6 +918,8 @@ class Dataset(object):
         sympy_namespace['cosh'] = sympy.Function('cosh')
         sympy_namespace['sinh'] = sympy.Function('sinh')
         sympy_namespace['tanh'] = sympy.Function('tanh')
+        sympy_namespace['exp'] = sympy.Function('exp')
+        sympy_namespace['log'] = sympy.Function('log')
         return sympy_namespace
     def load_csv_data(self, path_to_csv):
         dataframe = pandas.read_csv(path_to_csv)
@@ -2179,7 +2181,7 @@ def generate_benchmarks_SRconfigs():
                                                   max_permitted_trees=200)
 
     SR_config2: pySRURGS.SymbolicRegressionConfig(n_functions=['add','sub','mul','div','pow'],
-                                                  f_functions=['sin','sinh','exp'],
+                                                  f_functions=['sin','sinh','log'],
                                                   max_num_fit_params=5,
                                                   max_permitted_trees=200)
     ''' 
@@ -2188,7 +2190,7 @@ def generate_benchmarks_SRconfigs():
                                           max_num_fit_params=5,
                                           max_permitted_trees=200)
     SR_config2 = SymbolicRegressionConfig(n_functions=['add','sub','mul','div','pow'],
-                                          f_functions=['sin','sinh','exp'],
+                                          f_functions=['sin','sinh','log'],
                                           max_num_fit_params=5,
                                           max_permitted_trees=200)
     result = (SR_config1, SR_config2)
