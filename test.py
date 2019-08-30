@@ -12,6 +12,7 @@ import mpmath
 import tqdm
 import numpy as np
 from pySRURGS import Result
+from sqlitedict import SqliteDict
 try:
     import sh
 except ImportError:
@@ -137,6 +138,20 @@ def test_python_code():
     # generate benchmarks
     pySRURGS.generate_benchmarks()
     print('Finished run_python_tests')
+    # print DB inspection code
+    SR_config = pySRURGS.SymbolicRegressionConfig()
+    path_to_csv = './csv/quartic_polynomial.csv'
+    path_to_db = './db/quartic_polynomial.db'
+    with SqliteDict(path_to_db, autocommit=True) as results_dict:
+        best_result = results_dict['best_result']
+        number_equations = results_dict['n_evals']
+    result_list, dataset = pySRURGS.get_resultlist(path_to_db, path_to_csv, SR_config)
+    result_list.sort()
+    # after running sort, zero^th element is the best result
+    best_result = result_list._results[0]
+    print("R^2:", best_result._R2, "Equation:", best_result._simple_equation, 
+          "Unsimplified Equation:", best_result._equation)
+    result_list.print(dataset._y_data)
 
 if __name__ == '__main__':
     test_command_line_code()
