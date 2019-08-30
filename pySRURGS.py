@@ -918,6 +918,8 @@ class Dataset(object):
         sympy_namespace['cosh'] = sympy.Function('cosh')
         sympy_namespace['sinh'] = sympy.Function('sinh')
         sympy_namespace['tanh'] = sympy.Function('tanh')
+        sympy_namespace['exp'] = sympy.Function('exp')
+        sympy_namespace['log'] = sympy.Function('log')
         return sympy_namespace
     def load_csv_data(self, path_to_csv):
         dataframe = pandas.read_csv(path_to_csv)
@@ -2141,12 +2143,17 @@ def plot_results(path_to_db, path_to_csv, SRconfig):
     data_dict[xlabel] = np.linspace(np.min(dataset._x_data), 
                                     np.max(dataset._x_data))
     y_calc = eval_equation(params_obj, eval_eqn_string, dataset, mode=data_dict)
+    plt.figure(figsize=(3.14, 2))    
     plt.plot(data_dict[xlabel], y_calc, 'b-', 
              label=dataset._y_label+' calculated')
     plt.plot(dataset._x_data, dataset._y_data, 'ro', 
-             label=dataset._y_label+' original data')
-    plt.xlabel(dataset._x_labels[0])
+             label=dataset._y_label+' original data')    
     plt.ylabel(dataset._y_label)
+    #plt.yticks([6,5,4,3,2,1,0])
+    plt.xlabel(dataset._x_labels[0])        
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig('./image/plot.eps')
     plt.savefig('./image/plot.svg')
     plt.savefig('./image/plot.png')
        
@@ -2174,7 +2181,7 @@ def generate_benchmarks_SRconfigs():
                                                   max_permitted_trees=200)
 
     SR_config2: pySRURGS.SymbolicRegressionConfig(n_functions=['add','sub','mul','div','pow'],
-                                                  f_functions=['sin','sinh','exp'],
+                                                  f_functions=['sin','sinh','log'],
                                                   max_num_fit_params=5,
                                                   max_permitted_trees=200)
     ''' 
@@ -2183,7 +2190,7 @@ def generate_benchmarks_SRconfigs():
                                           max_num_fit_params=5,
                                           max_permitted_trees=200)
     SR_config2 = SymbolicRegressionConfig(n_functions=['add','sub','mul','div','pow'],
-                                          f_functions=['sin','sinh','exp'],
+                                          f_functions=['sin','sinh','log'],
                                           max_num_fit_params=5,
                                           max_permitted_trees=200)
     result = (SR_config1, SR_config2)
