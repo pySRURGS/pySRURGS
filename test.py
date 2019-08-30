@@ -142,6 +142,7 @@ def test_python_code():
     SR_config = pySRURGS.SymbolicRegressionConfig()
     path_to_csv = './csv/quartic_polynomial.csv'
     path_to_db = './db/quartic_polynomial.db'
+    pySRURGS.assign_n_evals(path_to_db)
     with SqliteDict(path_to_db, autocommit=True) as results_dict:
         best_result = results_dict['best_result']
         number_equations = results_dict['n_evals']
