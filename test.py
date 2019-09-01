@@ -30,6 +30,12 @@ x1sqrd_csv = './csv/x1_squared_minus_five_x3.csv'
 x1sqrd_db = './db/x1_squared_minus_five_x3.db'
 benchmarks_dir = './csv/benchmarks'
 
+def refresh_db(path_to_db):
+    try:
+        os.remove(path_to_db)
+    except:
+        pass
+
 def test_command_line_code():
     print('Started run_command_line_tests')
     # Command line interface
@@ -48,6 +54,13 @@ def test_command_line_code():
     sh.python('pySRURGS.py', '-funcs_arity_one', 'tan,exp', '-max_num_fit_params', 5, qrtic_polynml_csv, 10)
     print('Finished tan,exp funcs arity one run')
     sh.python('pySRURGS.py', '-max_permitted_trees', 10, '-max_num_fit_params', 5, qrtic_polynml_csv, 10)
+    print('Finished max_permitted_trees 10 run')    
+    refresh_db(path_to_db)
+    sh.python('pySRURGS.py', '-exhaustive', '-funcs_arity_two', 'add,sub','-funcs_arity_one', 'sin' , '-max_permitted_trees', 3, '-max_num_fit_params', 1, qrtic_polynml_csv, 10)
+    print('Finished exhaustive search multiprocessing run')
+    refresh_db(path_to_db)
+    sh.python('pySRURGS.py', '-exhaustive', '-funcs_arity_two', 'add,sub', '-max_permitted_trees', 3, '-max_num_fit_params', 1, qrtic_polynml_csv, 10)
+    print('Finished exhaustive search single processing run')
     sh.python('pySRURGS.py', '-plotting', '-max_permitted_trees', 10, '-max_num_fit_params', 5, qrtic_polynml_csv, 10)
     print('Finished run_command_line_tests')
 
@@ -70,10 +83,7 @@ def test_python_code():
     # assign the arguments used for later assessment of the algorithm
     path_to_db = qrtic_polynml_db
     path_to_csv = qrtic_polynml_csv
-    try:
-        os.remove(path_to_db)
-    except:
-        pass
+    refresh_db(path_to_db)
     SRconfig = pySRURGS.SymbolicRegressionConfig(n_funcs, f_funcs, max_num_fit_params, max_permitted_trees)
     # the the -count functionality
     test_f_funcs = 'tan,exp,cos,sin,log,sinh,cosh,tanh'
@@ -153,6 +163,14 @@ def test_python_code():
     print("R^2:", best_result._R2, "Equation:", best_result._simple_equation, 
           "Unsimplified Equation:", best_result._equation)
     result_list.print(dataset._y_data)
+    # run tests for exhaustive search
+    refresh_db(path_to_db)
+    SRconfig = pySRURGS.SymbolicRegressionConfig(['add','sub'],['sin'], 1, 3)
+    pySRURGS.exhaustive_search(path_to_db, path_to_csv, SRconfig, mode='multi')
+    refresh_db(path_to_db)
+    SRconfig = pySRURGS.SymbolicRegressionConfig(['add','sub'],[], 1, 3)
+    pySRURGS.exhaustive_search(path_to_db, path_to_csv, SRconfig, mode='single')
+
 
 if __name__ == '__main__':
     test_command_line_code()
