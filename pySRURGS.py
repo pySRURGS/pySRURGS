@@ -15,6 +15,7 @@ import pdb
 import re
 import os
 import tqdm
+import itertools
 import parmap
 import pandas
 import argparse
@@ -629,6 +630,7 @@ def equation_generator(i, q, r, s, dataset, enumerator, SRconfig):
         raise Exception("r is an index that must be smaller than A")
     B = en.get_B(m, i)
     if s >= B:
+        pdb.set_trace()
         raise Exception("s is an index that must be smaller than B")
     l_i = en.get_l_i(i)
     k_i = en.get_k_i(i)
@@ -1114,9 +1116,9 @@ class Enumerator(object):
         if i == 0:
             l_i = 0 
         elif i == 1:
-            l_i = 1
-        elif i == 2:
             l_i = 0
+        elif i == 2:
+            l_i = 1
         else:
             left_int, right_int = get_left_right_bits(i)
             left_l_i = self.get_l_i(left_int)
@@ -1686,7 +1688,8 @@ class ResultList(object):
         table = []
         header = ["Normalized Mean Squared Error", "R^2", 
                   "Equation, simplified", "Parameters"]
-        for i in range(0, top):
+        num_eqn = int(np.min((top, len(self._results))))
+        for i in range(0, num_eqn):
             row = self._results[i].summarize(mode)
             row[0] = row[0]/np.std(y_data)
             table.append(row)
@@ -1734,8 +1737,9 @@ class Result(object):
         elif mode == 'detailed':
             summary = [self._MSE, self._R2, self._simple_equation, self._equation]
         parameters = []
-        for param in self._params:
-            parameters.append(str_e(param))
+        if self._params.shape != (): # avoid cases where there are no fit params
+            for param in self._params:
+                parameters.append(str_e(param))
         parameters_str = ','.join(parameters)
         summary.append(parameters_str)
         return summary
@@ -1803,7 +1807,7 @@ def uniform_random_global_search_once(path_to_db, path_to_csv, SRconfig):
         file ends in a '.csv' extension.
     
     SRconfig: pySRURGS.SymbolicRegressionConfig
-        The symbolic regression configuration file for this problem
+        The symbolic regression configuration object for this problem
             
     Returns
     -------
@@ -1871,7 +1875,7 @@ def generate_benchmark(benchmark_name, SRconfig):
         set as a string will do.
     
     SRconfig: pySRURGS.SymbolicRegressionConfig
-        The symbolic regression configuration file for this problem
+        The symbolic regression configuration object for this problem
             
     Returns
     -------
@@ -1962,7 +1966,7 @@ def setup(path_to_csv, SR_config):
         An absolute or relative path to the CSV for the problem.
     
     SR_config: pySRURGS.SymbolicRegressionConfig
-        The symbolic regression configuration file for this problem
+        The symbolic regression configuration object for this problem
             
     Returns
     -------
@@ -2326,6 +2330,205 @@ def count_number_equations(path_to_csv, SRconfig):
     print("Number possible equations:", number_possible_equations)        
     return number_possible_equations
 
+def exhaustive_search(path_to_db, path_to_csv, SRconfig, mode='multi'):
+    '''
+    Runs a brute-force/exhaustive symbolic regression search against the CSV 
+    file. WARNING, unless you specify a very simple problem, this computation 
+    will indefinitely. Consider using the `count_number_equations` function 
+    to first determine how many equations you will be considering.
+    
+    Parameters
+    ----------
+    path_to_db: string 
+        An absolute or relative path to where the code can save an output 
+        database file. Usually, this file ends in a '.db' extension.
+    
+    path_to_csv: string 
+        An absolute or relative path to the dataset CSV file. Usually, this 
+        file ends in a '.csv' extension.
+    
+    SRconfig: pySRURGS.SymbolicRegressionConfig
+        The symbolic regression configuration object for this problem
+    
+    mode: string
+        Denotes whether to use single core processing or multiprocessing.
+        Either 'multi' or 'single', 
+    
+    Returns
+    -------
+    None
+    
+    Notes
+    -----
+    Technically, the code here does not consider the simplest binary tree where 
+    i==0, however, there is redundancy in the way equations are written and this 
+    simplest case is checked if you are using 1 or more fitting parameters and 
+    include the `add` function, which is so basic a configuration that I will 
+    raise an exception should this not be the case.
+    
+    Example
+    -------
+    >>> import pySRURGS
+    >>> n_funcs = ['add','sub','mul','div']
+    >>> f_funcs = []
+    >>> n_par = 2
+    >>> n_tree = 10
+    >>> SR_config = pySRURGS.SymbolicRegressionConfig(n_funcs, f_funcs, n_par, n_tree]
+    >>> path_to_db = './db/quartic_polynomial.db'
+    >>> path_to_csv = './csv/quartic_polynomial.csv'
+    >>> num_equations = count_number_equations(path_to_csv, SR_config)
+    >>> print(num_equations)
+    >>> pySRURGS.exhaustive_search(path_to_db, path_to_csv, SR_config)
+    >>> result_list = get_resultlist(path_to_db, path_to_csv, SR_config)
+    >>> result_list.sort()
+    >>> result_list.print()
+    '''
+    warning_string = """
+    WARNING: you are running an exhaustive search on a large search space.
+    Are you sure you want to do this?!
+    """
+    num_equations = count_number_equations(path_to_csv, SRconfig)
+    if num_equations > 50000:
+        print(warning_string)
+        print("Number of equations: ", num_equations)
+    if (('add' not in SRconfig._n_functions and 
+         'sub' not in SRconfig._n_functions) or  
+         SRconfig._max_num_fit_params == 0):
+        raise Exception("Exhaustive search needs `add` and >=1 fit parameter")        
+    (f, n, m, _, N, dataset, enumerator, _, _) = setup(path_to_csv, 
+                                                             SRconfig)                                                            
+    initialize_db(path_to_db)
+    if mode not in ['multi', 'single']:
+        raise Exception("Invalid run mode of exhaustive search")
+    # we need to have two streams here, the first for the case where there are 
+    # functions of arity one permitted, the second for the case where there are 
+    # no functions of arity one permitted. Within each stream, we need to have 
+    # a substream for single processing and a substream for multiprocessing
+    results = ResultList()
+    if f > 0: # functions of arity one present
+        for i in range(0,N):            
+            G = enumerator.get_G(f, i)
+            A = enumerator.get_A(n, i)
+            B = enumerator.get_B(m, i)
+            if mode == 'single':  # single processor substream     
+                for r in range(0, A):
+                    for s in range(0, B):
+                        for q in range(0, G):
+                            index_tuple = (q, r, s)
+                            n_evals = assign_n_evals(path_to_db)
+                            print("n_evals:", n_evals, "i:", i, "q:", q, "r:", 
+                                  r, "s:", s)                            
+                            check_equation_at_specified_indices(index_tuple, i, 
+                                                                path_to_db, 
+                                                                path_to_csv,
+                                                                SRconfig)
+            elif mode == 'multi': # multiprocessing substream
+                iterator = itertools.product(range(0,G), range(0,A), range(0,B))
+                iterator = list(iterator)
+                parmap.map(check_equation_at_specified_indices, 
+                           iterator, i, path_to_db, path_to_csv, SRconfig, 
+                           pm_pbar=True)                       
+    elif f == 0: # functions of arity one absent
+        for i in range(0,N):
+            A = enumerator.get_A(n, i)
+            B = enumerator.get_B(m, i)
+            if mode == 'single':  # single processor substream     
+                for r in range(0, A):
+                    for s in range(0, B):
+                        index_tuple = (r, s)
+                        n_evals = assign_n_evals(path_to_db)
+                        print("n_evals:", n_evals, "i:", i, "r:", r, "s:", s)
+                        check_equation_at_specified_indices(index_tuple, i, 
+                                                            path_to_db, 
+                                                            path_to_csv,
+                                                            SRconfig)
+            elif mode == 'multi': # multiprocessing substream
+                iterator = itertools.product(range(0,A), range(0,B))
+                iterator = list(iterator)
+                parmap.map(check_equation_at_specified_indices, 
+                           iterator, i, path_to_db, path_to_csv, SRconfig, 
+                           pm_pbar=True)
+
+def check_equation_at_specified_indices(index_tuple, i, path_to_db, path_to_csv,
+                                        SRconfig):
+    '''
+    The indices specified gets mapped into the pySRURGS enumeration scheme and 
+    the corresponding equation gets evaluated against the dataset. 
+    
+    Parameters
+    ----------
+    index_tuple: tuple housing (q,r,s) or (r,s) if there are zero functions 
+                 of arity one
+    
+        q: int
+            the index specifying which configuration of functions of arity one 
+            to use within [0, G-1]
+
+        r: int 
+            the index specifying which configuration of functions of arity two
+            to use within [0, A-1]
+
+        s: int 
+            the index specifying which configuration of terminals to use within 
+            [0, B-1]
+            
+    i: int
+        the index specifying which binary tree to consider within [0, N-1]
+
+    path_to_db: string 
+        An absolute or relative path to where the code can save an output 
+        database file. Usually, this file ends in a '.db' extension.
+    
+    path_to_csv: string 
+        An absolute or relative path to the dataset CSV file. Usually, this 
+        file ends in a '.csv' extension.
+    
+    SRconfig: pySRURGS.SymbolicRegressionConfig
+        The symbolic regression configuration object for this problem
+       
+    Returns
+    -------
+    result: pySRURGS.Result or None (if floating point error)        
+    '''
+    (f, n, m, _, N, dataset, enumerator, _, _) = setup(path_to_csv, SRconfig)
+    if len(index_tuple) == 3:
+        q,r,s = index_tuple        
+    elif len(index_tuple) == 2:
+        r,s = index_tuple        
+    else:
+        raise Exception("Invalid length to index_tuple")
+    if f > 0:
+        eqn_str = equation_generator(i, q, r, s, dataset, enumerator, SRconfig)
+    else:
+        eqn_str = equation_generator2(i, r, s, dataset, enumerator, SRconfig)
+    try:
+        simple_eqn = simplify_equation_string(eqn_str, dataset)
+        initialize_db(path_to_db)    
+        with SqliteDict(path_to_db, autocommit=True) as results_dict:
+            # if we have already attempted this equation, do not run again
+            try: 
+                result = results_dict[simple_eqn]
+                raise FloatingPointError
+            except:
+                pass
+        params = create_fitting_parameters(dataset._int_max_params)        
+        (sum_of_squared_residuals, sum_of_squared_totals, 
+        R2, params_fitted,
+        residual) = check_goodness_of_fit(eqn_str, params, dataset)                
+        if np.isnan(R2) or np.isnan(sum_of_squared_totals):
+            raise FloatingPointError
+        valid = True            
+    except FloatingPointError:
+        return None
+    MSE = sum_of_squared_residuals
+    result = Result(simple_eqn, eqn_str, MSE, R2, params_fitted)
+    with SqliteDict(path_to_db, autocommit=True) as results_dict:
+        best_result = results_dict['best_result']             
+        results_dict[simple_eqn] = result
+        if result._MSE < best_result._MSE:                       
+            results_dict['best_result'] = best_result
+    return result
+
 if __name__ == '__main__':
     # Read the doc string at the top of this script.
     # Run this script in terminal with '-h' as an argument.
@@ -2338,6 +2541,7 @@ if __name__ == '__main__':
     parser.add_argument("-count", help="Instead of doing symbolic regression, just count out how many possible equations for this configuration. No other processing performed.", action="store_true")
     parser.add_argument("-benchmarks", help="Instead of doing symbolic regression, generate the 100 benchmark problems. No other processing performed.", action="store_true")
     parser.add_argument("-plotting", help="plot the best model against the data to ./image/plot.png and ./image/plot.svg - note only works for univariate datasets", action="store_true")
+    parser.add_argument("-exhaustive", help="instead of running pure random search, do an exhaustive search", action="store_true")
     parser.add_argument("-funcs_arity_two", help="a comma separated string listing the functions of arity two you want to be considered. Permitted:add,sub,mul,div,pow", default=defaults_dict['funcs_arity_two'])
     parser.add_argument("-funcs_arity_one", help="a comma separated string listing the functions of arity one you want to be considered. Permitted:sin,cos,tan,exp,log,sinh,cosh,tanh")
     parser.add_argument("-max_num_fit_params", help="the maximum number of fitting parameters permitted in the generated models", default=defaults_dict['max_num_fit_params'], type=int)
@@ -2352,6 +2556,7 @@ if __name__ == '__main__':
     max_attempts = arguments.iters
     count_M = arguments.count
     benchmarks = arguments.benchmarks
+    exhaustive = arguments.exhaustive
     path_to_db = arguments.path_to_db
     n_funcs = arguments.funcs_arity_two    
     n_funcs = n_funcs.split(',')
@@ -2379,22 +2584,32 @@ if __name__ == '__main__':
     if path_to_db is None:
         path_to_db = create_db_name(path_to_csv)    
     os.makedirs('./db', exist_ok=True) 
-    if single_processing_mode == False:
-        print("Running in multi processor mode")
-        results = parmap.map(uniform_random_global_search_once, 
-                             [path_to_db]*max_attempts,
-                             path_to_csv, SRconfig, pm_pbar=True)
-        print("Making sure we meet the iters value")
-        n_evals = assign_n_evals(path_to_db)
-        for i in range(0, max_attempts - n_evals):
-            uniform_random_global_search_once(path_to_db, path_to_csv, SRconfig)
-        assign_n_evals(path_to_db)
-    elif single_processing_mode == True:
-        print("Running in single processor mode")
-        for i in tqdm.tqdm(range(0,max_attempts)):
-            uniform_random_global_search_once(path_to_db, path_to_csv, SRconfig)
+    if exhaustive == False:
+        if single_processing_mode == False:
+            print("Running in multi processor mode")
+            results = parmap.map(uniform_random_global_search_once, 
+                                 [path_to_db]*max_attempts,
+                                 path_to_csv, SRconfig, pm_pbar=True)
+            print("Making sure we meet the iters value")
+            n_evals = assign_n_evals(path_to_db)
+            for i in range(0, max_attempts - n_evals):
+                uniform_random_global_search_once(path_to_db, path_to_csv, SRconfig)
+            assign_n_evals(path_to_db)
+        elif single_processing_mode == True:
+            print("Running in single processor mode")
+            for i in tqdm.tqdm(range(0,max_attempts)):
+                uniform_random_global_search_once(path_to_db, path_to_csv, SRconfig)
+        else:
+            raise("Invalid mode")
     else:
-        raise("Invalid mode")
+        if single_processing_mode == False:
+            print("Running exhaustive search in multi processor mode")
+            exhaustive_search(path_to_db, path_to_csv, SRconfig, mode='multi')
+        elif single_processing_mode == True:
+            print("Running exhaustive search in single processor mode")
+            exhaustive_search(path_to_db, path_to_csv, SRconfig, mode='single')
+        else:
+            raise("Invalid mode")
     compile_results(path_to_db, path_to_csv, SRconfig)
     if plotting == True:
         plot_results(path_to_db, path_to_csv, SRconfig)
