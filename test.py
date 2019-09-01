@@ -37,6 +37,7 @@ def refresh_db(path_to_db):
         pass
 
 def test_command_line_code():
+    path_to_db = qrtic_polynml_db
     print('Started run_command_line_tests')
     # Command line interface
     sh.python('pySRURGS.py', qrtic_polynml_csv, 10)
