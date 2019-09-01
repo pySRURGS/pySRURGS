@@ -2541,7 +2541,7 @@ if __name__ == '__main__':
     parser.add_argument("-count", help="Instead of doing symbolic regression, just count out how many possible equations for this configuration. No other processing performed.", action="store_true")
     parser.add_argument("-benchmarks", help="Instead of doing symbolic regression, generate the 100 benchmark problems. No other processing performed.", action="store_true")
     parser.add_argument("-plotting", help="plot the best model against the data to ./image/plot.png and ./image/plot.svg - note only works for univariate datasets", action="store_true")
-    parser.add_argument("-exhaustive", help="instead of running pure random search, do an exhaustive search", action="store_true")
+    parser.add_argument("-exhaustive", help="instead of running pure random search, do an exhaustive search. Be careful about running this as it may run forever. `iters` gets ignored.", action="store_true")
     parser.add_argument("-funcs_arity_two", help="a comma separated string listing the functions of arity two you want to be considered. Permitted:add,sub,mul,div,pow", default=defaults_dict['funcs_arity_two'])
     parser.add_argument("-funcs_arity_one", help="a comma separated string listing the functions of arity one you want to be considered. Permitted:sin,cos,tan,exp,log,sinh,cosh,tanh")
     parser.add_argument("-max_num_fit_params", help="the maximum number of fitting parameters permitted in the generated models", default=defaults_dict['max_num_fit_params'], type=int)
