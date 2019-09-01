@@ -60,7 +60,8 @@ The above command should render the following:
 
 ```
 usage: pySRURGS.py [-h] [-memoize_funcs] [-single] [-count] [-benchmarks]
-                   [-plotting] [-funcs_arity_two FUNCS_ARITY_TWO]
+                   [-plotting] [-exhaustive]
+                   [-funcs_arity_two FUNCS_ARITY_TWO]
                    [-funcs_arity_one FUNCS_ARITY_ONE]
                    [-max_num_fit_params MAX_NUM_FIT_PARAMS]
                    [-max_permitted_trees MAX_PERMITTED_TREES]
@@ -87,6 +88,10 @@ optional arguments:
   -plotting             plot the best model against the data to
                         ./image/plot.png and ./image/plot.svg - note only
                         works for univariate datasets (default: False)
+  -exhaustive           instead of running pure random search, do an
+                        exhaustive search. Be careful about running this as it
+                        may run forever. `iters` gets ignored. (default:
+                        False)
   -funcs_arity_two FUNCS_ARITY_TWO
                         a comma separated string listing the functions of
                         arity two you want to be considered.
