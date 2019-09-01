@@ -24,20 +24,21 @@ https://github.com/pySRURGS/pySRURGS</tt></p>
 <a href="collections.html">collections</a><br>
 <a href="csv.html">csv</a><br>
 <a href="datetime.html">datetime</a><br>
+<a href="itertools.html">itertools</a><br>
 <a href="lmfit.html">lmfit</a><br>
 </td><td width="25%" valign=top><a href="matplotlib.html">matplotlib</a><br>
 <a href="multiprocessing.html">multiprocessing</a><br>
 <a href="mpmath.html">mpmath</a><br>
 <a href="numpy.html">numpy</a><br>
 <a href="os.html">os</a><br>
-</td><td width="25%" valign=top><a href="pandas.html">pandas</a><br>
-<a href="parmap.html">parmap</a><br>
+<a href="pandas.html">pandas</a><br>
+</td><td width="25%" valign=top><a href="parmap.html">parmap</a><br>
 <a href="pdb.html">pdb</a><br>
 <a href="matplotlib.pyplot.html">matplotlib.pyplot</a><br>
 <a href="random.html">random</a><br>
-</td><td width="25%" valign=top><a href="re.html">re</a><br>
+<a href="re.html">re</a><br>
 <a href="sympy.html">sympy</a><br>
-<a href="sys.html">sys</a><br>
+</td><td width="25%" valign=top><a href="sys.html">sys</a><br>
 <a href="tabulate.html">tabulate</a><br>
 <a href="tqdm.html">tqdm</a><br>
 </td></tr></table></td></tr></table><p>
@@ -67,7 +68,9 @@ https://github.com/pySRURGS/pySRURGS</tt></p>
 <font color="#000000" face="helvetica, arial"><a name="Dataset">class <strong>Dataset</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt>An&nbsp;<a href="builtins.html#object">object</a>&nbsp;used&nbsp;to&nbsp;store&nbsp;the&nbsp;dataset&nbsp;of&nbsp;this&nbsp;symbolic&nbsp;regression&nbsp;<br>
+<td colspan=2><tt><a href="#Dataset">Dataset</a>(path_to_csv_file,&nbsp;int_max_params,&nbsp;scaled=False)<br>
+&nbsp;<br>
+An&nbsp;<a href="builtins.html#object">object</a>&nbsp;used&nbsp;to&nbsp;store&nbsp;the&nbsp;dataset&nbsp;of&nbsp;this&nbsp;symbolic&nbsp;regression&nbsp;<br>
 problem.<br>
 &nbsp;<br>
 Parameters<br>
@@ -361,7 +364,9 @@ Data descriptors defined here:<br>
 <font color="#000000" face="helvetica, arial"><a name="Result">class <strong>Result</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt>Stores&nbsp;the&nbsp;result&nbsp;of&nbsp;a&nbsp;single&nbsp;run&nbsp;of&nbsp;pySRURGS<br>
+<td colspan=2><tt><a href="#Result">Result</a>(simple_equation,&nbsp;equation,&nbsp;MSE,&nbsp;R2,&nbsp;params)<br>
+&nbsp;<br>
+Stores&nbsp;the&nbsp;result&nbsp;of&nbsp;a&nbsp;single&nbsp;run&nbsp;of&nbsp;pySRURGS<br>
 &nbsp;<br>
 Parameters<br>
 ----------<br>
@@ -473,7 +478,9 @@ Data descriptors defined here:<br>
 <font color="#000000" face="helvetica, arial"><a name="SymbolicRegressionConfig">class <strong>SymbolicRegressionConfig</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt>An&nbsp;<a href="builtins.html#object">object</a>&nbsp;used&nbsp;to&nbsp;store&nbsp;the&nbsp;configuration&nbsp;of&nbsp;this&nbsp;symbolic&nbsp;regression&nbsp;<br>
+<td colspan=2><tt><a href="#SymbolicRegressionConfig">SymbolicRegressionConfig</a>(n_functions=['add',&nbsp;'sub',&nbsp;'mul',&nbsp;'div',&nbsp;'pow'],&nbsp;f_functions=['log',&nbsp;'sinh',&nbsp;'sin'],&nbsp;max_num_fit_params=3,&nbsp;max_permitted_trees=100)<br>
+&nbsp;<br>
+An&nbsp;<a href="builtins.html#object">object</a>&nbsp;used&nbsp;to&nbsp;store&nbsp;the&nbsp;configuration&nbsp;of&nbsp;this&nbsp;symbolic&nbsp;regression&nbsp;<br>
 problem.&nbsp;Notably,&nbsp;does&nbsp;not&nbsp;contain&nbsp;information&nbsp;regarding&nbsp;the&nbsp;dataset.<br>
 &nbsp;<br>
 Parameters<br>
@@ -540,8 +547,43 @@ Data descriptors defined here:<br>
  <dl><dt><a name="-assign_n_evals"><strong>assign_n_evals</strong></a>(path_to_db)</dt><dd><tt>Checks&nbsp;the&nbsp;number&nbsp;of&nbsp;equations&nbsp;in&nbsp;a&nbsp;SqliteDict&nbsp;file,&nbsp;and&nbsp;assigns&nbsp;a&nbsp;<br>
 value&nbsp;to&nbsp;the&nbsp;'n_evals'&nbsp;key&nbsp;of&nbsp;the&nbsp;dictionary</tt></dd></dl>
  <dl><dt><a name="-binary"><strong>binary</strong></a>(num, pre='', length=16, spacer=0)</dt><dd><tt>formats&nbsp;a&nbsp;number&nbsp;into&nbsp;binary&nbsp;-&nbsp;https://stackoverflow.com/a/16926270/3549879</tt></dd></dl>
- <dl><dt><a name="-check_dir_perms"><strong>check_dir_perms</strong></a>(path_to_file)</dt></dl>
- <dl><dt><a name="-check_file_exists"><strong>check_file_exists</strong></a>(path_to_file)</dt></dl>
+ <dl><dt><a name="-check_equation_at_specified_indices"><strong>check_equation_at_specified_indices</strong></a>(index_tuple, i, path_to_db, path_to_csv, SRconfig)</dt><dd><tt>The&nbsp;indices&nbsp;specified&nbsp;gets&nbsp;mapped&nbsp;into&nbsp;the&nbsp;pySRURGS&nbsp;enumeration&nbsp;scheme&nbsp;and&nbsp;<br>
+the&nbsp;corresponding&nbsp;equation&nbsp;gets&nbsp;evaluated&nbsp;against&nbsp;the&nbsp;dataset.&nbsp;<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+index_tuple:&nbsp;tuple&nbsp;housing&nbsp;(q,r,s)&nbsp;or&nbsp;(r,s)&nbsp;if&nbsp;there&nbsp;are&nbsp;zero&nbsp;functions&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;of&nbsp;arity&nbsp;one<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;q:&nbsp;int<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;index&nbsp;specifying&nbsp;which&nbsp;configuration&nbsp;of&nbsp;functions&nbsp;of&nbsp;arity&nbsp;one&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;to&nbsp;use&nbsp;within&nbsp;[0,&nbsp;G-1]<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;r:&nbsp;int&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;index&nbsp;specifying&nbsp;which&nbsp;configuration&nbsp;of&nbsp;functions&nbsp;of&nbsp;arity&nbsp;two<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;to&nbsp;use&nbsp;within&nbsp;[0,&nbsp;A-1]<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;s:&nbsp;int&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;index&nbsp;specifying&nbsp;which&nbsp;configuration&nbsp;of&nbsp;terminals&nbsp;to&nbsp;use&nbsp;within&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[0,&nbsp;B-1]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+i:&nbsp;int<br>
+&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;index&nbsp;specifying&nbsp;which&nbsp;binary&nbsp;tree&nbsp;to&nbsp;consider&nbsp;within&nbsp;[0,&nbsp;N-1]<br>
+&nbsp;<br>
+path_to_db:&nbsp;string&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;An&nbsp;absolute&nbsp;or&nbsp;relative&nbsp;path&nbsp;to&nbsp;where&nbsp;the&nbsp;code&nbsp;can&nbsp;save&nbsp;an&nbsp;output&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;database&nbsp;file.&nbsp;Usually,&nbsp;this&nbsp;file&nbsp;ends&nbsp;in&nbsp;a&nbsp;'.db'&nbsp;extension.<br>
+&nbsp;<br>
+path_to_csv:&nbsp;string&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;An&nbsp;absolute&nbsp;or&nbsp;relative&nbsp;path&nbsp;to&nbsp;the&nbsp;dataset&nbsp;CSV&nbsp;file.&nbsp;Usually,&nbsp;this&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;file&nbsp;ends&nbsp;in&nbsp;a&nbsp;'.csv'&nbsp;extension.<br>
+&nbsp;<br>
+SRconfig:&nbsp;pySRURGS.<a href="#SymbolicRegressionConfig">SymbolicRegressionConfig</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;symbolic&nbsp;regression&nbsp;configuration&nbsp;<a href="builtins.html#object">object</a>&nbsp;for&nbsp;this&nbsp;problem<br>
+&nbsp;&nbsp;&nbsp;<br>
+Returns<br>
+-------<br>
+result:&nbsp;pySRURGS.<a href="#Result">Result</a>&nbsp;or&nbsp;None&nbsp;(if&nbsp;floating&nbsp;point&nbsp;error)</tt></dd></dl>
  <dl><dt><a name="-check_for_nans"><strong>check_for_nans</strong></a>(X)</dt></dl>
  <dl><dt><a name="-check_goodness_of_fit"><strong>check_goodness_of_fit</strong></a>(individual, params, my_data)</dt><dd><tt>Calculates&nbsp;metrics&nbsp;to&nbsp;assess&nbsp;the&nbsp;goodness&nbsp;of&nbsp;fit.&nbsp;Does&nbsp;so&nbsp;by&nbsp;first&nbsp;<br>
 optimizing&nbsp;the&nbsp;fitting&nbsp;parameters.<br>
@@ -652,21 +694,6 @@ SRconfig:&nbsp;pySRURGS.<a href="#SymbolicRegressionConfig">SymbolicRegressionCo
 Returns<br>
 -------<br>
 number_possible_equations:&nbsp;mpmath.ctx_mp_python.mpf&nbsp;(int)</tt></dd></dl>
- <dl><dt><a name="-count_parameters_in_equation_string"><strong>count_parameters_in_equation_string</strong></a>(equation_string)</dt><dd><tt>Reads&nbsp;the&nbsp;equation&nbsp;string&nbsp;and&nbsp;determines&nbsp;the&nbsp;number&nbsp;of&nbsp;fitting&nbsp;parameters.<br>
-Assumes&nbsp;that&nbsp;fitting&nbsp;parameter&nbsp;names&nbsp;are&nbsp;in&nbsp;the&nbsp;form&nbsp;'p'&nbsp;+&nbsp;str(myint)<br>
-and&nbsp;that&nbsp;myint&nbsp;starts&nbsp;with&nbsp;0&nbsp;indexing.<br>
-&nbsp;<br>
-Parameters<br>
-----------<br>
-equation_string:&nbsp;string&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;pySRURGS&nbsp;generated&nbsp;equation&nbsp;string.&nbsp;Should&nbsp;have&nbsp;fitting&nbsp;parameter&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;prefix/suffix&nbsp;still&nbsp;in&nbsp;place.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<br>
-Returns<br>
--------<br>
-num_params:&nbsp;int<br>
-&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;minimum&nbsp;number&nbsp;of&nbsp;fitting&nbsp;parameters&nbsp;needed&nbsp;to&nbsp;recreate&nbsp;the&nbsp;search&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;space&nbsp;used&nbsp;to&nbsp;generate&nbsp;this&nbsp;equation&nbsp;string.</tt></dd></dl>
  <dl><dt><a name="-create_db_name"><strong>create_db_name</strong></a>(path_to_csv, additional_name=None)</dt><dd><tt>Generates&nbsp;a&nbsp;name&nbsp;of&nbsp;a&nbsp;SqliteDict&nbsp;file&nbsp;based&nbsp;on&nbsp;the&nbsp;CSV&nbsp;filename<br>
 &nbsp;<br>
 Parameters<br>
@@ -821,8 +848,57 @@ Returns<br>
 output:&nbsp;array&nbsp;like&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;An&nbsp;array&nbsp;of&nbsp;residuals&nbsp;or&nbsp;predicted&nbsp;dependent&nbsp;variable&nbsp;values,&nbsp;depending&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;on&nbsp;the&nbsp;value&nbsp;of&nbsp;`mode`.</tt></dd></dl>
+ <dl><dt><a name="-exhaustive_search"><strong>exhaustive_search</strong></a>(path_to_db, path_to_csv, SRconfig, mode='multi')</dt><dd><tt>Runs&nbsp;a&nbsp;brute-force/exhaustive&nbsp;symbolic&nbsp;regression&nbsp;search&nbsp;against&nbsp;the&nbsp;CSV&nbsp;<br>
+file.&nbsp;WARNING,&nbsp;unless&nbsp;you&nbsp;specify&nbsp;a&nbsp;very&nbsp;simple&nbsp;problem,&nbsp;this&nbsp;computation&nbsp;<br>
+will&nbsp;indefinitely.&nbsp;Consider&nbsp;using&nbsp;the&nbsp;`count_number_equations`&nbsp;function&nbsp;<br>
+to&nbsp;first&nbsp;determine&nbsp;how&nbsp;many&nbsp;equations&nbsp;you&nbsp;will&nbsp;be&nbsp;considering.<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+path_to_db:&nbsp;string&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;An&nbsp;absolute&nbsp;or&nbsp;relative&nbsp;path&nbsp;to&nbsp;where&nbsp;the&nbsp;code&nbsp;can&nbsp;save&nbsp;an&nbsp;output&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;database&nbsp;file.&nbsp;Usually,&nbsp;this&nbsp;file&nbsp;ends&nbsp;in&nbsp;a&nbsp;'.db'&nbsp;extension.<br>
+&nbsp;<br>
+path_to_csv:&nbsp;string&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;An&nbsp;absolute&nbsp;or&nbsp;relative&nbsp;path&nbsp;to&nbsp;the&nbsp;dataset&nbsp;CSV&nbsp;file.&nbsp;Usually,&nbsp;this&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;file&nbsp;ends&nbsp;in&nbsp;a&nbsp;'.csv'&nbsp;extension.<br>
+&nbsp;<br>
+SRconfig:&nbsp;pySRURGS.<a href="#SymbolicRegressionConfig">SymbolicRegressionConfig</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;symbolic&nbsp;regression&nbsp;configuration&nbsp;<a href="builtins.html#object">object</a>&nbsp;for&nbsp;this&nbsp;problem<br>
+&nbsp;<br>
+mode:&nbsp;string<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Denotes&nbsp;whether&nbsp;to&nbsp;use&nbsp;single&nbsp;core&nbsp;processing&nbsp;or&nbsp;multiprocessing.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Either&nbsp;'multi'&nbsp;or&nbsp;'single',&nbsp;<br>
+&nbsp;<br>
+Returns<br>
+-------<br>
+None<br>
+&nbsp;<br>
+Notes<br>
+-----<br>
+Technically,&nbsp;the&nbsp;code&nbsp;here&nbsp;does&nbsp;not&nbsp;consider&nbsp;the&nbsp;simplest&nbsp;binary&nbsp;tree&nbsp;where&nbsp;<br>
+i==0,&nbsp;however,&nbsp;there&nbsp;is&nbsp;redundancy&nbsp;in&nbsp;the&nbsp;way&nbsp;equations&nbsp;are&nbsp;written&nbsp;and&nbsp;this&nbsp;<br>
+simplest&nbsp;case&nbsp;is&nbsp;checked&nbsp;if&nbsp;you&nbsp;are&nbsp;using&nbsp;1&nbsp;or&nbsp;more&nbsp;fitting&nbsp;parameters&nbsp;and&nbsp;<br>
+include&nbsp;the&nbsp;`add`&nbsp;function,&nbsp;which&nbsp;is&nbsp;so&nbsp;basic&nbsp;a&nbsp;configuration&nbsp;that&nbsp;I&nbsp;will&nbsp;<br>
+raise&nbsp;an&nbsp;exception&nbsp;should&nbsp;this&nbsp;not&nbsp;be&nbsp;the&nbsp;case.<br>
+&nbsp;<br>
+Example<br>
+-------<br>
+&gt;&gt;&gt;&nbsp;import&nbsp;pySRURGS<br>
+&gt;&gt;&gt;&nbsp;n_funcs&nbsp;=&nbsp;['add','sub','mul','div']<br>
+&gt;&gt;&gt;&nbsp;f_funcs&nbsp;=&nbsp;[]<br>
+&gt;&gt;&gt;&nbsp;n_par&nbsp;=&nbsp;2<br>
+&gt;&gt;&gt;&nbsp;n_tree&nbsp;=&nbsp;10<br>
+&gt;&gt;&gt;&nbsp;SR_config&nbsp;=&nbsp;pySRURGS.<a href="#SymbolicRegressionConfig">SymbolicRegressionConfig</a>(n_funcs,&nbsp;f_funcs,&nbsp;n_par,&nbsp;n_tree]<br>
+&gt;&gt;&gt;&nbsp;path_to_db&nbsp;=&nbsp;'./db/quartic_polynomial.db'<br>
+&gt;&gt;&gt;&nbsp;path_to_csv&nbsp;=&nbsp;'./csv/quartic_polynomial.csv'<br>
+&gt;&gt;&gt;&nbsp;num_equations&nbsp;=&nbsp;<a href="#-count_number_equations">count_number_equations</a>(path_to_csv,&nbsp;SR_config)<br>
+&gt;&gt;&gt;&nbsp;print(num_equations)<br>
+&gt;&gt;&gt;&nbsp;pySRURGS.<a href="#-exhaustive_search">exhaustive_search</a>(path_to_db,&nbsp;path_to_csv,&nbsp;SR_config)<br>
+&gt;&gt;&gt;&nbsp;result_list&nbsp;=&nbsp;<a href="#-get_resultlist">get_resultlist</a>(path_to_db,&nbsp;path_to_csv,&nbsp;SR_config)<br>
+&gt;&gt;&gt;&nbsp;result_list.sort()<br>
+&gt;&gt;&gt;&nbsp;result_list.print()</tt></dd></dl>
  <dl><dt><a name="-exp"><strong>exp</strong></a>(x)</dt></dl>
- <dl><dt><a name="-fix_order_of_fitting_parameters"><strong>fix_order_of_fitting_parameters</strong></a>(funcstring)</dt></dl>
  <dl><dt><a name="-generate_benchmark"><strong>generate_benchmark</strong></a>(benchmark_name, SRconfig)</dt><dd><tt>Generate&nbsp;a&nbsp;random&nbsp;symbolic&nbsp;regression&nbsp;benchmark&nbsp;problem.<br>
 &nbsp;<br>
 Parameters<br>
@@ -832,7 +908,7 @@ benchmark_name:&nbsp;string&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;set&nbsp;as&nbsp;a&nbsp;string&nbsp;will&nbsp;do.<br>
 &nbsp;<br>
 SRconfig:&nbsp;pySRURGS.<a href="#SymbolicRegressionConfig">SymbolicRegressionConfig</a><br>
-&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;symbolic&nbsp;regression&nbsp;configuration&nbsp;file&nbsp;for&nbsp;this&nbsp;problem<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;symbolic&nbsp;regression&nbsp;configuration&nbsp;<a href="builtins.html#object">object</a>&nbsp;for&nbsp;this&nbsp;problem<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
 Returns<br>
 -------<br>
@@ -884,7 +960,7 @@ SR_config1:&nbsp;pySRURGS.<a href="#SymbolicRegressionConfig">SymbolicRegression
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;max_permitted_trees=200)<br>
 &nbsp;<br>
 SR_config2:&nbsp;pySRURGS.<a href="#SymbolicRegressionConfig">SymbolicRegressionConfig</a>(n_functions=['add','sub','mul','div','pow'],<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;f_functions=['sin','sinh','exp'],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;f_functions=['sin','sinh','log'],<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;max_num_fit_params=5,<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;max_permitted_trees=200)</tt></dd></dl>
  <dl><dt><a name="-get_bits"><strong>get_bits</strong></a>(x)</dt><dd><tt>Gets&nbsp;the&nbsp;odd&nbsp;and&nbsp;even&nbsp;bits&nbsp;of&nbsp;a&nbsp;binary&nbsp;number&nbsp;in&nbsp;string&nbsp;format.&nbsp;Used&nbsp;by&nbsp;<br>
@@ -1288,7 +1364,7 @@ path_to_csv:&nbsp;string&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;An&nbsp;absolute&nbsp;or&nbsp;relative&nbsp;path&nbsp;to&nbsp;the&nbsp;CSV&nbsp;for&nbsp;the&nbsp;problem.<br>
 &nbsp;<br>
 SR_config:&nbsp;pySRURGS.<a href="#SymbolicRegressionConfig">SymbolicRegressionConfig</a><br>
-&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;symbolic&nbsp;regression&nbsp;configuration&nbsp;file&nbsp;for&nbsp;this&nbsp;problem<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;symbolic&nbsp;regression&nbsp;configuration&nbsp;<a href="builtins.html#object">object</a>&nbsp;for&nbsp;this&nbsp;problem<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
 Returns<br>
 -------<br>
@@ -1361,7 +1437,7 @@ path_to_csv:&nbsp;string&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;file&nbsp;ends&nbsp;in&nbsp;a&nbsp;'.csv'&nbsp;extension.<br>
 &nbsp;<br>
 SRconfig:&nbsp;pySRURGS.<a href="#SymbolicRegressionConfig">SymbolicRegressionConfig</a><br>
-&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;symbolic&nbsp;regression&nbsp;configuration&nbsp;file&nbsp;for&nbsp;this&nbsp;problem<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;symbolic&nbsp;regression&nbsp;configuration&nbsp;<a href="builtins.html#object">object</a>&nbsp;for&nbsp;this&nbsp;problem<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
 Returns<br>
 -------<br>
