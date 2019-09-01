@@ -11,6 +11,7 @@ import mpmath
 import sys
 import lmfit
 import csv 
+import time
 import pdb
 import re
 import os
@@ -630,7 +631,6 @@ def equation_generator(i, q, r, s, dataset, enumerator, SRconfig):
         raise Exception("r is an index that must be smaller than A")
     B = en.get_B(m, i)
     if s >= B:
-        pdb.set_trace()
         raise Exception("s is an index that must be smaller than B")
     l_i = en.get_l_i(i)
     k_i = en.get_k_i(i)
@@ -1290,7 +1290,7 @@ class Enumerator2(object):
         elif i == 1:
             k_i = 1
         else:
-            left_int, right_int = get_left_right_bits(i)
+            left_int, right_int = get_left_right_bits(i-1)
             left_k_i = self.get_k_i(left_int)
             right_k_i = self.get_k_i(right_int)
             k_i = left_k_i + right_k_i + 1
@@ -1308,7 +1308,7 @@ class Enumerator2(object):
         elif i == 1:
             j_i = 2
         else:
-            left_int, right_int = get_left_right_bits(i)
+            left_int, right_int = get_left_right_bits(i-1)
             left_j_i = self.get_j_i(left_int)
             right_j_i = self.get_j_i(right_int)
             j_i = left_j_i + right_j_i
@@ -2391,10 +2391,13 @@ def exhaustive_search(path_to_db, path_to_csv, SRconfig, mode='multi'):
     if num_equations > 50000:
         print(warning_string)
         print("Number of equations: ", num_equations)
+        print("Waiting 10 seconds for user to break with ctrl-c, otherwise will run.")
+        time.sleep(10)
     if (('add' not in SRconfig._n_functions and 
          'sub' not in SRconfig._n_functions) or  
          SRconfig._max_num_fit_params == 0):
-        raise Exception("Exhaustive search needs `add` and >=1 fit parameter")        
+        msg = "Exhaustive search needs `add` or `sub` and >=1 fit parameter to be truly exhaustive"
+        raise Exception(msg)  
     (f, n, m, _, N, dataset, enumerator, _, _) = setup(path_to_csv, 
                                                              SRconfig)                                                            
     initialize_db(path_to_db)
@@ -2502,7 +2505,10 @@ def check_equation_at_specified_indices(index_tuple, i, path_to_db, path_to_csv,
     else:
         eqn_str = equation_generator2(i, r, s, dataset, enumerator, SRconfig)
     try:
-        simple_eqn = simplify_equation_string(eqn_str, dataset)
+        try:
+            simple_eqn = simplify_equation_string(eqn_str, dataset)
+        except:
+            pdb.set_trace()
         initialize_db(path_to_db)    
         with SqliteDict(path_to_db, autocommit=True) as results_dict:
             # if we have already attempted this equation, do not run again
@@ -2573,8 +2579,12 @@ if __name__ == '__main__':
     max_permitted_trees = arguments.max_permitted_trees
     SRconfig = SymbolicRegressionConfig(n_funcs, f_funcs, 
                                         max_num_fit_params, max_permitted_trees)
-    if benchmarks and count_M:
-        raise Exception("You cannot have both -count and -benchmarks as arguments")
+    num_flags = np.sum([exhaustive, count_M, benchmarks])
+    if num_flags > 1:
+        msg = "You are only permitted to have one of these options:"
+        msg += '[exhaustive, count_M, benchmarks]; '
+        msg += 'you have ' + str(num_flags) + " of them" 
+        raise Exception(msg)
     if benchmarks == True:
         generate_benchmarks()
         exit(0)
@@ -2584,7 +2594,16 @@ if __name__ == '__main__':
     if path_to_db is None:
         path_to_db = create_db_name(path_to_csv)    
     os.makedirs('./db', exist_ok=True) 
-    if exhaustive == False:
+    if exhaustive == True:
+        if single_processing_mode == False:
+            print("Running exhaustive search in multi processor mode")
+            exhaustive_search(path_to_db, path_to_csv, SRconfig, mode='multi')
+        elif single_processing_mode == True:
+            print("Running exhaustive search in single processor mode")
+            exhaustive_search(path_to_db, path_to_csv, SRconfig, mode='single')
+        else:
+            raise("Invalid mode")
+    else:
         if single_processing_mode == False:
             print("Running in multi processor mode")
             results = parmap.map(uniform_random_global_search_once, 
@@ -2599,15 +2618,6 @@ if __name__ == '__main__':
             print("Running in single processor mode")
             for i in tqdm.tqdm(range(0,max_attempts)):
                 uniform_random_global_search_once(path_to_db, path_to_csv, SRconfig)
-        else:
-            raise("Invalid mode")
-    else:
-        if single_processing_mode == False:
-            print("Running exhaustive search in multi processor mode")
-            exhaustive_search(path_to_db, path_to_csv, SRconfig, mode='multi')
-        elif single_processing_mode == True:
-            print("Running exhaustive search in single processor mode")
-            exhaustive_search(path_to_db, path_to_csv, SRconfig, mode='single')
         else:
             raise("Invalid mode")
     compile_results(path_to_db, path_to_csv, SRconfig)
