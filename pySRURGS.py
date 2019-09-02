@@ -733,7 +733,7 @@ def equation_generator2(i, r, s, dataset, enumerator, SRconfig):
     return tree
     
 def random_equation(N, cum_weights, dataset, enumerator, SRconfig, 
-                    details=False):
+                    details=False, i=None):
     """
     Generates a random equation string. Generating the random numbers which 
     specify the equation, then passes those as arguments to equation_generator. 
@@ -775,7 +775,8 @@ def random_equation(N, cum_weights, dataset, enumerator, SRconfig,
     n = len(SRconfig._n_functions)
     f = len(SRconfig._f_functions)
     m = dataset._m_terminals
-    i = random.choices(range(0, N), cum_weights=cum_weights, k=1)[0]
+    if i is None:
+        i = random.choices(range(0, N), cum_weights=cum_weights, k=1)[0]
     q = enumerator.get_q(f, i)
     r = enumerator.get_r(n, i)
     s = enumerator.get_s(m, i)   
@@ -787,7 +788,7 @@ def random_equation(N, cum_weights, dataset, enumerator, SRconfig,
         return result
     
 def random_equation2(N, cum_weights, dataset, enumerator, SRconfig, 
-                     details=False):
+                     details=False, i=None):
     """
     Generates a random equation string. Generating the random numbers which 
     specify the equation, then passes those as arguments to equation_generator. 
@@ -817,7 +818,10 @@ def random_equation2(N, cum_weights, dataset, enumerator, SRconfig,
         
     details: Boolean 
         Determines the output type 
-        
+    
+    i: int (default: None)
+        If not none, specifies which binary tree to use
+
     Returns
     -------
     if `details` == False:
@@ -828,7 +832,8 @@ def random_equation2(N, cum_weights, dataset, enumerator, SRconfig,
     """
     n = len(SRconfig._n_functions)
     m = dataset._m_terminals
-    i = random.choices(range(0, N), cum_weights=cum_weights, k=1)[0]
+    if i is None:
+        i = random.choices(range(0, N), cum_weights=cum_weights, k=1)[0]
     r = enumerator.get_r(n, i)
     s = enumerator.get_s(m, i)   
     equation_string = equation_generator2(i, r, s, dataset, enumerator, 
