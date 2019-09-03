@@ -2136,8 +2136,6 @@ def plot_results(path_to_db, path_to_csv, SRconfig):
     
     ''' 
     result_list, dataset = get_resultlist(path_to_db, path_to_csv, SRconfig)
-    if len(dataset._x_labels) != 1:
-        raise Exception("We only plot univariate data")
     result_list.sort()
     best_model = result_list._results[0]
     param_values = best_model._params
@@ -2147,19 +2145,28 @@ def plot_results(path_to_db, path_to_csv, SRconfig):
                                            param_values=param_values)
     evaluatable_equation_string = equation_string
     eval_eqn_string = clean_funcstring(equation_string)        
-    data_dict = dict()
-    xlabel = dataset._x_labels[0]
-    data_dict[xlabel] = np.linspace(np.min(dataset._x_data), 
-                                    np.max(dataset._x_data))
-    y_calc = eval_equation(params_obj, eval_eqn_string, dataset, mode=data_dict)
-    plt.figure(figsize=(3.14, 2))    
-    plt.plot(data_dict[xlabel], y_calc, 'b-', 
-             label=dataset._y_label+' calculated')
-    plt.plot(dataset._x_data, dataset._y_data, 'ro', 
-             label=dataset._y_label+' original data')    
-    plt.ylabel(dataset._y_label)
-    #plt.yticks([6,5,4,3,2,1,0])
-    plt.xlabel(dataset._x_labels[0])        
+    plt.figure(figsize=(3.14, 2))
+    if len(dataset._x_labels) == 1:
+        data_dict = dict()
+        xlabel = dataset._x_labels[0]
+        data_dict[xlabel] = np.linspace(np.min(dataset._x_data), 
+                                        np.max(dataset._x_data))
+        y_calc = eval_equation(params_obj, eval_eqn_string, dataset, mode=data_dict)    
+        plt.plot(data_dict[xlabel], y_calc, 'b-', 
+                 label=dataset._y_label+' calculated')
+        plt.plot(dataset._x_data, dataset._y_data, 'ro', 
+                 label=dataset._y_label+' original data')    
+        plt.ylabel(dataset._y_label)
+        plt.xlabel(dataset._x_labels[0])
+    else:
+        xlabel = 'y_predicted'
+        ylabel = 'y_observed'
+        y_pred = eval_equation(params_obj, eval_eqn_string, dataset)
+        y_calc = y_pred/dataset._y_data        
+        plt.plot(dataset._y_data, y_calc, 'bo', 
+                 label="Prediction Error")
+        plt.ylabel(ylabel)
+        plt.xlabel(xlabel)        
     plt.legend()
     plt.tight_layout()
     plt.savefig('./image/plot.eps')
