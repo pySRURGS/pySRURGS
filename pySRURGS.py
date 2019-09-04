@@ -32,7 +32,6 @@ import pandas
 import argparse
 import numpy as np
 np.seterr(all='raise')
-matplotlib.use("TkAgg")
 matplotlib.style.use('seaborn-colorblind')
 
 ''' GLOBALS '''
