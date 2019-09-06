@@ -30,6 +30,54 @@ x1sqrd_csv = './csv/x1_squared_minus_five_x3.csv'
 x1sqrd_db = './db/x1_squared_minus_five_x3.db'
 benchmarks_dir = './csv/benchmarks'
 
+##### CLI TEST INPUTS ######
+
+
+test_inputs = dict()
+test_inputs['-deterministic ./csv/quartic_polynomial.csv 10'] = ['pySRURGS.py', '-deterministic', qrtic_polynml_csv, 10]
+
+test_inputs['-deterministic -single ./csv/quartic_polynomial.csv 10'] = ['pySRURGS.py', '-single', '-deterministic', qrtic_polynml_csv, 10]
+
+test_inputs['-deterministic -max_num_fit_params 0 ./csv/quartic_polynomial.csv 10'] = ['pySRURGS.py', '-deterministic', '-max_num_fit_params', 0, qrtic_polynml_csv, 10]
+
+test_inputs['-deterministic -max_num_fit_params 5 ./csv/quartic_polynomial.csv 10'] = ['pySRURGS.py', '-deterministic', '-max_num_fit_params', 5, qrtic_polynml_csv, 10]
+
+test_inputs['-deterministic -funcs_arity_two add,sub,div -max_num_fit_params 5 ./csv/quartic_polynomial.csv 10'] = ['pySRURGS.py', '-deterministic', '-funcs_arity_two', 'add,sub,div', '-max_num_fit_params', 5, qrtic_polynml_csv, 10]
+
+test_inputs['-deterministic -funcs_arity_one tan,exp -max_num_fit_params 5 ./csv/quartic_polynomial.csv 10'] = ['pySRURGS.py', '-deterministic', '-funcs_arity_one', 'tan,exp', '-max_num_fit_params', 5, qrtic_polynml_csv, 10]
+
+test_inputs['-deterministic -max_permitted_trees 10 -max_num_fit_params 5 ./csv/quartic_polynomial.csv 10'] = ['pySRURGS.py', '-deterministic', '-max_permitted_trees', 10, '-max_num_fit_params', 5, qrtic_polynml_csv, 10]
+
+test_inputs['-exhaustive -funcs_arity_two add,sub -funcs_arity_one sin -max_permitted_trees 3 -max_num_fit_params 1 ./csv/quartic_polynomial 10'] = ['pySRURGS.py', '-exhaustive', '-funcs_arity_two', 'add,sub','-funcs_arity_one', 'sin' , '-max_permitted_trees', 3, '-max_num_fit_params', 1, qrtic_polynml_csv, 10]
+
+test_inputs['-exhaustive -funcs_arity_two add,sub -max_permitted_trees 3 -max_num_fit_params 1 ./csv/quartic_polynomial.csv 10'] = ['pySRURGS.py', '-exhaustive', '-funcs_arity_two', 'add,sub', '-max_permitted_trees', 3, '-max_num_fit_params', 1, qrtic_polynml_csv, 10]
+
+test_inputs['plotting -max_permitted_trees 10 -max_num_fit_params 5 ./csv/quartic_polynomial.csv 10'] = ['pySRURGS.py', '-plotting', '-max_permitted_trees', 10, '-max_num_fit_params', 5, qrtic_polynml_csv, 10]
+
+##### CLI TEST OUTPUTS ######
+
+test_outputs = dict()
+test_outputs['-deterministic ./csv/quartic_polynomial.csv 10'] = "Normalized Mean Squared Error"
+
+test_outputs['-deterministic -single ./csv/quartic_polynomial.csv 10'] = "Normalized Mean Squared Error"
+
+test_outputs['-deterministic -max_num_fit_params 0 ./csv/quartic_polynomial.csv 10'] = "Normalized Mean Squared Error"
+
+test_outputs['-deterministic -max_num_fit_params 5 ./csv/quartic_polynomial.csv 10'] = "Normalized Mean Squared Error"
+
+test_outputs['-deterministic -funcs_arity_two add,sub,div -max_num_fit_params 5 ./csv/quartic_polynomial.csv 10'] = "Normalized Mean Squared Error"
+
+test_outputs['-deterministic -funcs_arity_one tan,exp -max_num_fit_params 5 ./csv/quartic_polynomial.csv 10'] = "Normalized Mean Squared Error"
+
+test_outputs['-deterministic -max_permitted_trees 10 -max_num_fit_params 5 ./csv/quartic_polynomial.csv 10'] = "Normalized Mean Squared Error"
+
+test_outputs['-exhaustive -funcs_arity_two add,sub -funcs_arity_one sin -max_permitted_trees 3 -max_num_fit_params 1 ./csv/quartic_polynomial 10'] = "Normalized Mean Squared Error"
+
+test_outputs['-exhaustive -funcs_arity_two add,sub -max_permitted_trees 3 -max_num_fit_params 1 ./csv/quartic_polynomial.csv 10'] = "Normalized Mean Squared Error"
+
+test_outputs['plotting -max_permitted_trees 10 -max_num_fit_params 5 ./csv/quartic_polynomial.csv 10'] = "Normalized Mean Squared Error"
+
+
 def refresh_db(path_to_db):
     try:
         os.remove(path_to_db)
@@ -40,30 +88,12 @@ def test_command_line_code():
     path_to_db = qrtic_polynml_db
     print('Started run_command_line_tests')
     # Command line interface
-    sh.python('pySRURGS.py', qrtic_polynml_csv, 10)
-    print('Finished basic run')
-    sh.python('pySRURGS.py', '-single', qrtic_polynml_csv, 10)
-    print('Finished single cpu run')
-    sh.python('pySRURGS.py', '-count', qrtic_polynml_csv, 10)
-    print('Finished count equations run')
-    sh.python('pySRURGS.py', '-max_num_fit_params', 0, qrtic_polynml_csv, 10)
-    print('Finished zero fit params run')
-    sh.python('pySRURGS.py', '-max_num_fit_params', 5, qrtic_polynml_csv, 10)
-    print('Finished five fit params run')
-    sh.python('pySRURGS.py', '-funcs_arity_two', 'add,sub,div', '-max_num_fit_params', 5, qrtic_polynml_csv, 10)
-    print('Finished add sub div funcs arity two run')
-    sh.python('pySRURGS.py', '-funcs_arity_one', 'tan,exp', '-max_num_fit_params', 5, qrtic_polynml_csv, 10)
-    print('Finished tan,exp funcs arity one run')
-    sh.python('pySRURGS.py', '-max_permitted_trees', 10, '-max_num_fit_params', 5, qrtic_polynml_csv, 10)
-    print('Finished max_permitted_trees 10 run')    
-    refresh_db(path_to_db)
-    sh.python('pySRURGS.py', '-exhaustive', '-funcs_arity_two', 'add,sub','-funcs_arity_one', 'sin' , '-max_permitted_trees', 3, '-max_num_fit_params', 1, qrtic_polynml_csv, 10)
-    print('Finished exhaustive search multiprocessing run')
-    refresh_db(path_to_db)
-    sh.python('pySRURGS.py', '-exhaustive', '-funcs_arity_two', 'add,sub', '-max_permitted_trees', 3, '-max_num_fit_params', 1, qrtic_polynml_csv, 10)
-    print('Finished exhaustive search single processing run')
-    sh.python('pySRURGS.py', '-plotting', '-max_permitted_trees', 10, '-max_num_fit_params', 5, qrtic_polynml_csv, 10)
-    print('Finished run_command_line_tests')
+    for arguments_string in test_inputs.keys():
+        refresh_db(path_to_db)
+        input_args = test_inputs[arguments_string]
+        output_string = sh.python(*input_args)
+        assert test_outputs[arguments_string] in output_string
+        print('Finished', *input_args)
 
 def test_python_code():
     print('Started run_python_tests')
