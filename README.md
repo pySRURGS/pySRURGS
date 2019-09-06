@@ -61,7 +61,7 @@ The above command should render the following:
 
 ```
 usage: pySRURGS.py [-h] [-memoize_funcs] [-single] [-count] [-benchmarks]
-                   [-plotting] [-exhaustive]
+                   [-deterministic] [-plotting] [-exhaustive]
                    [-funcs_arity_two FUNCS_ARITY_TWO]
                    [-funcs_arity_one FUNCS_ARITY_ONE]
                    [-max_num_fit_params MAX_NUM_FIT_PARAMS]
@@ -86,6 +86,9 @@ optional arguments:
   -benchmarks           Instead of doing symbolic regression, generate the 100
                         benchmark problems. No other processing performed.
                         (default: False)
+  -deterministic        If set, the pseudorandom number generator will act in
+                        a predictable manner and pySRURGS will produce
+                        reproducible results. (default: False)
   -plotting             plot the best model against the data to
                         ./image/plot.png and ./image/plot.svg - note only
                         works for univariate datasets (default: False)
