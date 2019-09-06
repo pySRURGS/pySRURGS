@@ -14,7 +14,6 @@ import collections
 from sqlitedict import SqliteDict
 import tabulate
 import datetime
-import random
 import sympy
 from sympy import simplify, sympify, Symbol
 import mpmath
@@ -33,7 +32,6 @@ import argparse
 import numpy as np
 np.seterr(all='raise')
 matplotlib.style.use('seaborn-colorblind')
-
 ''' GLOBALS '''
 BIG_NUM = 1.79769313e+300
 fitting_param_prefix = 'begin_fitting_param_'
@@ -46,6 +44,7 @@ benchmarks_fit_param_domain = [-10, 10]
 benchmarks_dir = './csv/benchmarks'
 benchmarks_summary_tsv = './benchmarks_summary.tsv'
 memoize_funcs = False
+randgen = np.random.RandomState()
 defaults_dict = {'funcs_arity_one': None,
                  'funcs_arity_two': 'add,sub,mul,div,pow',
                  'max_num_fit_params': 3,
@@ -83,7 +82,7 @@ class SymbolicRegressionConfig(object):
         determine the structure of random equations. pySRURGS will consider
         equations from [0 ... max_permitted_trees] during its search. Increasing
         this value increases the size of the search space. Default: 100
-
+    
     Returns
     -------
     self
@@ -816,7 +815,7 @@ def random_equation(N, cum_weights, dataset, enumerator, SRconfig,
     f = len(SRconfig._f_functions)
     m = dataset._m_terminals
     if i is None:
-        i = random.choices(range(0, N), cum_weights=cum_weights, k=1)[0]
+        i = randgen.choice(range(0, N), p=cum_weights)
     q = enumerator.get_q(f, i)
     r = enumerator.get_r(n, i)
     s = enumerator.get_s(m, i)
@@ -875,7 +874,7 @@ def random_equation2(N, cum_weights, dataset, enumerator, SRconfig,
     n = len(SRconfig._n_functions)
     m = dataset._m_terminals
     if i is None:
-        i = random.choices(range(0, N), cum_weights=cum_weights, k=1)[0]
+        i = randgen.choice(range(0, N), p=cum_weights)
     r = enumerator.get_r(n, i)
     s = enumerator.get_s(m, i)
     equation_string = equation_generator2(i, r, s, dataset, enumerator,
@@ -1092,7 +1091,6 @@ class Enumerator(object):
         """
         l = self.get_l_i(i)
         G = mempower(f, l)
-        G = int(G)
         return G
 
     def get_A(self, n, i):
@@ -1117,7 +1115,6 @@ class Enumerator(object):
         """
         k = self.get_k_i(i)
         A = mempower(n, k)
-        A = int(A)
         return A
 
     @memoize
@@ -1143,25 +1140,31 @@ class Enumerator(object):
         """
         j = self.get_j_i(i)
         B = mempower(m, j)
-        B = int(B)
         return B
 
     def get_q(self, f, i):
         ''' Generates a random integer between 0 and `G` - 1, inclusive '''
         G = self.get_G(f, i)
-        q = random.randint(0, G - 1)
+        q = randgen.randint(0, G - 1, dtype=np.int64)
         return q
 
     def get_r(self, n, i):
         ''' Generates a random integer between 0 and `A` - 1, inclusive '''
         A = self.get_A(n, i)
-        r = random.randint(0, A - 1)
+        r = randgen.randint(0, A - 1, dtype=np.int64)
         return r
 
     def get_s(self, m, i):
         ''' Generates a random integer between 0 and `B` - 1, inclusive '''
         B = self.get_B(m, i)
-        s = random.randint(0, B - 1)
+        try:
+            s = randgen.randint(0, B - 1, dtype=np.int64)
+        except ValueError as e:
+            if B == 1:
+                s = 0
+            else:
+                print(e)
+                raise ValueError
         return s
 
     @memoize
@@ -1303,7 +1306,6 @@ class Enumerator2(object):
         """
         k = self.get_k_i(i)
         A = mempower(n, k)
-        A = int(A)
         return A
 
     @memoize
@@ -1329,19 +1331,25 @@ class Enumerator2(object):
         """
         j = self.get_j_i(i)
         B = mempower(m, j)
-        B = int(B)
         return B
 
     def get_r(self, n, i):
         ''' Generates a random integer between 0 and `A` - 1, inclusive '''
         A = self.get_A(n, i)
-        r = random.randint(0, A - 1)
+        r = randgen.randint(0, A - 1, dtype=np.int64)
         return r
 
     def get_s(self, m, i):
-        ''' Generates a random integer between 0 and `B` - 1, inclusive '''
+        ''' Generates a random integer between 0 and `B` - 1, inclusive '''        
         B = self.get_B(m, i)
-        s = random.randint(0, B - 1)
+        try:
+            s = randgen.randint(0, B - 1, dtype=np.int64)
+        except ValueError as e:
+            if B == 1:
+                s = 0
+            else:
+                print(e)
+                raise ValueError
         return s
 
     @memoize
@@ -1685,9 +1693,9 @@ def get_cum_weights(N, f, n, m, enumerator):
             m,
             i) for i in range(
             0,
-            N)]
-    weights = np.array(weights)
+            N)]    
     cum_weights = np.array(weights) / np.sum(weights)
+    cum_weights = cum_weights.astype(np.float64)
     return cum_weights
 
 
@@ -1727,6 +1735,7 @@ def get_cum_weights2(N, n, m, enumerator):
     weights = [en.get_A(n, i) * en.get_B(m, i) for i in range(0, N)]
     weights = np.array(weights)
     cum_weights = np.array(weights) / np.sum(weights)
+    cum_weights = cum_weights.astype(np.float64)
     return cum_weights
 
 
@@ -1896,7 +1905,8 @@ def assign_n_evals(path_to_db):
     return n_evals
 
 
-def uniform_random_global_search_once(path_to_db, path_to_csv, SRconfig):
+def uniform_random_global_search_once(path_to_db, path_to_csv, SRconfig, 
+                                      seed=None):
     """
     Runs pySRURGS once against the CSV file
 
@@ -1933,6 +1943,8 @@ def uniform_random_global_search_once(path_to_db, path_to_csv, SRconfig):
     (f, n, m, cum_weights, N, dataset, enumerator, _, _) = setup(path_to_csv,
                                                                  SRconfig)
     valid = False
+    if seed is not None:
+        randgen.seed(seed)
     while valid == False:
         if f == 0:
             eqn_str = random_equation2(N, cum_weights, dataset, enumerator,
@@ -2014,7 +2026,7 @@ def generate_benchmark(benchmark_name, SRconfig):
             eqn_simple = simplify_equation_string(eqn_original, dataset)
             eqn_specifiers = eqn_details[1:]
             # create the fitting parameters values
-            fitting_parameters = (np.random.sample((5)) - 0.5) * 20
+            fitting_parameters = (randgen.random_sample((5)) - 0.5) * 20
             fit_param_list = create_fitting_parameters(5)
             for i in range(0, 5):
                 fit_param_list['p' + str(i)].value = fitting_parameters[i]
@@ -2024,7 +2036,7 @@ def generate_benchmark(benchmark_name, SRconfig):
                     0, 2):  # 1st iteration, train. 2nd iteration, test.
                 sample_dataset = np.zeros((100, 6))
                 for j in range(0, 5):
-                    sample_dataset[:, j] = np.random.sample((100,)) * 10
+                    sample_dataset[:, j] = randgen.random_sample((100,)) * 10
                 dataset._dataframe = pandas.DataFrame(sample_dataset)
                 dataset._dataframe.columns = dataset._x_labels.tolist() + \
                     [dataset._y_label]
@@ -2558,9 +2570,9 @@ def exhaustive_search(path_to_db, path_to_csv, SRconfig, mode='multi'):
     results = ResultList()
     if f > 0:  # functions of arity one present
         for i in range(0, N):
-            G = enumerator.get_G(f, i)
-            A = enumerator.get_A(n, i)
-            B = enumerator.get_B(m, i)
+            G = int(enumerator.get_G(f, i))
+            A = int(enumerator.get_A(n, i))
+            B = int(enumerator.get_B(m, i))
             if mode == 'single':  # single processor substream
                 for r in range(0, A):
                     for s in range(0, B):
@@ -2585,8 +2597,8 @@ def exhaustive_search(path_to_db, path_to_csv, SRconfig, mode='multi'):
                            pm_pbar=True)
     elif f == 0:  # functions of arity one absent
         for i in range(0, N):
-            A = enumerator.get_A(n, i)
-            B = enumerator.get_B(m, i)
+            A = int(enumerator.get_A(n, i))
+            B = int(enumerator.get_B(m, i))
             if mode == 'single':  # single processor substream
                 for r in range(0, A):
                     for s in range(0, B):
@@ -2725,6 +2737,10 @@ if __name__ == '__main__':
         help="Instead of doing symbolic regression, generate the 100 benchmark problems. No other processing performed.",
         action="store_true")
     parser.add_argument(
+        "-deterministic",
+        help="If set, the pseudorandom number generator will act in a predictable manner and pySRURGS will produce reproducible results.",
+        action="store_true")
+    parser.add_argument(
         "-plotting",
         help="plot the best model against the data to ./image/plot.png and ./image/plot.svg - note only works for univariate datasets",
         action="store_true")
@@ -2761,6 +2777,9 @@ if __name__ == '__main__':
     path_to_csv = arguments.train
     max_attempts = arguments.iters
     count_M = arguments.count
+    deterministic = arguments.deterministic
+    if deterministic:
+        randgen.seed(0)
     benchmarks = arguments.benchmarks
     exhaustive = arguments.exhaustive
     path_to_db = arguments.path_to_db
@@ -2806,9 +2825,15 @@ if __name__ == '__main__':
     else:
         if not single_processing_mode:
             print("Running in multi processor mode")
+            if deterministic:
+                seed_list = list(range(0,max_attempts))
+            else:
+                seed_list = None
             results = parmap.map(uniform_random_global_search_once,
                                  [path_to_db] * max_attempts,
-                                 path_to_csv, SRconfig, pm_pbar=True)
+                                 path_to_csv, SRconfig, 
+                                 seed_list, 
+                                 pm_pbar=True)
             print("Making sure we meet the iters value")
             n_evals = assign_n_evals(path_to_db)
             for i in range(0, max_attempts - n_evals):
