@@ -1436,6 +1436,10 @@ path_to_csv:&nbsp;string<br>
 SRconfig:&nbsp;pySRURGS.<a href="#SymbolicRegressionConfig">SymbolicRegressionConfig</a><br>
 &nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;symbolic&nbsp;regression&nbsp;configuration&nbsp;<a href="builtins.html#object">object</a>&nbsp;for&nbsp;this&nbsp;problem<br>
 &nbsp;<br>
+seed:&nbsp;int&nbsp;(or&nbsp;None)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Sets&nbsp;the&nbsp;seed&nbsp;of&nbsp;the&nbsp;pseudorandom&nbsp;number&nbsp;generator.&nbsp;Will&nbsp;make&nbsp;results<br>
+&nbsp;&nbsp;&nbsp;&nbsp;reproducible&nbsp;if&nbsp;not&nbsp;None.<br>
+&nbsp;<br>
 Returns<br>
 -------<br>
 y_calc:&nbsp;array&nbsp;like<br>
@@ -1469,7 +1473,7 @@ Example<br>
 <strong>fitting_param_suffix</strong> = '_end_fitting_param'<br>
 <strong>memoize_funcs</strong> = False<br>
 <strong>path_to_toy_csv</strong> = './csv/toy_data_for_benchmark_gen.csv'<br>
-<strong>randgen</strong> = RandomState(MT19937) at 0x28D7621A678<br>
+<strong>randgen</strong> = RandomState(MT19937) at 0x17F6045A678<br>
 <strong>variable_prefix</strong> = 'begin_variable_'<br>
 <strong>variable_suffix</strong> = '_end_variable'</td></tr></table>
 </body></html>
