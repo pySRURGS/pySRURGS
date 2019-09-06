@@ -1923,6 +1923,10 @@ def uniform_random_global_search_once(path_to_db, path_to_csv, SRconfig,
     SRconfig: pySRURGS.SymbolicRegressionConfig
         The symbolic regression configuration object for this problem
 
+    seed: int (or None)
+        Sets the seed of the pseudorandom number generator. Will make results
+        reproducible if not None.
+
     Returns
     -------
     y_calc: array like
