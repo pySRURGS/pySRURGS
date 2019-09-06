@@ -35,11 +35,10 @@ https://github.com/pySRURGS/pySRURGS</tt></p>
 </td><td width="25%" valign=top><a href="parmap.html">parmap</a><br>
 <a href="pdb.html">pdb</a><br>
 <a href="matplotlib.pyplot.html">matplotlib.pyplot</a><br>
-<a href="random.html">random</a><br>
 <a href="re.html">re</a><br>
 <a href="sympy.html">sympy</a><br>
-</td><td width="25%" valign=top><a href="sys.html">sys</a><br>
-<a href="tabulate.html">tabulate</a><br>
+<a href="sys.html">sys</a><br>
+</td><td width="25%" valign=top><a href="tabulate.html">tabulate</a><br>
 <a href="time.html">time</a><br>
 <a href="tqdm.html">tqdm</a><br>
 </td></tr></table></td></tr></table><p>
@@ -69,9 +68,7 @@ https://github.com/pySRURGS/pySRURGS</tt></p>
 <font color="#000000" face="helvetica, arial"><a name="Dataset">class <strong>Dataset</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt><a href="#Dataset">Dataset</a>(path_to_csv_file,&nbsp;int_max_params,&nbsp;scaled=False)<br>
-&nbsp;<br>
-An&nbsp;<a href="builtins.html#object">object</a>&nbsp;used&nbsp;to&nbsp;store&nbsp;the&nbsp;dataset&nbsp;of&nbsp;this&nbsp;symbolic&nbsp;regression<br>
+<td colspan=2><tt>An&nbsp;<a href="builtins.html#object">object</a>&nbsp;used&nbsp;to&nbsp;store&nbsp;the&nbsp;dataset&nbsp;of&nbsp;this&nbsp;symbolic&nbsp;regression<br>
 problem.<br>
 &nbsp;<br>
 Parameters<br>
@@ -365,9 +362,7 @@ Data descriptors defined here:<br>
 <font color="#000000" face="helvetica, arial"><a name="Result">class <strong>Result</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt><a href="#Result">Result</a>(simple_equation,&nbsp;equation,&nbsp;MSE,&nbsp;R2,&nbsp;params)<br>
-&nbsp;<br>
-Stores&nbsp;the&nbsp;result&nbsp;of&nbsp;a&nbsp;single&nbsp;run&nbsp;of&nbsp;pySRURGS<br>
+<td colspan=2><tt>Stores&nbsp;the&nbsp;result&nbsp;of&nbsp;a&nbsp;single&nbsp;run&nbsp;of&nbsp;pySRURGS<br>
 &nbsp;<br>
 Parameters<br>
 ----------<br>
@@ -479,9 +474,7 @@ Data descriptors defined here:<br>
 <font color="#000000" face="helvetica, arial"><a name="SymbolicRegressionConfig">class <strong>SymbolicRegressionConfig</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt><a href="#SymbolicRegressionConfig">SymbolicRegressionConfig</a>(n_functions=['add',&nbsp;'sub',&nbsp;'mul',&nbsp;'div',&nbsp;'pow'],&nbsp;f_functions=['log',&nbsp;'sinh',&nbsp;'sin'],&nbsp;max_num_fit_params=3,&nbsp;max_permitted_trees=100)<br>
-&nbsp;<br>
-An&nbsp;<a href="builtins.html#object">object</a>&nbsp;used&nbsp;to&nbsp;store&nbsp;the&nbsp;configuration&nbsp;of&nbsp;this&nbsp;symbolic&nbsp;regression<br>
+<td colspan=2><tt>An&nbsp;<a href="builtins.html#object">object</a>&nbsp;used&nbsp;to&nbsp;store&nbsp;the&nbsp;configuration&nbsp;of&nbsp;this&nbsp;symbolic&nbsp;regression<br>
 problem.&nbsp;Notably,&nbsp;does&nbsp;not&nbsp;contain&nbsp;information&nbsp;regarding&nbsp;the&nbsp;dataset.<br>
 &nbsp;<br>
 Parameters<br>
@@ -1428,7 +1421,7 @@ namespace.</tt></dd></dl>
  <dl><dt><a name="-sum"><strong>sum</strong></a>(x)</dt></dl>
  <dl><dt><a name="-tan"><strong>tan</strong></a>(x)</dt></dl>
  <dl><dt><a name="-tanh"><strong>tanh</strong></a>(x)</dt></dl>
- <dl><dt><a name="-uniform_random_global_search_once"><strong>uniform_random_global_search_once</strong></a>(path_to_db, path_to_csv, SRconfig)</dt><dd><tt>Runs&nbsp;pySRURGS&nbsp;once&nbsp;against&nbsp;the&nbsp;CSV&nbsp;file<br>
+ <dl><dt><a name="-uniform_random_global_search_once"><strong>uniform_random_global_search_once</strong></a>(path_to_db, path_to_csv, SRconfig, seed=None)</dt><dd><tt>Runs&nbsp;pySRURGS&nbsp;once&nbsp;against&nbsp;the&nbsp;CSV&nbsp;file<br>
 &nbsp;<br>
 Parameters<br>
 ----------<br>
@@ -1476,6 +1469,7 @@ Example<br>
 <strong>fitting_param_suffix</strong> = '_end_fitting_param'<br>
 <strong>memoize_funcs</strong> = False<br>
 <strong>path_to_toy_csv</strong> = './csv/toy_data_for_benchmark_gen.csv'<br>
+<strong>randgen</strong> = RandomState(MT19937) at 0x28D7621A678<br>
 <strong>variable_prefix</strong> = 'begin_variable_'<br>
 <strong>variable_suffix</strong> = '_end_variable'</td></tr></table>
 </body></html>
