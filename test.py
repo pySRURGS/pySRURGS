@@ -71,12 +71,12 @@ test_inputs[x[7]] = ['pySRURGS.py', '-exhaustive', '-funcs_arity_two',
 ##### CLI TEST OUTPUTS ######
 
 test_outputs = dict()
-test_outputs[x[0]] = "0.000283258      0.999993  (p0**2 + p2**x + (p0 - 2*p2)*(p0 + (p2/(p0 + x))**p1))/(p0 - 2*p2)                   1.62E+01,-4.18E+01,1.65E+01"
-test_outputs[x[1]] = "46.2653   0.299924  3*x**2*(x**2 - x + 1)"
-test_outputs[x[2]] = "0.235363    0.994111     (-p3 + p4*(-p1 + (p4 + x)**(p0 + p1) + (p1 + p2**p1 + x)**(p1**p4 - p3)))/p4    2.79E+00,2.44E-08,1.10E+00,3.52E-01,7.12E-01"
-test_outputs[x[3]] = " 2.33541   0.938364  (p0*p3*(p0 + p4) + p0*(p2 + p4 - x) + (p0 + p4)*(-p1 + p4 + x))/(p0*(p0 + p4))  2.21E-01,4.86E-01,-7.01E-02,-3.81E+00,1.27E+00"
-test_outputs[x[4]] = " 5.89909e-05   0.999999     -p0**p2*(p0*p2)**(p2**x)*(p0 + p2)*(p2 - p3) + (p0 + x)**(p2*p3)*(2*p1**(x + 1) - p2)       1.25E+00,1.03E+00,2.04E+00,2.11E+00,1.00E+00"
-test_outputs[x[5]] = "2.33541   0.938364  p2**p3 - p4*x + x        1.00E+00,1.00E+00,5.29E-01,1.00E+00,-2.85E+00"
+test_outputs[x[0]] = "Normalized Mean Squared Error"
+test_outputs[x[1]] = "Normalized Mean Squared Error"
+test_outputs[x[2]] = "Normalized Mean Squared Error"
+test_outputs[x[3]] = "Normalized Mean Squared Error"
+test_outputs[x[4]] = "Normalized Mean Squared Error"
+test_outputs[x[5]] = "Normalized Mean Squared Error"
 test_outputs[x[6]] = "Number of equations:  12.0"
 test_outputs[x[7]] = "Number of equations:  42.0"
 
