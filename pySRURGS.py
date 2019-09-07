@@ -2490,7 +2490,6 @@ def count_number_equations(path_to_csv, SRconfig):
         number_possible_equations = enumerator.get_M(N, n, m)
     else:
         number_possible_equations = enumerator.get_M(N, f, n, m)
-    print("Number possible equations:", number_possible_equations)
     return number_possible_equations
 
 
@@ -2552,9 +2551,9 @@ def exhaustive_search(path_to_db, path_to_csv, SRconfig, mode='multi'):
     Are you sure you want to do this?!
     """
     num_equations = count_number_equations(path_to_csv, SRconfig)
+    print("Number of equations: ", num_equations)
     if num_equations > 50000:
-        print(warning_string)
-        print("Number of equations: ", num_equations)
+        print(warning_string)        
         print("Waiting 10 seconds for user to break with ctrl-c, otherwise will run.")
         time.sleep(10)
     if (('add' not in SRconfig._n_functions and

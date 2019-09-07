@@ -42,7 +42,6 @@ x[4] = '-deterministic -funcs_arity_one tan,exp -max_num_fit_params 5 ./csv/quar
 x[5] = '-deterministic -max_permitted_trees 10 -max_num_fit_params 5 ./csv/quartic_polynomial.csv 10'
 x[6] = '-exhaustive -funcs_arity_two add,sub -funcs_arity_one sin -max_permitted_trees 3 -max_num_fit_params 1 ./csv/quartic_polynomial 10'
 x[7] = '-exhaustive -funcs_arity_two add,sub -max_permitted_trees 3 -max_num_fit_params 1 ./csv/quartic_polynomial.csv 10'
-x[8] = '-plotting -max_permitted_trees 10 -max_num_fit_params 5 ./csv/quartic_polynomial.csv 10'
 
 ##### CLI TEST INPUTS ######
 
@@ -68,8 +67,6 @@ test_inputs[x[6]] = ['pySRURGS.py', '-exhaustive', '-funcs_arity_two',
 test_inputs[x[7]] = ['pySRURGS.py', '-exhaustive', '-funcs_arity_two', 
                      'add,sub', '-max_permitted_trees', 3, 
                      '-max_num_fit_params', 1, qrtic_polynml_csv, 10]
-test_inputs[x[8]] = ['pySRURGS.py', '-plotting', '-max_permitted_trees', 10, 
-                     '-max_num_fit_params', 5, qrtic_polynml_csv, 10]
 
 ##### CLI TEST OUTPUTS ######
 
@@ -80,9 +77,8 @@ test_outputs[x[2]] = "0.235363    0.994111     (-p3 + p4*(-p1 + (p4 + x)**(p0 + 
 test_outputs[x[3]] = " 2.33541   0.938364  (p0*p3*(p0 + p4) + p0*(p2 + p4 - x) + (p0 + p4)*(-p1 + p4 + x))/(p0*(p0 + p4))  2.21E-01,4.86E-01,-7.01E-02,-3.81E+00,1.27E+00"
 test_outputs[x[4]] = " 5.89909e-05   0.999999     -p0**p2*(p0*p2)**(p2**x)*(p0 + p2)*(p2 - p3) + (p0 + x)**(p2*p3)*(2*p1**(x + 1) - p2)       1.25E+00,1.03E+00,2.04E+00,2.11E+00,1.00E+00"
 test_outputs[x[5]] = "2.33541   0.938364  p2**p3 - p4*x + x        1.00E+00,1.00E+00,5.29E-01,1.00E+00,-2.85E+00"
-test_outputs[x[6]] = "Number possible equations: 12.0"
-test_outputs[x[7]] = "Number possible equations: 42.0"
-test_outputs[x[8]] = " 0.6804   0.981226     (p0**(p4 + 1))**(p4**x)  1.03E+00,1.00E+00,1.00E+00,1.00E+00,7.06E+0"
+test_outputs[x[6]] = "Number of equations:  12.0"
+test_outputs[x[7]] = "Number of equations:  42.0"
 
 def refresh_db(path_to_db):
     try:
@@ -99,8 +95,7 @@ def test_command_line_code():
         input_args = test_inputs[arguments_string]
         output_string = sh.python(*input_args)
         print(output_string)
-        assert test_outputs[arguments_string] in output_string, print(
-            arguments_string)
+        assert test_outputs[arguments_string] in output_string
         print('Finished', *input_args)
 
 def test_python_code():
