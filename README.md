@@ -29,7 +29,8 @@ and researchers working on symbolic regression problems.
 9. User specified number of permitted unique binary trees, which determine the possible equation forms 
 10. User specified permitted functions of arity 1 or 2
 11. Can also run an exhaustive/brute-force search
-12. Developed and tested on Python 3.6
+12. Can be run in deterministic mode for reproducibility
+13. Developed and tested on Python 3.6
 
 ## Getting Started
 
