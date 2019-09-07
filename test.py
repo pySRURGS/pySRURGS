@@ -136,7 +136,6 @@ def test_python_code():
     SRconfigtest = pySRURGS.SymbolicRegressionConfig(
         n_funcs, f_funcs, max_num_fit_params, max_permitted_trees)
     num_equations = pySRURGS.count_number_equations(path_to_csv, SRconfigtest)
-    num_equations = int(num_equations)
     max_attempts = 15
     # test the basic functionality
     for i in range(0, max_attempts):
