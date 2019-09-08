@@ -195,5 +195,5 @@ With regards to community suggested changes, I would comment as to whether it wo
 
 ## Acknowledgments
 
-* Luther Tychonievich created the algorithm mapping integers to full binary trees [link](http://web.archive.org/web/20190908010319/https://www.cs.virginia.edu/luther/blog/posts/434.html).
-* The icon is from the GNOME desktop icons project and the respective artists. Originally taken from [here](https://commons.wikimedia.org/wiki/GNOME_Desktop_icons#/media/File:Gnome-system-search.svg). License: GPL version 2.0. 
+* Luther Tychonievich created the algorithm mapping integers to full binary trees: [link](https://www.cs.virginia.edu/luther/blog/posts/434.html) [web_archived_link](http://web.archive.org/web/20190908010319/https://www.cs.virginia.edu/luther/blog/posts/434.html).
+* The icon is from the GNOME desktop icons project and the respective artists. Taken from [link](https://commons.wikimedia.org/wiki/GNOME_Desktop_icons#/media/File:Gnome-system-search.svg) [web_archived_link](https://web.archive.org/web/20151002175042/https://commons.wikimedia.org/wiki/File:Gnome-system-search.svg). License: GPL version 2.0. 
