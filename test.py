@@ -226,5 +226,4 @@ def test_python_code():
 
 if __name__ == '__main__':
     test_command_line_code()
-    exit(0)
     test_python_code()
