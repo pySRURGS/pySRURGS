@@ -7,6 +7,7 @@
 [![License: GPL v3](image/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![python versions](image/python-3_6_3_7-blue.svg)](https://www.python.org)
 [![status](https://joss.theoj.org/papers/6c575a3b0604e5c5d4ca31f27d4d182d/status.svg)](https://joss.theoj.org/papers/6c575a3b0604e5c5d4ca31f27d4d182d)
+[![DOI](https://zenodo.org/badge/200314164.svg)](https://zenodo.org/badge/latestdoi/200314164)
 
 Symbolic regression is a type of data analysis problem where you search for the 
 equation of best fit for a numerical dataset. This package does this task by 
