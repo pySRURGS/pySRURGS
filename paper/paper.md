@@ -23,7 +23,7 @@ Symbolic regression is a regression analysis where we search for the
 mathematical expression that best describes the relationship between our 
 independent variables and our dependent variable. ``pySRURGS`` is a python code 
 for symbolic regression by uniform random global search. Typically, symbolic
-regression problems are solved using genetic programming [@Koza:1992], but the 
+regression problems are solved using genetic programming [@Koza:1994], but the 
 data demonstrating that genetic programming outperforms random search 
 on symbolic regression problems is lacking. Comparing the performance 
 of an algorithm against that of random search demonstrates the advantage gained 
