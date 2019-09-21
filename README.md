@@ -196,7 +196,7 @@ Towfighi, (2019). pySRURGS - a python package for symbolic regression by uniform
 
 ## Community
 
-If you would like to contribute to the project or you need help please create an issue. 
+If you would like to contribute to the project or you need help, then please create an issue. 
 
 With regards to community suggested changes, I would comment as to whether it would be within the scope of the project to include the suggested changes. If both parties are in agreement, whomever is interested in developing the changes can make a pull request, or I will implement the suggested changes. 
 
