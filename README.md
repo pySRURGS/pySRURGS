@@ -3,10 +3,11 @@
 
 # Symbolic Regression by Uniform Random Global Search
 [![Build Status](https://travis-ci.com/pySRURGS/pySRURGS.svg?branch=master)](https://travis-ci.com/pySRURGS/pySRURGS)
+[![status](https://joss.theoj.org/papers/6c575a3b0604e5c5d4ca31f27d4d182d/status.svg)](https://joss.theoj.org/papers/6c575a3b0604e5c5d4ca31f27d4d182d)
 [![Coverage Status](https://coveralls.io/repos/github/pySRURGS/pySRURGS/badge.svg)](https://coveralls.io/github/pySRURGS/pySRURGS)
 [![License: GPL v3](image/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![python versions](image/python-3_6_3_7-blue.svg)](https://www.python.org)
-[![status](https://joss.theoj.org/papers/6c575a3b0604e5c5d4ca31f27d4d182d/status.svg)](https://joss.theoj.org/papers/6c575a3b0604e5c5d4ca31f27d4d182d)
+[![DOI](https://zenodo.org/badge/200314164.svg)](https://zenodo.org/badge/latestdoi/200314164)
 
 Symbolic regression is a type of data analysis problem where you search for the 
 equation of best fit for a numerical dataset. This package does this task by 
@@ -28,7 +29,9 @@ and researchers working on symbolic regression problems.
 8. User specified number of fitting parameters.
 9. User specified number of permitted unique binary trees, which determine the possible equation forms 
 10. User specified permitted functions of arity 1 or 2
-11. Developed and tested on Python 3.6
+11. Can also run an exhaustive/brute-force search
+12. Can be run in deterministic mode for reproducibility
+13. Developed and tested on Python 3.6
 
 ## Getting Started
 
@@ -60,7 +63,8 @@ The above command should render the following:
 
 ```
 usage: pySRURGS.py [-h] [-memoize_funcs] [-single] [-count] [-benchmarks]
-                   [-plotting] [-funcs_arity_two FUNCS_ARITY_TWO]
+                   [-deterministic] [-plotting] [-exhaustive]
+                   [-funcs_arity_two FUNCS_ARITY_TWO]
                    [-funcs_arity_one FUNCS_ARITY_ONE]
                    [-max_num_fit_params MAX_NUM_FIT_PARAMS]
                    [-max_permitted_trees MAX_PERMITTED_TREES]
@@ -84,9 +88,16 @@ optional arguments:
   -benchmarks           Instead of doing symbolic regression, generate the 100
                         benchmark problems. No other processing performed.
                         (default: False)
+  -deterministic        If set, the pseudorandom number generator will act in
+                        a predictable manner and pySRURGS will produce
+                        reproducible results. (default: False)
   -plotting             plot the best model against the data to
                         ./image/plot.png and ./image/plot.svg - note only
                         works for univariate datasets (default: False)
+  -exhaustive           instead of running pure random search, do an
+                        exhaustive search. Be careful about running this as it
+                        may run forever. `iters` gets ignored. (default:
+                        False)
   -funcs_arity_two FUNCS_ARITY_TWO
                         a comma separated string listing the functions of
                         arity two you want to be considered.
@@ -177,13 +188,19 @@ result_list.print(dataset._y_data)
 
 This project is licensed under the GPL 3.0 License - see the [LICENSE](LICENSE) file for details
 
+## How to Cite
+
+If you use this software in your research, then please cite our paper. <br><br>
+Towfighi, (2019). pySRURGS - a python package for symbolic regression by uniform random global search. Journal of Open Source Software, 4(41), 1675, https://doi.org/10.21105/joss.01675 <br><br>
+[![DOI](https://joss.theoj.org/papers/10.21105/joss.01675/status.svg)](https://doi.org/10.21105/joss.01675)
+
 ## Community
 
-If you would like to contribute to the project or you need help please create an issue. 
+If you would like to contribute to the project or you need help, then please create an issue. 
 
 With regards to community suggested changes, I would comment as to whether it would be within the scope of the project to include the suggested changes. If both parties are in agreement, whomever is interested in developing the changes can make a pull request, or I will implement the suggested changes. 
 
 ## Acknowledgments
 
-* Luther Tychonievich created the algorithm mapping integers to full binary trees
-* The icon is from the GNOME icon project and the respective artists.
+* Luther Tychonievich created the algorithm mapping integers to full binary trees: [link](https://www.cs.virginia.edu/luther/blog/posts/434.html), [web archived link](http://web.archive.org/web/20190908010319/https://www.cs.virginia.edu/luther/blog/posts/434.html).
+* The icon is from the GNOME desktop icons project and the respective artists. Taken from [link](https://commons.wikimedia.org/wiki/GNOME_Desktop_icons#/media/File:Gnome-system-search.svg), [web archived link](https://web.archive.org/web/20151002175042/https://commons.wikimedia.org/wiki/File:Gnome-system-search.svg). License: GPL version 2.0. 
