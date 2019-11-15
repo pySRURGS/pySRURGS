@@ -1,5 +1,1 @@
-first we submit the SRGP jobs
-run them
-then we submit the SRURGS jobs with matching n_evals
-run them 
-then we submit jobs for FFX and ITSR
+These codes are used in the preparation of a publication currently under review.
