@@ -73,7 +73,8 @@ usage: pySRURGS.py [-h] [-memoize_funcs] [-single] [-count] [-benchmarks]
 
 positional arguments:
   train                 absolute or relative file path to the csv file housing
-                        the training data
+                        the training data. The rightmost column of the CSV
+                        file should be the dependent variable.
   iters                 the number of equations to be attempted in this run
 
 optional arguments:
