@@ -2716,7 +2716,7 @@ if __name__ == '__main__':
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument(
         "train",
-        help="absolute or relative file path to the csv file housing the training data")
+        help="absolute or relative file path to the csv file housing the training data. The rightmost column of the CSV file should be the dependent variable.")
     parser.add_argument(
         "iters",
         help="the number of equations to be attempted in this run",
