@@ -195,6 +195,8 @@ If you use this software in your research, then please cite our paper. <br><br>
 Towfighi, (2019). pySRURGS - a python package for symbolic regression by uniform random global search. Journal of Open Source Software, 4(41), 1675, https://doi.org/10.21105/joss.01675 <br><br>
 [![DOI](https://joss.theoj.org/papers/10.21105/joss.01675/status.svg)](https://doi.org/10.21105/joss.01675)
 
+Towfighi, S. Symbolic Regression by Uniform Random Global Search. SN Applied Sciences (2020) 2: 34. (https://doi.org/10.1007/s42452-019-1734-3)](https://doi.org/10.1007/s42452-019-1734-3)
+
 ## Community
 
 If you would like to contribute to the project or you need help, then please create an issue. 
