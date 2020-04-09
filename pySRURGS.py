@@ -1990,7 +1990,8 @@ def uniform_random_global_search_once(path_to_db, path_to_csv, SRconfig,
     return result
 
 
-def generate_benchmark(benchmark_name, SRconfig):
+def generate_benchmark(benchmark_name, SRconfig, 
+                       path_to_problem_csv=path_to_toy_csv):
     """
     Generate a random symbolic regression benchmark problem.
 
@@ -2001,7 +2002,12 @@ def generate_benchmark(benchmark_name, SRconfig):
         set as a string will do.
 
     SRconfig: pySRURGS.SymbolicRegressionConfig
-        The symbolic regression configuration object for this problem
+        The symbolic regression configuration object for this problem.
+
+    path_to_problem_csv: string 
+        A filepath which points to a CSV file. The number of columns in the file 
+        will determine the number of variables in the symbolic regression
+        problem. (default: path_to_toy_csv)
 
     Returns
     -------
@@ -2018,7 +2024,8 @@ def generate_benchmark(benchmark_name, SRconfig):
     `benchmarks_dir` is a global variable typically set to './benchmarks'
     """
     (f, n, m, cum_weights, N, dataset,
-     enumerator, n_functions, f_functions) = setup(path_to_toy_csv, SRconfig)
+     enumerator, n_functions, f_functions) = setup(path_to_problem_csv, 
+                                                   SRconfig)
     valid = False
     while valid == False:
         print("Iterating...                                         ", end='\r')
