@@ -150,7 +150,10 @@ def check_for_nans(X):
 
 
 def binary(num, pre='', length=16, spacer=0):
-    ''' formats a number into binary - https://stackoverflow.com/a/16926270/3549879 '''
+    ''' 
+        formats a number into binary:
+        https://stackoverflow.com/a/16926270/3549879 
+    '''
     return '{0}{{:{1}>{2}}}'.format(pre, spacer, length).format(bin(num)[2:])
 
 
@@ -213,7 +216,8 @@ def remove_variable_tags(equation_string):
 
 def remove_parameter_tags(equation_string):
     """
-    Removes the pySRURGS fitting parameter prefix/suffix from an equation string.
+    Removes the pySRURGS fitting parameter prefix/suffix from an equation 
+    string.
 
     Parameters
     ----------
@@ -614,8 +618,8 @@ def simplify_equation_string(eqn_str, dataset):
 def equation_generator(i, q, r, s, dataset, enumerator, SRconfig):
     """
     Generates an equation string given the integers that specify an equation
-    string in pySRURGS. Use `equation_generator2` instead when there are no
-    functions of arity one permitted.
+    string in pySRURGS. Use `equation_generator_full_binary_tree` instead when 
+    there are no functions of arity one permitted.
 
     Parameters
     ----------
@@ -659,7 +663,7 @@ def equation_generator(i, q, r, s, dataset, enumerator, SRconfig):
     f = len(SRconfig._f_functions)
     n = len(SRconfig._n_functions)
     m = dataset._m_terminals
-    tree = ith_full_binary_tree(i)
+    tree = ith_binary_tree(i)
     G = en.get_G(f, i)
     if q >= G and not G == 0:
         raise Exception("q is an index that must be smaller than G")
@@ -704,7 +708,7 @@ def equation_generator(i, q, r, s, dataset, enumerator, SRconfig):
     return tree
 
 
-def equation_generator2(i, r, s, dataset, enumerator, SRconfig):
+def equation_generator_full_binary_tree(i, r, s, dataset, enumerator, SRconfig):
     """
     Generates an equation string given the integers that specify an equation
     string in pySRURGS. Use `equation_generator` instead when there are
@@ -745,7 +749,7 @@ def equation_generator2(i, r, s, dataset, enumerator, SRconfig):
     en = enumerator
     n = len(SRconfig._n_functions)
     m = dataset._m_terminals
-    tree = ith_full_binary_tree2(i)
+    tree = ith_full_binary_tree(i)
     A = en.get_A(n, i)
     if r >= A:
         raise Exception("r is an index that must be smaller than A")
@@ -771,13 +775,13 @@ def equation_generator2(i, r, s, dataset, enumerator, SRconfig):
     return tree
 
 
-def random_equation(N, cum_weights, dataset, enumerator, SRconfig,
+def random_equation_binary_tree(N, cum_weights, dataset, enumerator, SRconfig,
                     details=False, i=None):
     """
     Generates a random equation string. Generating the random numbers which
     specify the equation, then passes those as arguments to equation_generator.
-    Use `random_equation2` instead when there are no functions of arity one
-    permitted.
+    Use `random_equation_full_binary_tree` instead when there are no functions 
+    of arity one permitted.
 
     Parameters
     ----------
@@ -828,13 +832,13 @@ def random_equation(N, cum_weights, dataset, enumerator, SRconfig,
         return result
 
 
-def random_equation2(N, cum_weights, dataset, enumerator, SRconfig,
-                     details=False, i=None):
+def random_equation_full_binary_tree(N, cum_weights, dataset, enumerator, 
+                                     SRconfig, details=False, i=None):
     """
     Generates a random equation string. Generating the random numbers which
     specify the equation, then passes those as arguments to equation_generator.
-    Use `random_equation` instead when there are functions of arity one
-    permitted.
+    Use `random_equation_binary_tree` instead when there are functions of arity 
+    one permitted.
 
     Parameters
     ----------
@@ -855,7 +859,8 @@ def random_equation2(N, cum_weights, dataset, enumerator, SRconfig,
         The `Enumerator2` object for the symbolic regression problem
 
     SRconfig: pySRURGS.SymbolicRegressionConfig
-        The `SymbolicRegressionConfig` object for the symbolic regression problem
+        The `SymbolicRegressionConfig` object for the symbolic regression 
+        problem
 
     details: Boolean
         Determines the output type
@@ -877,8 +882,8 @@ def random_equation2(N, cum_weights, dataset, enumerator, SRconfig,
         i = randgen.choice(range(0, N), p=cum_weights)
     r = enumerator.get_r(n, i)
     s = enumerator.get_s(m, i)
-    equation_string = equation_generator2(i, r, s, dataset, enumerator,
-                                          SRconfig)
+    equation_string = equation_generator_full_binary_tree(i, r, s, dataset, 
+                                                     enumerator, SRconfig)
     if not details:
         return equation_string
     else:
@@ -910,9 +915,9 @@ class Dataset(object):
     Returns
     -------
     self
-        A pySRURGS.Dataset object, which houses a variety of attributes including
-        the numerical data, the sympy namespace, the data dict used in evaluating
-        the equation string, etc.
+        A pySRURGS.Dataset object, which houses a variety of attributes 
+        including the numerical data, the sympy namespace, the data dict used in 
+        evaluating the equation string, etc.
 
     Example
     --------
@@ -1393,8 +1398,8 @@ class Enumerator2(object):
 
 def create_fitting_parameters(max_params, param_values=None):
     """
-    Creates the lmfit.Parameters object based on the number of fitting parameters
-    permitted in this symbolic regression problem.
+    Creates the lmfit.Parameters object based on the number of fitting 
+    parameters permitted in this symbolic regression problem.
 
     Parameters
     ----------
@@ -1587,9 +1592,9 @@ def check_goodness_of_fit(individual, params, my_data):
 
 
 @memoize
-def ith_full_binary_tree(i):
+def ith_binary_tree(i):
     """
-    Generates the `i`th binary tree. Use ith_full_binary_tree2 when no functions
+    Generates the `i`th binary tree. Use ith_full_binary_tree when no functions
     of arity one are permitted.
 
     Parameters
@@ -1611,16 +1616,16 @@ def ith_full_binary_tree(i):
         tree = '|.|'
     else:
         left_int, right_int = get_left_right_bits(i)
-        left = ith_full_binary_tree(left_int)
-        right = ith_full_binary_tree(right_int)
+        left = ith_binary_tree(left_int)
+        right = ith_binary_tree(right_int)
         tree = '[' + left + ', ' + right + ']'
     return tree
 
 
 @memoize
-def ith_full_binary_tree2(i):
+def ith_full_binary_tree(i):
     """
-    Generates the `i`th binary tree. Use ith_full_binary_tree when functions
+    Generates the `i`th binary tree. Use ith_binary_tree when functions
     of arity one are permitted.
 
     Parameters
@@ -1640,20 +1645,20 @@ def ith_full_binary_tree2(i):
         tree = '[., .]'
     else:
         left_int, right_int = get_left_right_bits(i - 1)
-        left = ith_full_binary_tree2(left_int)
-        right = ith_full_binary_tree2(right_int)
+        left = ith_full_binary_tree(left_int)
+        right = ith_full_binary_tree(right_int)
         tree = '[' + left + ', ' + right + ']'
     return tree
 
 
 @memoize
-def get_cum_weights(N, f, n, m, enumerator):
+def get_cum_weights_binary_tree(N, f, n, m, enumerator):
     """
     Generates the relative probabilities of selecting the `i`th binary tree.
     Sums to 1. Ensures that each equation has equal probability of selection.
     Gives increasing probability with increasing `i`, because larger values
     of `i` correspond to more complex trees which permit more equations.
-    Use `get_cum_weights2` when functions of arity one are not permitted.
+    Use `get_cum_weights_full_binary_tree` when functions of arity one are not permitted.
 
     Parameters
     ----------
@@ -1700,13 +1705,13 @@ def get_cum_weights(N, f, n, m, enumerator):
 
 
 @memoize
-def get_cum_weights2(N, n, m, enumerator):
+def get_cum_weights_full_binary_tree(N, n, m, enumerator):
     """
     Generates the relative probabilities of selecting the `i`th binary tree.
     Sums to 1. Ensures that each equation has equal probability of selection.
     Gives increasing probability with increasing `i`, because larger values
     of `i` correspond to more complex trees which permit more equations.
-    Use `get_cum_weights` when functions of arity one are permitted.
+    Use `get_cum_weights_binary_tree` when functions of arity one are permitted.
 
     Parameters
     ----------
@@ -1845,7 +1850,7 @@ class Result(object):
                 self._simple_equation,
                 self._equation]
         parameters = []
-        if self._params.shape != ():  # avoid cases where there are no fit params
+        if self._params.shape != ():  # avoid cases with no fit params
             for param in self._params:
                 parameters.append(str_e(param))
         parameters_str = ','.join(parameters)
@@ -1951,11 +1956,11 @@ def uniform_random_global_search_once(path_to_db, path_to_csv, SRconfig,
         randgen.seed(seed)
     while valid == False:
         if f == 0:
-            eqn_str = random_equation2(N, cum_weights, dataset, enumerator,
-                                       SRconfig)
+            eqn_str = random_equation_full_binary_tree(N, cum_weights, dataset, 
+                                                       enumerator, SRconfig)
         else:
-            eqn_str = random_equation(N, cum_weights, dataset, enumerator,
-                                      SRconfig)
+            eqn_str = random_equation_binary_tree(N, cum_weights, dataset, 
+                                                  enumerator, SRconfig)
         try:
             simple_eqn = simplify_equation_string(eqn_str, dataset)
             initialize_db(path_to_db)
@@ -2005,9 +2010,10 @@ def generate_benchmark(benchmark_name, SRconfig):
 
     Notes
     -----
-    Saves a CSV file to - `benchmarks_dir + '/' + benchmark_name + '_train.csv'`
-    Saves a CSV file to - `benchmarks_dir + '/' + benchmark_name + '_test.csv'`
-    Saves a human readable text file to - `benchmarks_dir + '/' + benchmark_name + '_params.txt'`
+    Saves a CSV file to: `benchmarks_dir + '/' + benchmark_name + '_train.csv'`
+    Saves a CSV file to: `benchmarks_dir + '/' + benchmark_name + '_test.csv'`
+    Saves a human readable text file to:
+            `benchmarks_dir + '/' + benchmark_name + '_params.txt'`
 
     `benchmarks_dir` is a global variable typically set to './benchmarks'
     """
@@ -2015,15 +2021,15 @@ def generate_benchmark(benchmark_name, SRconfig):
      enumerator, n_functions, f_functions) = setup(path_to_toy_csv, SRconfig)
     valid = False
     while valid == False:
-        print("Iterating...")
+        print("Iterating...                                         ", end='\r')
         try:
             # specify the equation
             if f == 0:
-                eqn_details = random_equation2(N, cum_weights,
+                eqn_details = random_equation_full_binary_tree(N, cum_weights,
                                                dataset, enumerator, SRconfig,
                                                details=True)
             else:
-                eqn_details = random_equation(N, cum_weights,
+                eqn_details = random_equation_binary_tree(N, cum_weights,
                                               dataset, enumerator, SRconfig,
                                               details=True)
             eqn_original = eqn_details[0]
@@ -2077,7 +2083,7 @@ def generate_benchmark(benchmark_name, SRconfig):
             if eqn_simple == '0':
                 valid = False
         except Exception as e:
-            print(e)
+            print(e, end='\r')
             valid = False
 
 
@@ -2109,8 +2115,8 @@ def setup(path_to_csv, SR_config):
         The number of functions of arity two in the problem
 
     cum_weights: array like
-        The relative weight of selecting the binary trees from 0 to N-1, calculated
-        to ensure equal probabilty of selecting each equation.
+        The relative weight of selecting the binary trees from 0 to N-1, 
+        calculated to ensure equal probabilty of selecting each equation.
 
     N: int
         The number of unique binary trees permitted in the search. Same as
@@ -2138,10 +2144,10 @@ def setup(path_to_csv, SR_config):
     m = dataset._m_terminals  # the number of vars + number of fit params
     if f == 0:
         enumerator = Enumerator2()
-        cum_weights = get_cum_weights2(N, n, m, enumerator)
+        cum_weights = get_cum_weights_full_binary_tree(N, n, m, enumerator)
     else:
         enumerator = Enumerator()
-        cum_weights = get_cum_weights(N, f, n, m, enumerator)
+        cum_weights = get_cum_weights_binary_tree(N, f, n, m, enumerator)
     return (f, n, m, cum_weights, N, dataset, enumerator, n_funcs, f_funcs)
 
 
@@ -2233,7 +2239,7 @@ def compile_results(path_to_db, path_to_csv, SRconfig):
     return result_list
 
 
-def plot_results(path_to_db, path_to_csv, SRconfig):
+def plot_results(path_to_db, path_to_csv, SRconfig, output_dir='./image/'):
     '''
     Reads the generated SqliteDict file to determine the best model,
     then plots it against the raw data. saves the figure to './image/plot.png'
@@ -2298,9 +2304,12 @@ def plot_results(path_to_db, path_to_csv, SRconfig):
         plt.xlabel(xlabel)
     plt.legend()
     plt.tight_layout()
-    plt.savefig('./image/plot.eps')
-    plt.savefig('./image/plot.svg')
-    plt.savefig('./image/plot.png')
+    output_files = ['plot.eps', 'plot.svg', 'plot.png']
+    for img in output_files:
+        output_path = os.path.join(output_dir, img)
+        if os.path.isfile(output_path):
+            os.remove(output_path)   
+        plt.savefig(output_path)
 
 
 def generate_benchmarks_SRconfigs():
@@ -2321,13 +2330,17 @@ def generate_benchmarks_SRconfigs():
 
     Notes
     ------
-    SR_config1: pySRURGS.SymbolicRegressionConfig(n_functions=['add','sub','mul','div'],
+    SR_config1: pySRURGS.SymbolicRegressionConfig(n_functions=['add','sub',
+                                                               'mul','div'],
                                                   f_functions=[],
                                                   max_num_fit_params=5,
                                                   max_permitted_trees=200)
 
-    SR_config2: pySRURGS.SymbolicRegressionConfig(n_functions=['add','sub','mul','div','pow'],
-                                                  f_functions=['sin','sinh','log'],
+    SR_config2: pySRURGS.SymbolicRegressionConfig(n_functions=['add','sub',
+                                                               'mul','div',
+                                                               'pow'],
+                                                  f_functions=['sin','sinh',
+                                                               'log'],
                                                   max_num_fit_params=5,
                                                   max_permitted_trees=200)
     '''
@@ -2343,7 +2356,8 @@ def generate_benchmarks_SRconfigs():
     SR_config2 = SymbolicRegressionConfig(
         n_functions=[
             'add', 'sub', 'mul', 'div', 'pow'], f_functions=[
-            'sin', 'sinh', 'log'], max_num_fit_params=5, max_permitted_trees=200)
+            'sin', 'sinh', 'log'], max_num_fit_params=5, 
+            max_permitted_trees=200)
     result = (SR_config1, SR_config2)
     return result
 
@@ -2370,10 +2384,10 @@ def generate_benchmarks():
     SR_config1, SR_config2 = generate_benchmarks_SRconfigs()
     # first set is from 0 - 19 inclusive
     for z in range(0, 20):
-        print("Generating benchmark:", z, "out of:", 99)
+        print("Generating benchmark:", z, "out of:", 99, end="\r")
         generate_benchmark(str(z), SR_config1)
     for z in range(20, 100):
-        print("Generating benchmark:", z, "out of:", 99)
+        print("Generating benchmark:", z, "out of:", 99, end="\r")
         generate_benchmark(str(z), SR_config2)
     print("Outputting a summary to ", benchmarks_summary_tsv)
     read_benchmarks()
@@ -2381,7 +2395,8 @@ def generate_benchmarks():
 
 def read_benchmarks():
     '''
-    Reads the benchmark problems and generates a summary tab separated value file.
+    Reads the benchmark problems and generates a summary tab separated value 
+    file.
 
     Parameters
     ----------
@@ -2425,8 +2440,11 @@ def check_validity_suggested_functions(suggested_funcs, arity):
     ----------
     suggested_funcs: list
         A list of strings.
-        In case of `arity==1`, permitted values are ['sin','cos','tan','exp','log','tanh','sinh','cosh',None]
-        In case of `arity==2`, permitted values are ['add','sub','mul','div','pow']
+        In case of `arity==1`, permitted values are ['sin','cos','tan','exp',
+                                                     'log','tanh','sinh','cosh',
+                                                     None]
+        In case of `arity==2`, permitted values are ['add','sub','mul','div',
+                                                     'pow']
 
     Returns
     -------
@@ -2583,7 +2601,7 @@ def exhaustive_search(path_to_db, path_to_csv, SRconfig, mode='multi'):
                             index_tuple = (q, r, s)
                             n_evals = assign_n_evals(path_to_db)
                             print("n_evals:", n_evals, "i:", i, "q:", q, "r:",
-                                  r, "s:", s)
+                                  r, "s:", s, end='\r')
                             check_equation_at_specified_indices(index_tuple, i,
                                                                 path_to_db,
                                                                 path_to_csv,
@@ -2607,7 +2625,8 @@ def exhaustive_search(path_to_db, path_to_csv, SRconfig, mode='multi'):
                     for s in range(0, B):
                         index_tuple = (r, s)
                         n_evals = assign_n_evals(path_to_db)
-                        print("n_evals:", n_evals, "i:", i, "r:", r, "s:", s)
+                        print("n_evals:", n_evals, "i:", i, "r:", r, "s:", s, 
+                              end='\r')
                         check_equation_at_specified_indices(index_tuple, i,
                                                             path_to_db,
                                                             path_to_csv,
@@ -2675,7 +2694,8 @@ def check_equation_at_specified_indices(
     if f > 0:
         eqn_str = equation_generator(i, q, r, s, dataset, enumerator, SRconfig)
     else:
-        eqn_str = equation_generator2(i, r, s, dataset, enumerator, SRconfig)
+        eqn_str = equation_generator_full_binary_tree(i, r, s, dataset, 
+                                                      enumerator, SRconfig)
     try:
         try:
             simple_eqn = simplify_equation_string(eqn_str, dataset)
