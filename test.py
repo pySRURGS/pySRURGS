@@ -31,8 +31,8 @@ x1sqrd_csv = './csv/x1_squared_minus_five_x3.csv'
 x1sqrd_db = './db/x1_squared_minus_five_x3.db'
 benchmarks_dir = './csv/benchmarks'
 
-##### CLI ARGUMENT STRINGS ######
 
+##### CLI ARGUMENT STRINGS ######
 x = [None]*10
 x[0] = '-deterministic -single ./csv/quartic_polynomial.csv 10'
 x[1] = '-deterministic -max_num_fit_params 0 ./csv/quartic_polynomial.csv 10'
@@ -43,9 +43,8 @@ x[5] = '-deterministic -max_permitted_trees 10 -max_num_fit_params 5 ./csv/quart
 x[6] = '-exhaustive -funcs_arity_two add,sub -funcs_arity_one sin -max_permitted_trees 3 -max_num_fit_params 1 ./csv/quartic_polynomial 10'
 x[7] = '-exhaustive -funcs_arity_two add,sub -max_permitted_trees 3 -max_num_fit_params 1 ./csv/quartic_polynomial.csv 10'
 
+
 ##### CLI TEST INPUTS ######
-
-
 test_inputs = dict()
 test_inputs[x[0]] = ['pySRURGS.py', '-single', '-deterministic', 
                      qrtic_polynml_csv, 10]
@@ -68,8 +67,8 @@ test_inputs[x[7]] = ['pySRURGS.py', '-exhaustive', '-funcs_arity_two',
                      'add,sub', '-max_permitted_trees', 3, 
                      '-max_num_fit_params', 1, qrtic_polynml_csv, 10]
 
-##### CLI TEST OUTPUTS ######
 
+##### CLI TEST OUTPUTS ######
 test_outputs = dict()
 test_outputs[x[0]] = "Normalized Mean Squared Error"
 test_outputs[x[1]] = "Normalized Mean Squared Error"
@@ -80,11 +79,13 @@ test_outputs[x[5]] = "Normalized Mean Squared Error"
 test_outputs[x[6]] = "Number of equations:  12.0"
 test_outputs[x[7]] = "Number of equations:  42.0"
 
+
 def refresh_db(path_to_db):
     try:
         os.remove(path_to_db)
     except:
         pass
+
 
 def test_command_line_code():
     path_to_db = qrtic_polynml_db
@@ -97,6 +98,7 @@ def test_command_line_code():
         print(output_string)
         assert test_outputs[arguments_string] in output_string
         print('Finished', *input_args)
+
 
 def test_python_code():
     print('Started run_python_tests')
