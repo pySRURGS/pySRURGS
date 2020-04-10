@@ -38,7 +38,7 @@ def refresh_db(path_to_db):
     except:
         pass
 
-
+'''
 class TestCommandLineInterface(unittest.TestCase):
     
     def setUp(self):
@@ -139,7 +139,7 @@ class TestCommandLineInterface(unittest.TestCase):
         n_results = pySRURGS.count_results(working_db)
         result_list = pySRURGS.get_resultlist(working_db)
         self.assertGreater(n_results, 0.98*num_iters)
-
+'''
 
 def test_python_code():
     print('Started run_python_tests')
