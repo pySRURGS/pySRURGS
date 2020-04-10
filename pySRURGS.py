@@ -2867,13 +2867,17 @@ if __name__ == '__main__':
     else:
         if not single_processing_mode:
             print("Running in multi processor mode")
+            if max_attempts > NUM_ITERS_LIMIT:
+                msg = "Multiprocessing mode cannot accommodate more than "
+                msg += "NUM_ITERS_LIMIT iterations"
+                raise Exception(msg)
             if deterministic:
                 seed_list = list(range(0, max_attempts))
             else:
                 current_time = int(time.time())
                 seeds = np.arange(0, max_attempts)
                 seeds = seeds*current_time % NUM_ITERS_LIMIT
-                seed_list = seeds.tolist()
+                seed_list = seeds.tolist()                
             results = parmap.map(uniform_random_global_search_once,
                                  seed_list, 
                                  path_to_db, 
