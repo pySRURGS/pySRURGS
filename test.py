@@ -38,7 +38,7 @@ def refresh_db(path_to_db):
     except:
         pass
 
-test_CLI = False
+test_CLI = True
 
 if test_CLI == True:
     class TestCommandLineInterface(unittest.TestCase):
@@ -47,18 +47,18 @@ if test_CLI == True:
             refresh_db(working_db)
 
         def test_single_processor_deterministic(self):        
-            output = sh.python('pySRURGS.py', '-single', '-deterministic', 
-                               '-path_to_db', working_db, qrtic_polynml_csv, 
-                               num_iters)
+            output = sh.python3('pySRURGS.py', '-single', '-deterministic', 
+                                '-path_to_db', working_db, qrtic_polynml_csv, 
+                                num_iters)
             output = output.strip()
             print(output)
             n_results = pySRURGS.count_results(working_db)        
             self.assertGreater(n_results, 0.95*num_iters)
             
         def test_zero_fit_params(self):
-            output = sh.python('pySRURGS.py', '-deterministic', 
-                               '-max_num_fit_params', 0, '-path_to_db', working_db, 
-                               qrtic_polynml_csv, num_iters)
+            output = sh.python3('pySRURGS.py', '-deterministic', 
+                                '-max_num_fit_params', 0, '-path_to_db', working_db, 
+                                qrtic_polynml_csv, num_iters)
             output = output.strip()
             print(output)
             result_list = pySRURGS.get_resultlist(working_db)
@@ -68,16 +68,16 @@ if test_CLI == True:
                 self.assertEqual(len(result_list._results[i]._params), 0)
             
         def test_five_fit_params(self):
-            output = sh.python('pySRURGS.py', '-deterministic', 
-                               '-max_num_fit_params', 5, '-path_to_db', working_db, 
-                               qrtic_polynml_csv, num_iters)
+            output = sh.python3('pySRURGS.py', '-deterministic', 
+                                '-max_num_fit_params', 5, '-path_to_db', working_db, 
+                                qrtic_polynml_csv, num_iters)
             output = output.strip()
             print(output)
             n_results = pySRURGS.count_results(working_db)
             self.assertGreater(n_results, 0.98*num_iters)
 
         def test_funcs_arity_two(self):
-            output = output = sh.python('pySRURGS.py', '-deterministic', 
+            output = output = sh.python3('pySRURGS.py', '-deterministic', 
                                         '-funcs_arity_two', 'add,sub,div', 
                                         '-max_num_fit_params', 5, '-path_to_db', 
                                         working_db, qrtic_polynml_csv, num_iters)
@@ -93,9 +93,9 @@ if test_CLI == True:
                 self.assertEqual(('exp' in simple_eqn), False)
 
         def test_funcs_arity_one(self):
-            output = sh.python('pySRURGS.py', '-deterministic', '-funcs_arity_one', 
-                               'tan,exp', '-max_num_fit_params', 5, '-path_to_db', 
-                                working_db, qrtic_polynml_csv, num_iters)
+            output = sh.python3('pySRURGS.py', '-deterministic', '-funcs_arity_one', 
+                                'tan,exp', '-max_num_fit_params', 5, '-path_to_db', 
+                                 working_db, qrtic_polynml_csv, num_iters)
             output = output.strip()
             print(output)
             n_results = pySRURGS.count_results(working_db)
@@ -107,10 +107,10 @@ if test_CLI == True:
                 self.assertEqual(('cos' in simple_eqn), False)
 
         def test_max_permitted_trees(self):
-            output = sh.python('pySRURGS.py', '-deterministic', 
-                               '-max_permitted_trees', 10, '-max_num_fit_params', 5, 
-                               '-path_to_db', working_db, qrtic_polynml_csv, 
-                               num_iters)
+            output = sh.python3('pySRURGS.py', '-deterministic', 
+                                '-max_permitted_trees', 10, '-max_num_fit_params', 5, 
+                                '-path_to_db', working_db, qrtic_polynml_csv, 
+                                num_iters)
             output = output.strip()
             print(output)
             n_results = pySRURGS.count_results(working_db)
@@ -118,11 +118,11 @@ if test_CLI == True:
             self.assertGreater(n_results, 0.98*num_iters)    
 
         def test_combined_parameters_1(self):        
-            output = sh.python('pySRURGS.py', '-exhaustive', '-funcs_arity_two', 
-                               'add,sub', '-funcs_arity_one', 'sin', 
-                               '-max_permitted_trees', 3, '-max_num_fit_params', 1, 
-                               '-path_to_db', working_db, qrtic_polynml_csv, 
-                               num_iters)
+            output = sh.python3('pySRURGS.py', '-exhaustive', '-funcs_arity_two', 
+                                'add,sub', '-funcs_arity_one', 'sin', 
+                                '-max_permitted_trees', 3, '-max_num_fit_params', 1, 
+                                '-path_to_db', working_db, qrtic_polynml_csv, 
+                                num_iters)
             output = output.strip()
             print(output)
             self.assertEqual('12.0' in output, True)
@@ -131,10 +131,10 @@ if test_CLI == True:
             self.assertGreater(n_results, 0.98*num_iters)
 
         def test_combined_parameters_2(self):
-            output = sh.python('pySRURGS.py', '-exhaustive', '-funcs_arity_two', 
-                               'add,sub', '-max_permitted_trees', 3, 
-                               '-max_num_fit_params', 1, 
-                               '-path_to_db', working_db, qrtic_polynml_csv, 10)
+            output = sh.python3('pySRURGS.py', '-exhaustive', '-funcs_arity_two', 
+                                'add,sub', '-max_permitted_trees', 3, 
+                                '-max_num_fit_params', 1, 
+                                '-path_to_db', working_db, qrtic_polynml_csv, 10)
             output = output.strip()
             print(output)
             self.assertEqual('42.0' in output, True)
@@ -268,6 +268,5 @@ def test_python_code():
     print('Finished run_python_tests')
 
 if __name__ == '__main__':
-    test_python_code()    
-    if test_CLI == True:
-        unittest.main(verbosity=2) # this test does not yet work on travis-CI owing to NFS filesystem  
+    test_python_code()
+    unittest.main(verbosity=2)
