@@ -247,7 +247,6 @@ def test_python_code():
     path_to_db = './db/quartic_polynomial.db'    
     with SqliteDict(path_to_db, autocommit=True) as results_dict:
         best_result = results_dict['best_result']
-    number_equations = pySRURGS.count_results(working_db)
     result_list = pySRURGS.get_resultlist(path_to_db)
     dataset = pySRURGS.get_dataset(path_to_csv, SRconfig)
     result_list.sort()
