@@ -130,7 +130,8 @@ optional arguments:
 All your data needs to be numeric.
 Your CSV file should have a header.
 Inside the csv, the dependent variable should be the rightmost column.
-Do not use special characters or spaces in variable names and start variable names with a letter.
+Do not use special characters or spaces in variable names and start variable names with a letter (but not the letter 'p').
+The fitting parameters are displayed as the letter 'p' followed by an integer.
 
 ### An example
 
