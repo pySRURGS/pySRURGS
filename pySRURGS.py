@@ -34,6 +34,7 @@ np.seterr(all='raise')
 matplotlib.style.use('seaborn-colorblind')
 ''' GLOBALS '''
 BIG_NUM = 1.79769313e+300
+NUM_ITERS_LIMIT = (2**32-1)
 fitting_param_prefix = 'begin_fitting_param_'
 fitting_param_suffix = '_end_fitting_param'
 variable_prefix = 'begin_variable_'
@@ -615,7 +616,7 @@ def simplify_equation_string(eqn_str, dataset):
     return eqn_str
 
 
-def equation_generator(i, q, r, s, dataset, enumerator, SRconfig):
+def equation_generator_binary_tree(i, q, r, s, dataset, enumerator, SRconfig):
     """
     Generates an equation string given the integers that specify an equation
     string in pySRURGS. Use `equation_generator_full_binary_tree` instead when 
@@ -711,8 +712,8 @@ def equation_generator(i, q, r, s, dataset, enumerator, SRconfig):
 def equation_generator_full_binary_tree(i, r, s, dataset, enumerator, SRconfig):
     """
     Generates an equation string given the integers that specify an equation
-    string in pySRURGS. Use `equation_generator` instead when there are
-    functions of arity one permitted.
+    string in pySRURGS. Use `equation_generator_binary_tree` instead when there 
+    are functions of arity one permitted.
 
     Parameters
     ----------
@@ -735,8 +736,8 @@ def equation_generator_full_binary_tree(i, r, s, dataset, enumerator, SRconfig):
     dataset: pySRURGS.Dataset
         The `Dataset` object for the symbolic regression problem
 
-    enumerator: pySRURGS.Enumerator2
-        The `Enumerator2` object for the symbolic regression problem
+    enumerator: pySRURGS.EnumeratorFullBinaryTree
+        The `EnumeratorFullBinaryTree` object for the symbolic regression problem
 
     SRconfig: pySRURGS.SymbolicRegressionConfig
         The `SymbolicRegressionConfig` for the symbolic regression problem
@@ -799,7 +800,7 @@ def random_equation_binary_tree(N, cum_weights, dataset, enumerator, SRconfig,
         The `Dataset` object for the symbolic regression problem
 
     enumerator: pySRURGS.Enumerator
-        The `Enumerator2` object for the symbolic regression problem
+        The `EnumeratorFullBinaryTree` object for the symbolic regression problem
 
     SRconfig: pySRURGS.SymbolicRegressionConfig
         The `SymbolicRegressionConfig` for the symbolic regression problem
@@ -823,7 +824,7 @@ def random_equation_binary_tree(N, cum_weights, dataset, enumerator, SRconfig,
     q = enumerator.get_q(f, i)
     r = enumerator.get_r(n, i)
     s = enumerator.get_s(m, i)
-    equation_string = equation_generator(
+    equation_string = equation_generator_binary_tree(
         i, q, r, s, dataset, enumerator, SRconfig)
     if not details:
         return equation_string
@@ -855,8 +856,8 @@ def random_equation_full_binary_tree(N, cum_weights, dataset, enumerator,
     dataset: pySRURGS.Dataset
         The `Dataset` object for the symbolic regression problem
 
-    enumerator: pySRURGS.Enumerator2
-        The `Enumerator2` object for the symbolic regression problem
+    enumerator: pySRURGS.EnumeratorFullBinaryTree
+        The `EnumeratorFullBinaryTree` object for the symbolic regression problem
 
     SRconfig: pySRURGS.SymbolicRegressionConfig
         The `SymbolicRegressionConfig` object for the symbolic regression 
@@ -1016,10 +1017,10 @@ class Dataset(object):
         return data_dict
 
 
-class Enumerator(object):
+class EnumeratorBinaryTree(object):
     """
     An object housing methods for enumeration of the symbolic regression
-    problem. Use `Enumerator2` instead when no functions of arity one permitted.
+    problem. Use `EnumeratorFullBinaryTree` instead when no functions of arity one permitted.
 
     Returns
     -------
@@ -1039,7 +1040,7 @@ class Enumerator(object):
     def get_M(self, N, f, n, m):
         """
         Calculate the total number of equations for this symbolic regression
-        problem. Use get_M from `Enumerator2` instead if the number of functions
+        problem. Use get_M from `EnumeratorFullBinaryTree` instead if the number of functions
         of arity one permitted is zero.
 
         Parameters
@@ -1078,7 +1079,7 @@ class Enumerator(object):
         """
         Calculate the total number of configurations of the functions of arity
         one for the binary tree mapped from the integer `i`.  Use get_G from
-        `Enumerator2` instead if the number of functions of arity one permitted
+        `EnumeratorFullBinaryTree` instead if the number of functions of arity one permitted
         is zero.
 
         Parameters
@@ -1102,7 +1103,7 @@ class Enumerator(object):
         """
         Calculate the total number of configurations of the functions of arity
         two for the binary tree mapped from the integer `i`.  Use get_A from
-        `Enumerator2` instead if the number of functions of arity one permitted
+        `EnumeratorFullBinaryTree` instead if the number of functions of arity one permitted
         is zero.
 
         Parameters
@@ -1127,7 +1128,7 @@ class Enumerator(object):
         """
         Calculate the total number of configurations of the terminals for the
         binary tree mapped from the integer `i`.  Use get_B from
-        `Enumerator2` instead if the number of functions of arity one permitted
+        `EnumeratorFullBinaryTree` instead if the number of functions of arity one permitted
         is zero.
 
         Parameters
@@ -1235,15 +1236,15 @@ class Enumerator(object):
         return j_i
 
 
-class Enumerator2(object):
+class EnumeratorFullBinaryTree(object):
     """
     An object housing methods for enumeration of the symbolic regression
-    problem. Use `Enumerator` instead when functions of arity one are permitted.
+    problem. Use `EnumeratorBinaryTree` instead when functions of arity one are permitted.
 
     Returns
     -------
     Enumerator
-        A pySRURGS.Enumerator2 object which houses various methods for the
+        A pySRURGS.EnumeratorFullBinaryTree object which houses various methods for the
         enumeration of the problem space for case where only functions of arity
         two are permitted.
 
@@ -1251,7 +1252,7 @@ class Enumerator2(object):
     --------
 
     >>> import pySRURGS
-    >>> en = pySRURGS.Enumerator2()
+    >>> en = pySRURGS.EnumeratorFullBinaryTree()
     >>> en.get_M(1000, 5, 5)
     """
 
@@ -1259,7 +1260,7 @@ class Enumerator2(object):
     def get_M(self, N, n, m):
         """
         Calculate the total number of equations for this symbolic regression
-        problem. Use get_M from `Enumerator` instead if any functions
+        problem. Use get_M from `EnumeratorBinaryTree` instead if any functions
         of arity one are permitted.
 
         Parameters
@@ -1293,7 +1294,7 @@ class Enumerator2(object):
         """
         Calculate the total number of configurations of the functions of arity
         two for the binary tree mapped from the integer `i`.  Use get_A from
-        `Enumerator` instead if the number of functions of arity one permitted
+        `EnumeratorBinaryTree` instead if the number of functions of arity one permitted
         is not zero.
 
         Parameters
@@ -1318,7 +1319,7 @@ class Enumerator2(object):
         """
         Calculate the total number of configurations of the terminals for the
         binary tree mapped from the integer `i`.  Use get_B from
-        `Enumerator` instead if the number of functions of arity one permitted
+        `EnumeratorBinaryTree` instead if the number of functions of arity one permitted
         is not zero.
 
         Parameters
@@ -1676,7 +1677,7 @@ def get_cum_weights_binary_tree(N, f, n, m, enumerator):
         The number of terminals in the problem (includes variables and
         fitting parameters)
 
-    enumerator: pySRURGS.Enumerator
+    enumerator: pySRURGS.EnumeratorBinaryTree
         The enumerator of the symbolic regression problem
 
     Returns
@@ -1687,18 +1688,8 @@ def get_cum_weights_binary_tree(N, f, n, m, enumerator):
         have equal probability of selection
     """
     en = enumerator
-    weights = [
-        en.get_G(
-            f,
-            i) *
-        en.get_A(
-            n,
-            i) *
-        en.get_B(
-            m,
-            i) for i in range(
-            0,
-            N)]    
+    weights = [en.get_G(f,i) * en.get_A(n,i) * en.get_B(m, i) for i in 
+               range(0, N)]
     cum_weights = np.array(weights) / np.sum(weights)
     cum_weights = cum_weights.astype(np.float64)
     return cum_weights
@@ -1726,7 +1717,7 @@ def get_cum_weights_full_binary_tree(N, n, m, enumerator):
         The number of terminals in the problem (includes variables and
         fitting parameters)
 
-    enumerator: pySRURGS.Enumerator2
+    enumerator: pySRURGS.EnumeratorFullBinaryTree
         The enumerator of the symbolic regression problem
 
     Returns
@@ -1894,24 +1885,7 @@ def initialize_db(path_to_db):
     return
 
 
-def assign_n_evals(path_to_db):
-    '''
-        Checks the number of equations in a SqliteDict file, and assigns a
-        value to the 'n_evals' key of the dictionary
-    '''
-    with SqliteDict(path_to_db, autocommit=True) as results_dict:
-        keys = list(results_dict.keys())
-        n_evals = len(keys)
-        if 'best_eqn' in keys:
-            n_evals = n_evals - 1
-        if 'n_evals' in keys:
-            n_evals = n_evals - 1
-        results_dict['n_evals'] = n_evals
-    return n_evals
-
-
-def uniform_random_global_search_once(path_to_db, path_to_csv, SRconfig, 
-                                      seed=None):
+def uniform_random_global_search_once(seed, path_to_db, path_to_csv, SRconfig):
     """
     Runs pySRURGS once against the CSV file
 
@@ -1947,7 +1921,7 @@ def uniform_random_global_search_once(path_to_db, path_to_csv, SRconfig,
     >>> SR_config = pySRURGS.SymbolicRegressionConfig(n_funcs, f_funcs, n_par, n_tree]
     >>> path_to_db = './db/quartic_polynomial.db'
     >>> path_to_csv = './csv/quartic_polynomial.csv'
-    >>> pySRURGS.uniform_random_global_search_once(path_to_db, path_to_csv, SR_config)
+    >>> pySRURGS.uniform_random_global_search_once(None, path_to_db, path_to_csv, SR_config)
     """
     (f, n, m, cum_weights, N, dataset, enumerator, _, _) = setup(path_to_csv,
                                                                  SRconfig)
@@ -2132,7 +2106,8 @@ def setup(path_to_csv, SR_config):
     dataset: pySRURGS.Dataset
         The dataset object for the problem.
 
-    enumerator: pySRURGS.Enumerator OR pySRURGS.Enumerator2 (if `f_funcs` == 0)
+    enumerator: pySRURGS.EnumeratorBinaryTree OR 
+                pySRURGS.EnumeratorFullBinaryTree (if `f_funcs` == 0)
 
     n_funcs: list
         A list of strings of the functions of arity two permitted in this search
@@ -2150,10 +2125,10 @@ def setup(path_to_csv, SR_config):
     dataset = Dataset(path_to_csv, num_fit_param, scaled=False)
     m = dataset._m_terminals  # the number of vars + number of fit params
     if f == 0:
-        enumerator = Enumerator2()
+        enumerator = EnumeratorFullBinaryTree()
         cum_weights = get_cum_weights_full_binary_tree(N, n, m, enumerator)
     else:
-        enumerator = Enumerator()
+        enumerator = EnumeratorBinaryTree()
         cum_weights = get_cum_weights_binary_tree(N, f, n, m, enumerator)
     return (f, n, m, cum_weights, N, dataset, enumerator, n_funcs, f_funcs)
 
@@ -2185,17 +2160,14 @@ def create_db_name(path_to_csv, additional_name=None):
     return db_name
 
 
-def get_resultlist(path_to_db, path_to_csv, SRconfig):
+def get_dataset(path_to_csv, SRconfig):
     '''
-    Loads the ResultList of a previous run of pySRURGS
-
+    Loads the pySRURGS.Dataset for the proposed work
+    
     Parameters
     ----------
-    path_to_db: string
-        An absolute or relative path to the SqliteDict database file.
-
     path_to_csv: string
-        An absolute or relative path to the problem's data CSV file.
+        An absolute or relative path to the SqliteDict database file.
 
     SRconfig: pySRUGS.SymbolicRegressionConfig
         The symbolic regression problem's configuration object
@@ -2204,23 +2176,41 @@ def get_resultlist(path_to_db, path_to_csv, SRconfig):
     -------
     result_list: pySRURGS.ResultList
         An unsorted ResultList object for the previously run problem
-
-    dataset: pySRURGS.Dataset
-        The dataset for the problem
     '''
+    # since the Dataset object contains a number of attributes that really 
+    # should be housed in the SRConfig object, we will have to resort to loading
+    # the Dataset in this manner for now.
     (_, _, _, _, _, dataset, _, _, _) = setup(path_to_csv, SRconfig)
+    return dataset
+
+
+def get_resultlist(path_to_db):
+    '''
+    Loads the ResultList of a previous run of pySRURGS.
+    Skips the `best_result` key. 
+
+    Parameters
+    ----------
+    path_to_db: string
+        An absolute or relative path to the SqliteDict database file.
+
+    Returns
+    -------
+    result_list: pySRURGS.ResultList
+        An unsorted ResultList object for the previously run problem
+    '''
     result_list = ResultList()
     with SqliteDict(path_to_db, autocommit=True) as results_dict:
         keys = results_dict.keys()
         for eqn in keys:
-            if eqn == 'n_evals':
+            if eqn == 'best_result':
                 continue
             result = results_dict[eqn]
             result_list._results.append(result)
-    return result_list, dataset
+    return result_list
 
 
-def compile_results(path_to_db, path_to_csv, SRconfig):
+def compile_results(path_to_db, path_to_csv, SRconfig, print_mode=True):
     '''
     Reads the generated SqliteDict file to determine the best models, then
     prints them to screen
@@ -2238,12 +2228,35 @@ def compile_results(path_to_db, path_to_csv, SRconfig):
 
     Returns
     -------
-    None
+    result_list: pySRURGS.ResultList 
+        Compiling all the results found in the `path_to_db` database file
     '''
-    result_list, dataset = get_resultlist(path_to_db, path_to_csv, SRconfig)
+    dataset = get_dataset(path_to_csv, SRconfig)
+    result_list = get_resultlist(path_to_db)
     result_list.sort()
-    result_list.print(dataset._y_data)
+    if print_mode == True:
+        result_list.print(dataset._y_data)
     return result_list
+
+
+def count_results(path_to_db):
+    '''
+    Reads the generated SqliteDict file to determine the number of generated 
+    models
+
+    Parameters
+    ----------
+    path_to_db: string
+        An absolute or relative path to the SqliteDict database file.
+
+    Returns
+    -------
+    n_results: int
+        The number of results in the ResultList
+    '''
+    result_list = get_resultlist(path_to_db)
+    n_results = len(result_list._results)
+    return n_results
 
 
 def plot_results(path_to_db, path_to_csv, SRconfig, output_dir='./image/'):
@@ -2273,7 +2286,8 @@ def plot_results(path_to_db, path_to_csv, SRconfig, output_dir='./image/'):
     Exception, if data is not univariate.
 
     '''
-    result_list, dataset = get_resultlist(path_to_db, path_to_csv, SRconfig)
+    dataset = get_dataset(path_to_csv, SRconfig)
+    result_list = get_resultlist(path_to_db)
     result_list.sort()
     best_model = result_list._results[0]
     param_values = best_model._params
@@ -2495,7 +2509,7 @@ def check_validity_suggested_functions(suggested_funcs, arity):
 def count_number_equations(path_to_csv, SRconfig):
     '''
     Counts the number of possible equations in this problem. A wrapper function
-    around Enumerator.get_M / Enumerator2.get_M.
+    around EnumeratorBinaryTree.get_M / EnumeratorFullBinaryTree.get_M.
 
     Parameters
     ----------
@@ -2509,8 +2523,8 @@ def count_number_equations(path_to_csv, SRconfig):
     -------
     number_possible_equations: mpmath.ctx_mp_python.mpf (int)
     '''
-    (f, n, m, cum_weights, N, dataset, enumerator,
-     _, _) = setup(path_to_csv, SRconfig)
+    (f, n, m, cum_weights, N, dataset, enumerator, _, _) = setup(path_to_csv, 
+                                                                 SRconfig)
     if f == 0:
         number_possible_equations = enumerator.get_M(N, n, m)
     else:
@@ -2606,9 +2620,7 @@ def exhaustive_search(path_to_db, path_to_csv, SRconfig, mode='multi'):
                     for s in range(0, B):
                         for q in range(0, G):
                             index_tuple = (q, r, s)
-                            n_evals = assign_n_evals(path_to_db)
-                            print("n_evals:", n_evals, "i:", i, "q:", q, "r:",
-                                  r, "s:", s, end='\r')
+                            print("i:", i, "q:", q, "r:", r, "s:", s, end='\r')
                             check_equation_at_specified_indices(index_tuple, i,
                                                                 path_to_db,
                                                                 path_to_csv,
@@ -2631,8 +2643,7 @@ def exhaustive_search(path_to_db, path_to_csv, SRconfig, mode='multi'):
                 for r in range(0, A):
                     for s in range(0, B):
                         index_tuple = (r, s)
-                        n_evals = assign_n_evals(path_to_db)
-                        print("n_evals:", n_evals, "i:", i, "r:", r, "s:", s, 
+                        print("i:", i, "r:", r, "s:", s, 
                               end='\r')
                         check_equation_at_specified_indices(index_tuple, i,
                                                             path_to_db,
@@ -2699,7 +2710,8 @@ def check_equation_at_specified_indices(
     else:
         raise Exception("Invalid length to index_tuple")
     if f > 0:
-        eqn_str = equation_generator(i, q, r, s, dataset, enumerator, SRconfig)
+        eqn_str = equation_generator_binary_tree(i, q, r, s, dataset, 
+                                                 enumerator, SRconfig)
     else:
         eqn_str = equation_generator_full_binary_tree(i, r, s, dataset, 
                                                       enumerator, SRconfig)
@@ -2843,7 +2855,7 @@ if __name__ == '__main__':
     if path_to_db is None:
         path_to_db = create_db_name(path_to_csv)
     os.makedirs('./db', exist_ok=True)
-    if exhaustive:
+    if exhaustive == True:
         if not single_processing_mode:
             print("Running exhaustive search in multi processor mode")
             exhaustive_search(path_to_db, path_to_csv, SRconfig, mode='multi')
@@ -2856,25 +2868,23 @@ if __name__ == '__main__':
         if not single_processing_mode:
             print("Running in multi processor mode")
             if deterministic:
-                seed_list = list(range(0,max_attempts))
+                seed_list = list(range(0, max_attempts))
             else:
-                seed_list = None
+                current_time = int(time.time())
+                seeds = np.arange(0, max_attempts)
+                seeds = seeds*current_time % NUM_ITERS_LIMIT
+                seed_list = seeds.tolist()
             results = parmap.map(uniform_random_global_search_once,
-                                 [path_to_db] * max_attempts,
-                                 path_to_csv, SRconfig, 
                                  seed_list, 
+                                 path_to_db, 
+                                 path_to_csv, 
+                                 SRconfig,                                  
                                  pm_pbar=True)
-            print("Making sure we meet the iters value")
-            n_evals = assign_n_evals(path_to_db)
-            for i in range(0, max_attempts - n_evals):
-                uniform_random_global_search_once(
-                    path_to_db, path_to_csv, SRconfig)
-            assign_n_evals(path_to_db)
         elif single_processing_mode:
             print("Running in single processor mode")
             for i in tqdm.tqdm(range(0, max_attempts)):
                 uniform_random_global_search_once(
-                    path_to_db, path_to_csv, SRconfig)
+                    None, path_to_db, path_to_csv, SRconfig)
         else:
             raise("Invalid mode")
     compile_results(path_to_db, path_to_csv, SRconfig)
