@@ -12,3 +12,5 @@ scipy
 python-coveralls
 pytest
 pytest-cov
+sh
+pbs
