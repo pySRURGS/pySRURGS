@@ -167,9 +167,6 @@ from sqlitedict import SqliteDict
 SR_config = pySRURGS.SymbolicRegressionConfig()
 path_to_csv = './csv/quartic_polynomial.csv'
 path_to_db = './db/quartic_polynomial.db'
-with SqliteDict(path_to_db, autocommit=True) as results_dict:
-    best_result = results_dict['best_result']
-    number_equations = results_dict['n_evals']
 result_list, dataset = pySRURGS.get_resultlist(path_to_db, path_to_csv, SR_config)
 result_list.sort()
 # after running sort, zero^th element is the best result
