@@ -1938,13 +1938,6 @@ def uniform_random_global_search_once(seed, path_to_db, path_to_csv, SRconfig):
         try:
             simple_eqn = simplify_equation_string(eqn_str, dataset)
             initialize_db(path_to_db)
-            with SqliteDict(path_to_db, autocommit=True) as results_dict:
-                # if we have already attempted this equation, do not run again
-                try:
-                    result = results_dict[simple_eqn]
-                    raise FloatingPointError
-                except BaseException:
-                    pass
             params = create_fitting_parameters(dataset._int_max_params)
             (sum_of_squared_residuals, sum_of_squared_totals,
              R2, params_fitted,
@@ -1956,12 +1949,49 @@ def uniform_random_global_search_once(seed, path_to_db, path_to_csv, SRconfig):
             pass
     MSE = sum_of_squared_residuals
     result = Result(simple_eqn, eqn_str, MSE, R2, params_fitted)
-    with SqliteDict(path_to_db, autocommit=True) as results_dict:
-        best_result = results_dict['best_result']
-        results_dict[simple_eqn] = result
-        if result._MSE < best_result._MSE:
-            results_dict['best_result'] = best_result
     return result
+
+
+def uniform_random_global_search_once_to_queue(seed, path_to_db, path_to_csv, 
+                                             SRconfig, queue):
+    '''
+        Runs uniform random global search once, then takes the result and puts 
+        it in a queue so that it can be committed in a multiprocessing safe 
+        fashion
+    '''
+    result = uniform_random_global_search_once(seed, path_to_db, path_to_csv, 
+                                               SRconfig)
+    queue.put(result)    
+
+
+def uniform_random_global_search_once_to_db(seed, path_to_db, path_to_csv, 
+                                            SRconfig):
+    '''
+        Runs uniform random global search once, then takes the result and saves 
+        it immediately to the database
+    '''
+    result = uniform_random_global_search_once(seed, path_to_db, path_to_csv, 
+                                               SRconfig)
+    with SqliteDict(path_to_db, autocommit=False) as results_dict:
+        simple_eqn = result._simple_equation
+        results_dict[simple_eqn] = result
+        results_dict.commit()    
+
+def solution_saving_worker(queue, n_items, output_db):
+    """
+        Takes solutions from the queue of evaluated solutions, 
+        then saves them to the database.
+    """
+    checkpoint = int(n_items/100) + 1
+    with SqliteDict(output_db, autocommit=False) as results_dict:
+        for j in range(0, n_items):
+            result = queue.get()
+            simple_eqn = result._simple_equation
+            results_dict[simple_eqn] = result
+            if j == checkpoint:
+                print('  Saving results to db: ' + str(j/n_items))
+                results_dict.commit()
+        results_dict.commit()    
 
 
 def generate_benchmark(benchmark_name, SRconfig, 
@@ -2532,7 +2562,7 @@ def count_number_equations(path_to_csv, SRconfig):
     return number_possible_equations
 
 
-def exhaustive_search(path_to_db, path_to_csv, SRconfig, mode='multi'):
+def exhaustive_search(path_to_db, path_to_csv, SRconfig, queue=None):
     '''
     Runs a brute-force/exhaustive symbolic regression search against the CSV
     file. WARNING, unless you specify a very simple problem, this computation
@@ -2552,9 +2582,9 @@ def exhaustive_search(path_to_db, path_to_csv, SRconfig, mode='multi'):
     SRconfig: pySRURGS.SymbolicRegressionConfig
         The symbolic regression configuration object for this problem
 
-    mode: string
-        Denotes whether to use single core processing or multiprocessing.
-        Either 'multi' or 'single',
+    queue: multiprocessing.Manager.Queue OR None
+        If exists, will treat as multiprocessing, if None, will treat as 
+        single core processing
 
     Returns
     -------
@@ -2603,8 +2633,6 @@ def exhaustive_search(path_to_db, path_to_csv, SRconfig, mode='multi'):
     (f, n, m, _, N, dataset, enumerator, _, _) = setup(path_to_csv,
                                                        SRconfig)
     initialize_db(path_to_db)
-    if mode not in ['multi', 'single']:
-        raise Exception("Invalid run mode of exhaustive search")
     # we need to have two streams here, the first for the case where there are
     # functions of arity one permitted, the second for the case where there are
     # no functions of arity one permitted. Within each stream, we need to have
@@ -2615,54 +2643,61 @@ def exhaustive_search(path_to_db, path_to_csv, SRconfig, mode='multi'):
             G = int(enumerator.get_G(f, i))
             A = int(enumerator.get_A(n, i))
             B = int(enumerator.get_B(m, i))
-            if mode == 'single':  # single processor substream
+            if queue is None:  # single processor substream
                 for r in range(0, A):
                     for s in range(0, B):
                         for q in range(0, G):
                             index_tuple = (q, r, s)
                             print("i:", i, "q:", q, "r:", r, "s:", s, end='\r')
-                            check_equation_at_specified_indices(index_tuple, i,
+                            check_equation_at_specified_indices_to_db(
+                                                                index_tuple, i,
                                                                 path_to_db,
                                                                 path_to_csv,
                                                                 SRconfig)
-            elif mode == 'multi':  # multiprocessing substream
-                iterator = itertools.product(
-                    range(
-                        0, G), range(
-                        0, A), range(
-                        0, B))
+            else:  # multiprocessing substream
+                iterator = itertools.product(range(0, G), range(0, A), range(
+                                                                          0, B))
                 iterator = list(iterator)
-                parmap.map(check_equation_at_specified_indices,
+                num_solns = len(iterator)
+                runner = mp.Process(target=solution_saving_worker, 
+                                           args=(queue, num_solns, path_to_db))
+                runner.start()
+                parmap.map(check_equation_at_specified_indices_to_queue,
                            iterator, i, path_to_db, path_to_csv, SRconfig,
+                           queue,
                            pm_pbar=True)
+                runner.join()
     elif f == 0:  # functions of arity one absent
         for i in range(0, N):
             A = int(enumerator.get_A(n, i))
             B = int(enumerator.get_B(m, i))
-            if mode == 'single':  # single processor substream
+            if queue is None:  # single processor substream
                 for r in range(0, A):
                     for s in range(0, B):
                         index_tuple = (r, s)
                         print("i:", i, "r:", r, "s:", s, 
                               end='\r')
-                        check_equation_at_specified_indices(index_tuple, i,
+                        check_equation_at_specified_indices_to_db(
+                                                            index_tuple, i,
                                                             path_to_db,
                                                             path_to_csv,
                                                             SRconfig)
-            elif mode == 'multi':  # multiprocessing substream
+            else:  # multiprocessing substream
                 iterator = itertools.product(range(0, A), range(0, B))
                 iterator = list(iterator)
-                parmap.map(check_equation_at_specified_indices,
+                num_solns = len(iterator)
+                runner = mp.Process(target=solution_saving_worker, 
+                           args=(queue, num_solns, path_to_db))
+                runner.start()
+                parmap.map(check_equation_at_specified_indices_to_queue,
                            iterator, i, path_to_db, path_to_csv, SRconfig,
+                           queue,
                            pm_pbar=True)
+                runner.join()
 
 
-def check_equation_at_specified_indices(
-        index_tuple,
-        i,
-        path_to_db,
-        path_to_csv,
-        SRconfig):
+def check_equation_at_specified_indices(index_tuple, i, path_to_db, path_to_csv,
+                                        SRconfig):
     '''
     The indices specified gets mapped into the pySRURGS enumeration scheme and
     the corresponding equation gets evaluated against the dataset.
@@ -2721,13 +2756,6 @@ def check_equation_at_specified_indices(
         except BaseException:
             pdb.set_trace()
         initialize_db(path_to_db)
-        with SqliteDict(path_to_db, autocommit=True) as results_dict:
-            # if we have already attempted this equation, do not run again
-            try:
-                result = results_dict[simple_eqn]
-                raise FloatingPointError
-            except BaseException:
-                pass
         params = create_fitting_parameters(dataset._int_max_params)
         (sum_of_squared_residuals, sum_of_squared_totals,
          R2, params_fitted,
@@ -2739,12 +2767,32 @@ def check_equation_at_specified_indices(
         return None
     MSE = sum_of_squared_residuals
     result = Result(simple_eqn, eqn_str, MSE, R2, params_fitted)
-    with SqliteDict(path_to_db, autocommit=True) as results_dict:
-        best_result = results_dict['best_result']
-        results_dict[simple_eqn] = result
-        if result._MSE < best_result._MSE:
-            results_dict['best_result'] = best_result
     return result
+
+
+def check_equation_at_specified_indices_to_queue(index_tuple, i, path_to_db, 
+                                                 path_to_csv, SRconfig, queue):
+    '''
+        runs check_equation_at_specified_indices then puts the result in a 
+        queue for later push to the database
+    '''
+    result = check_equation_at_specified_indices(index_tuple, i, path_to_db, 
+                                                 path_to_csv, SRconfig)
+    queue.put(result)
+    
+
+def check_equation_at_specified_indices_to_db(index_tuple, i, path_to_db, 
+                                              path_to_csv, SRconfig):
+    '''
+        runs check_equation_at_specified_indices then puts the result in a 
+        queue for later push to the database
+    '''
+    result = check_equation_at_specified_indices(index_tuple, i, path_to_db, 
+                                                 path_to_csv, SRconfig)
+    with SqliteDict(path_to_db, autocommit=False) as results_dict:
+        simple_eqn = result._simple_equation
+        results_dict[simple_eqn] = result
+        results_dict.commit()    
 
 
 if __name__ == '__main__':
@@ -2855,13 +2903,15 @@ if __name__ == '__main__':
     if path_to_db is None:
         path_to_db = create_db_name(path_to_csv)
     os.makedirs('./db', exist_ok=True)
+    manager = mp.Manager()
+    queue = manager.Queue()
     if exhaustive == True:
         if not single_processing_mode:
             print("Running exhaustive search in multi processor mode")
-            exhaustive_search(path_to_db, path_to_csv, SRconfig, mode='multi')
+            exhaustive_search(path_to_db, path_to_csv, SRconfig, queue)
         elif single_processing_mode:
             print("Running exhaustive search in single processor mode")
-            exhaustive_search(path_to_db, path_to_csv, SRconfig, mode='single')
+            exhaustive_search(path_to_db, path_to_csv, SRconfig)
         else:
             raise("Invalid mode")
     else:
@@ -2876,19 +2926,24 @@ if __name__ == '__main__':
             else:
                 current_time = int(time.time())
                 seeds = np.arange(0, max_attempts)
-                seeds = seeds*current_time % NUM_ITERS_LIMIT
-                seed_list = seeds.tolist()                
-            results = parmap.map(uniform_random_global_search_once,
+                seeds = seeds*current_time % NUM_ITERS_LIMIT                
+                seed_list = seeds.tolist()
+            runner = mp.Process(target=solution_saving_worker, 
+                                       args=(queue, max_attempts, path_to_db))
+            runner.start()
+            results = parmap.map(uniform_random_global_search_once_to_queue,
                                  seed_list, 
                                  path_to_db, 
                                  path_to_csv, 
-                                 SRconfig,                                  
+                                 SRconfig,
+                                 queue,
                                  pm_pbar=True)
+            runner.join()
         elif single_processing_mode:
             print("Running in single processor mode")
             for i in tqdm.tqdm(range(0, max_attempts)):
-                uniform_random_global_search_once(
-                    None, path_to_db, path_to_csv, SRconfig)
+                uniform_random_global_search_once_to_db(None, path_to_db, 
+                                                        path_to_csv, SRconfig)
         else:
             raise("Invalid mode")
     compile_results(path_to_db, path_to_csv, SRconfig)
