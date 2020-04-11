@@ -691,7 +691,7 @@ def equation_generator_binary_tree(i, q, r, s, dataset, enumerator, SRconfig):
     for z in range(0, len(n_func_config)):
         func = n_func_config[z]
         tree = tree.replace('[', func + '(', 1)
-        tree = tree.replace(']', ')', 1)
+        tree = tree.replace(']', ')', 1)    
     for z in range(0, len(f_func_config)):
         func = f_func_config[z]
         tree = tree.replace('|', func + '(', 1)
@@ -1145,13 +1145,27 @@ class EnumeratorBinaryTree(object):
     def get_q(self, f, i):
         ''' Generates a random integer between 0 and `G` - 1, inclusive '''
         G = self.get_G(f, i)
-        q = randgen.randint(0, G - 1, dtype=np.int64)
+        try:
+            q = randgen.randint(0, G - 1, dtype=np.int64)
+        except ValueError as e:
+            if G == 1:
+                q = 0
+            else:
+                print(e)
+                raise ValueError
         return q
 
     def get_r(self, n, i):
         ''' Generates a random integer between 0 and `A` - 1, inclusive '''
         A = self.get_A(n, i)
-        r = randgen.randint(0, A - 1, dtype=np.int64)
+        try:
+            r = randgen.randint(0, A - 1, dtype=np.int64)
+        except ValueError as e:
+            if A == 1:
+                r = 0
+            else:
+                print(e)
+                raise ValueError
         return r
 
     def get_s(self, m, i):
@@ -1336,7 +1350,14 @@ class EnumeratorFullBinaryTree(object):
     def get_r(self, n, i):
         ''' Generates a random integer between 0 and `A` - 1, inclusive '''
         A = self.get_A(n, i)
-        r = randgen.randint(0, A - 1, dtype=np.int64)
+        try:
+            r = randgen.randint(0, A - 1, dtype=np.int64)
+        except ValueError as e:
+            if A == 1:
+                r = 0
+            else:
+                print(e)
+                raise ValueError
         return r
 
     def get_s(self, m, i):
@@ -1926,9 +1947,9 @@ def generate_benchmark(benchmark_name, SRconfig,
         The symbolic regression configuration object for this problem.
 
     path_to_problem_csv: string 
-        A filepath which points to a CSV file. The number of columns in the file 
-        will determine the number of variables in the symbolic regression
-        problem. (default: path_to_toy_csv)
+        A filepath which points to your CSV data file. The number of columns in 
+        the file will determine the number of variables in the symbolic 
+        regression problem. (default: path_to_toy_csv)
 
     Returns
     -------
@@ -2412,7 +2433,7 @@ def check_validity_suggested_functions(suggested_funcs, arity):
                                                      'log','tanh','sinh','cosh',
                                                      None]
         In case of `arity==2`, permitted values are ['add','sub','mul','div',
-                                                     'pow']
+                                                     'pow', None]
 
     Returns
     -------
@@ -2422,17 +2443,9 @@ def check_validity_suggested_functions(suggested_funcs, arity):
     ------
     Exception, if any of the suggested funcs is not in the permitted list
     '''
-    valid_funcs_arity_1 = [
-        'sin',
-        'cos',
-        'tan',
-        'exp',
-        'log',
-        'tanh',
-        'sinh',
-        'cosh',
-        None]
-    valid_funcs_arity_2 = ['add', 'sub', 'mul', 'div', 'pow']
+    valid_funcs_arity_1 = ['sin', 'cos', 'tan', 'exp', 'log', 'tanh', 'sinh', 
+                           'cosh', None]
+    valid_funcs_arity_2 = ['add', 'sub', 'mul', 'div', 'pow', None]
     if arity == 1:
         if suggested_funcs != [',']:
             for func in suggested_funcs:
