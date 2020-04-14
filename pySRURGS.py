@@ -120,14 +120,21 @@ else:
                                  defaults_dict['funcs_arity_one'].split(','), 1)
 
 
-def is_csv_valid(filepath):
+def is_csv_valid(filepath, check_header=False):
     try:
-        with open(filepath, 'r') as csv_file:               
-            dialect = csv.Sniffer().sniff(csv_file.read(1024))
+        with open(filepath, 'r') as csv_file:
+            dialect = csv.Sniffer().sniff(csv_file.read(2048))
     except Exception as e:
         print("Error encountering while reading: ", filepath)
         print(e)
         exit(2)
+    if check_header == True:        
+        with open(filepath, 'r') as csv_file:
+            sniffer = csv.Sniffer()
+            has_header = sniffer.has_header(csv_file.read(2048))
+        if has_header == False:
+            print("File which must have header is missing header: ", filepath)
+            exit(2)
 
 
 class Dataset(object):
@@ -166,8 +173,9 @@ class Dataset(object):
                  path_to_weights=None):
         (dataframe, header_labels) = self.load_csv_data(path_to_csv_file)
         if path_to_weights is not None:
-            (weights_df, empty_labels) = self.load_csv_data(path_to_weights)
-            self._data_weights = weights_df.values
+            (weights_df, empty_labels) = self.load_csv_data(path_to_weights, 
+                                                            header=None)            
+            self._data_weights = np.squeeze(weights_df.values)
         else: 
             self._data_weights = None
         self._int_max_params = int_max_params
@@ -213,8 +221,11 @@ class Dataset(object):
         sympy_namespace['log'] = sympy.Function('log')
         return sympy_namespace
 
-    def load_csv_data(self, path_to_csv):
-        dataframe = pandas.read_csv(path_to_csv)
+    def load_csv_data(self, path_to_csv, header=True):
+        if header is True:
+            dataframe = pandas.read_csv(path_to_csv)
+        else:
+            dataframe = pandas.read_csv(path_to_csv, header=header)
         column_labels = dataframe.keys()
         return (dataframe, column_labels)
 
@@ -342,7 +353,7 @@ class SymbolicRegressionConfig(object):
         self._max_permitted_trees = max_permitted_trees        
         self._path_to_csv = path_to_csv
         self._path_to_db = path_to_db
-        is_csv_valid(path_to_csv)
+        is_csv_valid(path_to_csv, True)
         self._path_to_weights = path_to_weights
         if path_to_weights is not None:
             is_csv_valid(path_to_weights)
@@ -1473,6 +1484,8 @@ def eval_equation(params, function_string, SRconfig, mode='residual'):
     if mode == 'residual':
         eval_string = '(' + function_string + ') -  df["' + y_label + '"]'
         residual = eval(eval_string)
+        if my_data._data_weights is not None:
+            residual = np.multiply(residual, my_data._data_weights)
         output = residual
     elif mode == 'y_calc':
         y_value = eval(function_string)
@@ -2701,6 +2714,6 @@ if __name__ == '__main__':
                                                         SRconfig)
         else:
             raise("Invalid mode")
-    compile_results(SRconfig)
+    results_list = compile_results(SRconfig)
     if plotting:
         plot_results(SRconfig)
