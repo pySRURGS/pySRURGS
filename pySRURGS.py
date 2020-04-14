@@ -2386,12 +2386,7 @@ def exhaustive_search(SRconfig, queue=None):
     Returns
     -------
     None
-    
-    # TODO 
-    for the case of i == 0, the number of operator/function configurations 
-    will be zero, so this exhaustive search will skip that case. Fix this in 
-    the future.
-    
+       
     '''
     warning_string = """
     WARNING: you are running an exhaustive search on a large search space.
@@ -2418,7 +2413,7 @@ def exhaustive_search(SRconfig, queue=None):
     # no functions of arity one permitted. Within each stream, we need to have
     # a substream for single processing and a substream for multiprocessing
     results = ResultList()
-    if f > 0:  # functions of arity one present
+    if f > 0:  # functions of arity one present       
         for i in range(0, N):
             G = int(enumerator.get_G(f, i))
             A = int(enumerator.get_A(n, i))
