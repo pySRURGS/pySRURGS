@@ -187,7 +187,9 @@ class TestPython(unittest.TestCase):
         self._max_permitted_trees = self._defaults['max_permitted_trees']
         self._path_to_db = working_db
         self._path_to_csv = qrtic_polynml_csv            
-        self._SRconfig = SymbolicRegressionConfig(self._n_funcs, 
+        self._SRconfig = SymbolicRegressionConfig(self._path_to_csv,
+                                                  self._path_to_db,
+                                                  self._n_funcs, 
                                                   self._f_funcs, 
                                                   self._max_num_fit_params, 
                                                   self._max_permitted_trees)
@@ -199,39 +201,33 @@ class TestPython(unittest.TestCase):
         test_f_funcs = 'tan,exp,cos,sin,log,sinh,cosh,tanh'
         test_f_funcs = test_f_funcs.split(',')
         test_f_funcs = check_validity_suggested_functions(test_f_funcs, 1)
-        SRconfig = SymbolicRegressionConfig(self._n_funcs, test_f_funcs, 0, 
+        SRconfig = SymbolicRegressionConfig(self._path_to_csv,
+                                            self._path_to_db,
+                                            self._n_funcs, test_f_funcs, 0, 
                                             self._max_permitted_trees)
-        num_equations = count_number_equations(self._path_to_csv, SRconfig)
+        num_equations = count_number_equations(SRconfig)
         self.assertEqual(type(num_equations), mpmath.ctx_mp_python.mpf)
 
     def test_py_basic_functionality(self):
         for i in range(0, int(self._max_attempts / 10)):
-            uniform_random_global_search_once_to_db(None,
-                                          self._path_to_db, 
-                                          self._path_to_csv, 
+            uniform_random_global_search_once_to_db(None, 
                                           self._SRconfig)
-        result_list = compile_results(self._path_to_db, 
-                                      self._path_to_csv, 
-                                      self._SRconfig)
+        result_list = compile_results(self._SRconfig)
         MSE_1st_run = result_list._results[0]._MSE
         max_attempts2 = self._max_attempts * 10
         for i in tqdm.tqdm(range(0, max_attempts2)):
-            uniform_random_global_search_once_to_db(None,
-                self._path_to_db, self._path_to_csv, self._SRconfig)
-        result_list = compile_results(self._path_to_db, 
-                                      self._path_to_csv, 
-                                      self._SRconfig)
+            uniform_random_global_search_once_to_db(None, self._SRconfig)
+        result_list = compile_results(self._SRconfig)
         MSE_2nd_run = result_list._results[0]._MSE
         self.assertLess(MSE_2nd_run, MSE_1st_run)
         
     def test_py_max_fit_params_zero(self):
         # test max_num_fit_params 0
-        SRconfig = SymbolicRegressionConfig(self._n_funcs, self._f_funcs, 0, 
+        SRconfig = SymbolicRegressionConfig(self._path_to_csv, self._path_to_db,
+                                            self._n_funcs, self._f_funcs, 0, 
                                             self._max_permitted_trees)
         for i in tqdm.tqdm(range(0, self._max_attempts)):
             uniform_random_global_search_once_to_db(None, 
-                                                    self._path_to_db, 
-                                                    self._path_to_csv, 
                                                     SRconfig)
         result_list = get_resultlist(working_db)
         n_results = count_results(working_db)
@@ -239,11 +235,11 @@ class TestPython(unittest.TestCase):
             self.assertEqual(len(result_list._results[i]._params), 0)
 
     def test_py_max_fit_params_five(self):
-        SRconfig = SymbolicRegressionConfig(self._n_funcs, self._f_funcs, 5, 
+        SRconfig = SymbolicRegressionConfig(self._path_to_csv, self._path_to_db,
+                                            self._n_funcs, self._f_funcs, 5, 
                                             self._max_permitted_trees)
         for i in tqdm.tqdm(range(0, self._max_attempts)):
-            uniform_random_global_search_once_to_db(None,
-                self._path_to_db, self._path_to_csv, SRconfig)
+            uniform_random_global_search_once_to_db(None, SRconfig)
         result_list = get_resultlist(working_db)
         n_results = count_results(working_db)            
         for i in range(0, n_results):
@@ -254,11 +250,11 @@ class TestPython(unittest.TestCase):
         test_n_funcs = 'add,sub,div'
         test_n_funcs = test_n_funcs.split(',')
         test_n_funcs = check_validity_suggested_functions(test_n_funcs, 2)
-        SRconfig = SymbolicRegressionConfig(test_n_funcs, self._f_funcs, 5, 
+        SRconfig = SymbolicRegressionConfig(self._path_to_csv, self._path_to_db,
+                                            test_n_funcs, self._f_funcs, 5, 
                                             self._max_permitted_trees)
         for i in tqdm.tqdm(range(0, self._max_attempts)):
-            uniform_random_global_search_once_to_db(None, self._path_to_db, 
-                                                    self._path_to_csv, 
+            uniform_random_global_search_once_to_db(None,  
                                                     SRconfig)
         flag1 = False
         flag2 = False 
@@ -285,11 +281,11 @@ class TestPython(unittest.TestCase):
         test_f_funcs = 'tan,exp,sinh,cosh'
         test_f_funcs = test_f_funcs.split(',')
         test_f_funcs = check_validity_suggested_functions(test_f_funcs, 1)        
-        SRconfig = SymbolicRegressionConfig(test_n_funcs, test_f_funcs, 5, 
+        SRconfig = SymbolicRegressionConfig(self._path_to_csv, self._path_to_db,
+                                            test_n_funcs, test_f_funcs, 5, 
                                             self._max_permitted_trees)
         for i in tqdm.tqdm(range(0, self._max_attempts)):
-            uniform_random_global_search_once_to_db(None, self._path_to_db, 
-                                                    self._path_to_csv, 
+            uniform_random_global_search_once_to_db(None, 
                                                     SRconfig)
         flag1 = False 
         flag2 = False 
@@ -315,19 +311,14 @@ class TestPython(unittest.TestCase):
         # DB inspection code
         import pySRURGS
         from result_class import Result # Result needs to be in the namespace.
-        from sqlitedict import SqliteDict
-        SRconfig = pySRURGS.SymbolicRegressionConfig()
+        from sqlitedict import SqliteDict        
         path_to_csv = './csv/quartic_polynomial.csv'
         path_to_db = './db/quartic_polynomial.db'
         refresh_db(path_to_db)
-        
-        # create test db        
+        SRconfig = pySRURGS.SymbolicRegressionConfig(path_to_csv, path_to_db)
+        # create test db
         for i in tqdm.tqdm(range(0, self._max_attempts)):
-            uniform_random_global_search_once_to_db(None, 
-                                                    path_to_db, 
-                                                    path_to_csv, 
-                                                    self._SRconfig)
-
+            uniform_random_global_search_once_to_db(None, SRconfig)        
         result_list = pySRURGS.get_resultlist(path_to_db)
         result_list.sort()
         # after running sort, zero^th element is the best result
@@ -338,7 +329,7 @@ class TestPython(unittest.TestCase):
         # will raise exception if unable to cast R2 as float
         float(best_result._R2)        
         # plot results
-        plot_results(path_to_db, path_to_csv, SRconfig)
+        plot_results(SRconfig)
         self.assertEqual(os.path.isfile('./image/plot.png'), True)
 
     def test_py_combo_params_exhaustive_1(self):
@@ -350,10 +341,13 @@ class TestPython(unittest.TestCase):
         test_f_funcs = check_validity_suggested_functions(test_f_funcs, 1)
         test_max_num_fit_params = 1
         test_max_num_trees = 3
-        SRconfig = SymbolicRegressionConfig(test_n_funcs, test_f_funcs, 
+        SRconfig = SymbolicRegressionConfig(self._path_to_csv, 
+                                            self._path_to_db,
+                                            test_n_funcs, 
+                                            test_f_funcs, 
                                             test_max_num_fit_params, 
                                             test_max_num_trees)
-        exhaustive_search(self._path_to_db, self._path_to_csv, SRconfig)
+        exhaustive_search(SRconfig)
         n_results = count_results(working_db)
         result_list = get_resultlist(working_db)
         self.assertEqual(n_results, 10)
@@ -364,10 +358,13 @@ class TestPython(unittest.TestCase):
         test_n_funcs = check_validity_suggested_functions(test_n_funcs, 2)
         test_max_num_fit_params = 1
         test_max_num_trees = 3
-        SRconfig = SymbolicRegressionConfig(test_n_funcs, self._f_funcs, 
+        SRconfig = SymbolicRegressionConfig(self._path_to_csv, 
+                                            self._path_to_db,
+                                            test_n_funcs, 
+                                            self._f_funcs, 
                                             test_max_num_fit_params, 
                                             test_max_num_trees)
-        exhaustive_search(self._path_to_db, self._path_to_csv, SRconfig)
+        exhaustive_search(SRconfig)
         n_results = count_results(working_db)
         result_list = get_resultlist(working_db)
         self.assertEqual(n_results, 18)
