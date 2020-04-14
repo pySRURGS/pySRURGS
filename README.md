@@ -68,7 +68,7 @@ usage: pySRURGS.py [-h] [-memoize_funcs] [-single] [-count] [-benchmarks]
                    [-funcs_arity_one FUNCS_ARITY_ONE]
                    [-max_num_fit_params MAX_NUM_FIT_PARAMS]
                    [-max_permitted_trees MAX_PERMITTED_TREES]
-                   [-path_to_db PATH_TO_DB]
+                   [-path_to_db PATH_TO_DB] [-path_to_weights PATH_TO_WEIGHTS]
                    train iters
 
 positional arguments:
@@ -123,6 +123,12 @@ optional arguments:
                         where we will save results. If not set, will save
                         database file to ./db directory with same name as the
                         csv file. (default: None)
+  -path_to_weights PATH_TO_WEIGHTS
+                        the absolute or relative path to the CSV file where we
+                        store the weights for each point in the dataset. The
+                        CSV file should be a single column of non-negative
+                        numerical data without a header. If not set, weights
+                        are equal to one for all data points. (default: None)
 ```
 
 ### Important details
