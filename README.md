@@ -159,6 +159,17 @@ Making sure we meet the iters value
 
 ![Example performance](image/plot.svg)
 
+
+### Another example - using relative weights for data points 
+
+Suppose you value some data points more than others, and you wish to ensure that those valued data points have greater weight than other data points. You can specify a path to a weights CSV file, which will inform the code the relative weight of the data points. An example where some of the data has no weight and the remainder have equal weight is shown below and is included in the repository.
+
+```
+winpty python pySRURGS.py -plotting -path_to_weights ./csv/weights.csv ./csv/weights_data.csv 300
+```
+
+![plot for data point weights feature](image/weights.png)
+
 ### Database file
 
 The database file is in Sqlite3 format, and we access it using the SqliteDict
