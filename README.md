@@ -37,12 +37,6 @@ and researchers working on symbolic regression problems.
 
 It's a python3 script. Download it and run it via a terminal.
 
-### Prerequisites
-
-You can install the prerequisite packages with pip
-
-```mpmath lmfit sympy pandas numpy parmap tqdm sqlitedict tabulate matplotlib scipy python-coveralls pytest pytest-cov```
-
 ### Installing
 
 Clone the repo then install the prerequisites.
