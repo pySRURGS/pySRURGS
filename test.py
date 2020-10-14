@@ -75,10 +75,10 @@ class TestCommandLineInterface(unittest.TestCase):
         self.assertGreater(n_results, 0.98*num_iters)
 
     def test_cli_funcs_arity_two(self):
-        output = output = sh.python3('pySRURGS.py', '-deterministic', 
-                                    '-funcs_arity_two', 'add,sub,div', 
-                                    '-max_num_fit_params', 1, '-path_to_db', 
-                                    working_db, qrtic_polynml_csv, num_iters*10)
+        output = sh.python3('pySRURGS.py', '-deterministic', 
+                            '-funcs_arity_two', 'add,sub,div', 
+                            '-max_num_fit_params', 1, '-path_to_db', 
+                            working_db, qrtic_polynml_csv, num_iters*10)
         output = output.strip()
         print(output)
         n_results = count_results(working_db)
