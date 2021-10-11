@@ -8,6 +8,6 @@ install: # command to install dependencies
 script: pytest --cov=pySRURGS -s ./test.py
 notifications:
   email:
-    - sohrab.towfighi@mail.utoronto.ca
+    - sohrab@alumni.ubc.ca
 after_success:
   - coveralls
