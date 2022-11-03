@@ -2,7 +2,7 @@ mpmath==0.19
 lmfit==0.9.13
 sympy==1.0
 pandas==0.25.0
-numpy==1.17.0
+numpy==1.22.0
 parmap==1.5.2
 tqdm==4.19.8
 sqlitedict==1.6.0
