@@ -20,18 +20,17 @@ and researchers working on symbolic regression problems.
 ## Features 
 
 1. Robust parameter fitting
-2. Multiprocessing for speed
-3. Memoization for speed
-4. Avoids many arithmetically equivalent equations
-5. Loads data from CSV files
-6. Results saved to SQLite file. 
-7. Results of new runs are added to results of old runs.
-8. User specified number of fitting parameters.
-9. User specified number of permitted unique binary trees, which determine the possible equation forms 
-10. User specified permitted functions of arity 1 or 2
-11. Can also run an exhaustive/brute-force search
-12. Can be run in deterministic mode for reproducibility
-13. Developed and tested on Python 3.6
+2. Memoization for speed
+3. Avoids many arithmetically equivalent equations
+4. Loads data from CSV files
+5. Results saved to SQLite file. 
+6. Results of new runs are added to results of old runs.
+7. User specified number of fitting parameters.
+8. User specified number of permitted unique binary trees, which determine the possible equation forms 
+9. User specified permitted functions of arity 1 or 2
+10. Can also run an exhaustive/brute-force search
+11. Can be run in deterministic mode for reproducibility
+12. Developed and tested on Python 3.6
 
 ## Getting Started
 
@@ -56,7 +55,7 @@ python3 pySRURGS.py -h
 The above command should render the following:
 
 ```
-usage: pySRURGS.py [-h] [-memoize_funcs] [-single] [-count] [-benchmarks]
+usage: pySRURGS.py [-h] [-memoize_funcs] [-count] [-benchmarks]
                    [-deterministic] [-plotting] [-exhaustive]
                    [-funcs_arity_two FUNCS_ARITY_TWO]
                    [-funcs_arity_one FUNCS_ARITY_ONE]
@@ -76,7 +75,6 @@ optional arguments:
   -memoize_funcs        memoize the computations. If you are running large
                         `iters` and you do not have massive ram, do not use
                         this option. (default: False)
-  -single               run in single processing mode (default: False)
   -count                Instead of doing symbolic regression, just count out
                         how many possible equations for this configuration. No
                         other processing performed. (default: False)
@@ -139,8 +137,6 @@ A sample problem is provided. The filename denotes the true equation.
 
 ```
 $ winpty python pySRURGS.py -max_num_fit_params 3 -max_permitted_trees 1000 -plotting ./csv/quartic_polynomial.csv 2000
-Running in multi processor mode
-100%|██████████████████████████████████████████████████████████████████████████████████████████████████████| 2000/2000 [05:22<00:00,  8.22it/s]
 Making sure we meet the iters value
   Normalized Mean Squared Error       R^2  Equation, simplified                                                    Parameters
 -------------------------------  --------  ----------------------------------------------------------------------  ----------------------------
